@@ -1,5 +1,24 @@
 import type { Metadata } from "next";
+import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["600", "700"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["500", "600"],
+});
 
 export const metadata: Metadata = {
   title: "AI-Studievalgsplatform 2026 | Fremtidssikret Studievejledning & AI-Arbejdsmarkedsanalyse",
@@ -50,14 +69,14 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="da" className="dark">
+    <html lang="da" className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="bg-slate-950 text-slate-100 antialiased font-sans">
+      <body className="bg-[#F7F8FA] text-[#12172B] antialiased font-sans">
         {children}
       </body>
     </html>

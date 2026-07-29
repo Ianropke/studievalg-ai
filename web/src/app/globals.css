@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F7F8FA;
+  --foreground: #12172B;
+  --surface: #FFFFFF;
+  --surface-hover: #FBFBFD;
+  --border-subtle: #E7E9EF;
+  --border-std: #D8DBE4;
+  --text-secondary: #545D71;
+  --text-tertiary: #8891A3;
+
+  /* Signature Metrics Colors */
+  --metric-robust-bar: #0F9D6E;
+  --metric-robust-text: #0B7A57;
+  --metric-robust-bg: #E3F6EE;
+
+  --metric-job-bar: #2563EB;
+  --metric-job-text: #1D4ED8;
+  --metric-job-bg: #E7EEFE;
+
+  --metric-salary-bar: #7C3AED;
+  --metric-salary-text: #6D28D9;
+  --metric-salary-bg: #F1E9FE;
+
+  --metric-warn-bar: #B45309;
+  --metric-warn-bg: #FDF1E3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-sans), "IBM Plex Sans", -apple-system, sans-serif;
+  --font-display: var(--font-display), "Space Grotesk", sans-serif;
+  --font-mono: var(--font-mono), "IBM Plex Mono", monospace;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+h1, h2, .font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono-data {
+  font-family: var(--font-mono);
+}
+
+/* Card Elevation Shadow per Design Brief v3 Section 4 */
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(18, 23, 43, 0.04), 0 4px 12px rgba(18, 23, 43, 0.04);
+}
+
+.card-shadow-hover:hover {
+  box-shadow: 0 4px 12px rgba(18, 23, 43, 0.08), 0 8px 24px rgba(18, 23, 43, 0.06);
 }

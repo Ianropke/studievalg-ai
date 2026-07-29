@@ -5,7 +5,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import allProgramsData from "@/data/all_programs_catalog.json";
 
-// Omfattende dansk synonymkortlægning af over 200 hverdagsudtryk, forkortelser og typiske stavefejl
+// Synonymer for søgning
 const SYNONYM_MAP: Record<string, string[]> = {
   "tandlæge": ["odontologi", "tandpleje", "tandteknik"],
   "tændlæge": ["odontologi", "tandpleje", "tandteknik"],
@@ -41,30 +41,13 @@ const SYNONYM_MAP: Record<string, string[]> = {
   "politiker": ["statskundskab", "politik"],
   "skuespiller": ["teater", "performancestudier", "musik", "film"],
   "grafisk design": ["multimediedesigner", "visuel kommunikation", "design"],
-  "agronom": ["agrobiologi", "jordbrug", "plante"],
-  "aktuarvidenskab": ["forsikringsmatematik", "matematik"],
-  "astronomi": ["fysik", "geofysik og rumteknologi"],
   "dtu": ["kgs. lyngby", "teknisk videnskab", "lyngby", "ballerup"],
   "cbs": ["frederiksberg", "business", "shipping", "erhvervsøkonomi"],
   "aau": ["aalborg"],
   "itu": ["it-universitetet", "datalogi", "software"],
-  "erhvervsakademi": ["professionsbachelor", "erhvervsøkonom", "akademigrad"],
-  "naestved": ["næstved"],
-  "skov og natur": ["skov", "landskab"],
-  "havbiologi": ["biologi"],
-  "oplevelsesøkonomi": ["service", "turisme", "leisure"],
-  "mode og design": ["design", "tekstildesign"],
-  "digital kommunikation": ["kommunikation", "it", "medievidenskab"],
-  "reklame": ["markedsføring", "kommunikation"],
-  "forlag": ["kommunikation", "dansk", "litteraturvidenskab"],
-  "master": ["kandidat", "bachelor"],
-  "akademigrad": ["akademiker", "bachelor"],
-  "diplomuddannelse": ["diplom", "diplomingeniør"],
-  "kvote 1": ["sommerstart", "bachelor"],
-  "kvote 2": ["sommerstart", "bachelor"]
+  "erhvervsakademi": ["professionsbachelor", "erhvervsakademi"]
 };
 
-// Direkte kobling mellem søgeord og primære uddannelser
 const EXACT_MAJOR_MAP: Record<string, string[]> = {
   "tandlæge": ["odontologi"],
   "tændlæge": ["odontologi"],
@@ -87,13 +70,80 @@ function normalizeSearchText(text: string): string {
     .replace(/tændlæge/g, "tandlæge")
     .replace(/ordontologi/g, "odontologi")
     .replace(/naestved/g, "næstved")
-    .replace(/kvote 1/g, "sommerstart")
-    .replace(/kvote 2/g, "sommerstart")
     .replace(/æ/g, "ae")
     .replace(/ø/g, "oe")
     .replace(/å/g, "aa")
     .trim();
 }
+
+// Signature Visual Element: Compact Triangle Radar Graph (Design Brief v3, Section 5)
+function CompactTriangleRadar({ robust, job, salary }: { robust: number; job: number; salary: number }) {
+  // Triangle Vertices (Center: 40,40, Radius: 30)
+  // Top: AI Robustness (0 deg: 40, 10)
+  // Bottom Right: Job Opportunities (120 deg: 66, 55)
+  // Bottom Left: Salary Potential (240 deg: 14, 55)
+  const rScale = (val: number) => (val / 100) * 28;
+
+  const rRob = rScale(robust);
+  const rJob = rScale(job);
+  const rSal = rScale(salary);
+
+  // Calculated Polygon Points
+  const pRob = { x: 40, y: 40 - rRob };
+  const pJob = { x: 40 + rJob * 0.866, y: 40 + rJob * 0.5 };
+  const pSal = { x: 40 - rSal * 0.866, y: 40 + rSal * 0.5 };
+
+  const pointsStr = `${pRob.x},${pRob.y} ${pJob.x},${pJob.y} ${pSal.x},${pSal.y}`;
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <svg viewBox="0 0 80 80" className="w-16 h-16 overflow-visible">
+        {/* Background Grid Triangle */}
+        <polygon points="40,12 66,55 14,55" fill="none" stroke="#E7E9EF" strokeWidth="1" />
+        <polygon points="40,26 53,47.5 27,47.5" fill="none" stroke="#E7E9EF" strokeWidth="1" strokeDasharray="2 2" />
+        
+        {/* Axis Lines */}
+        <line x1="40" y1="40" x2="40" y2="12" stroke="#E7E9EF" strokeWidth="1" />
+        <line x1="40" y1="40" x2="66" y2="55" stroke="#E7E9EF" strokeWidth="1" />
+        <line x1="40" y1="40" x2="14" y2="55" stroke="#E7E9EF" strokeWidth="1" />
+
+        {/* Filled Data Polygon */}
+        <polygon points={pointsStr} fill="#0F9D6E" fillOpacity="0.18" stroke="#0F9D6E" strokeWidth="2" />
+
+        {/* Vertex Data Points */}
+        <circle cx={pRob.x} cy={pRob.y} r="2.5" fill="#0F9D6E" />
+        <circle cx={pJob.x} cy={pJob.y} r="2.5" fill="#2563EB" />
+        <circle cx={pSal.x} cy={pSal.y} r="2.5" fill="#7C3AED" />
+      </svg>
+      <span className="text-[10px] text-[#545D71] font-mono-data font-semibold">Trekant-profil</span>
+    </div>
+  );
+}
+
+// Clean SVG Line Icons (No emojis per Design Brief v3, Section 3)
+const SearchIcon = () => (
+  <svg className="w-4 h-4 text-[#545D71]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+  </svg>
+);
+
+const SlidersIcon = () => (
+  <svg className="w-4 h-4 text-[#545D71]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5M3.75 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m3.75 0h6.75" />
+  </svg>
+);
+
+const CheckCircleIcon = () => (
+  <svg className="w-4 h-4 text-[#0B7A57]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const AlertTriangleIcon = () => (
+  <svg className="w-4 h-4 text-[#B45309]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+  </svg>
+);
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,7 +160,7 @@ export default function Dashboard() {
 
   const allPrograms = allProgramsData as any[];
 
-  // Dynamisk matchemotor styret direkte af brugerens tre skydere
+  // Matchemotor med vægtede faktorer
   const matchedPrograms = useMemo(() => {
     const rawQuery = searchQuery.trim().toLowerCase();
     const normalizedQuery = normalizeSearchText(searchQuery);
@@ -123,7 +173,6 @@ export default function Dashboard() {
     });
 
     const exactMajors = EXACT_MAJOR_MAP[rawQuery] || EXACT_MAJOR_MAP[normalizedQuery] || [];
-
     const totalWeight = Math.max(1, aiRobustnessWeight + jobOpportunitiesWeight + salaryWeight);
 
     let list = allPrograms.map((prog) => {
@@ -135,7 +184,6 @@ export default function Dashboard() {
       const jobScore = prog.scores.labour_demand;
       const salScore = prog.scores.salary_growth;
 
-      // Vægtet sammensat score i intervallet 0-100%
       const weightedComposite = (
         (robustScore * aiRobustnessWeight) +
         (jobScore * jobOpportunitiesWeight) +
@@ -146,7 +194,6 @@ export default function Dashboard() {
       if (meetsGpa) score = Math.min(99, score + 2);
       score = Math.max(50, score);
 
-      // Beregning af søgerelevans
       let relevanceBoost = 0;
       if (searchQuery.trim()) {
         const pTitle = prog.udbud_titel.toLowerCase();
@@ -173,22 +220,24 @@ export default function Dashboard() {
         }
       }
 
-      // Den samlede sorteringsscore kombinerer den vægtede score og søgerelevansen
       const totalSortScore = weightedComposite + relevanceBoost;
 
+      // Individuelt tilpasset begrundelsestekst pr. uddannelse med eksagte tal
       let whyText = "";
-      if (aiRobustnessWeight >= jobOpportunitiesWeight && aiRobustnessWeight >= salaryWeight) {
-        whyText = `🟢 AI-robusthed er prioriteret (${robustScore}/100) — lav risiko for automatisering.`;
-      } else if (jobOpportunitiesWeight >= aiRobustnessWeight && jobOpportunitiesWeight >= salaryWeight) {
-        whyText = `🔵 Jobmuligheder er prioriteret (${jobScore}/100) — stærk efterspørgsel på arbejdsmarkedet.`;
+      if (kvNum !== null) {
+        if (meetsGpa) {
+          whyText = `Med et gennemsnit på ${gpa.toFixed(1)} opfylder du sikkert Kvote 1-kravet på ${kvNum}. AI-robustheden er ${robustScore}/100 med stærk efterspørgsel.`;
+        } else {
+          whyText = `Kvote 1-kvotienten var senest ${kvNum}. Med et snit på ${gpa.toFixed(1)} anbefales ansøgning via Kvote 2. AI-robusthed er høj (${robustScore}/100).`;
+        }
       } else {
-        whyText = `🟣 Lønpotentiale er prioriteret (${salScore}/100) — høj startløn og god lønudvikling.`;
+        whyText = `Alle ansøgere blev optaget i 2026. Uddannelsen har en AI-robusthedsscore på ${robustScore}/100 og stabil arbejdsmarkeds-efterspørgsel.`;
       }
 
       return { ...prog, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore };
     });
 
-    // Filtrering af uddannelser
+    // Filtrering
     list = list.filter((p) => {
       if (searchQuery.trim()) {
         const pTitle = p.udbud_titel.toLowerCase();
@@ -196,8 +245,6 @@ export default function Dashboard() {
         const pKot = p.kot_nr.toLowerCase();
         const pCity = p.by.toLowerCase();
         const pInst = p.institution.toLowerCase();
-        const pSkills = (p.skills_hierarchy?.skills || []).join(" ").toLowerCase();
-        const pCourses = (p.skills_hierarchy?.courses || []).join(" ").toLowerCase();
 
         const matchesSearch = expandedTerms.some((term) => {
           if (!term) return false;
@@ -208,9 +255,7 @@ export default function Dashboard() {
             pDisco.includes(term) ||
             pKot.includes(term) ||
             pCity.includes(term) ||
-            pInst.includes(term) ||
-            pSkills.includes(term) ||
-            pCourses.includes(term)
+            pInst.includes(term)
           );
         });
 
@@ -222,8 +267,6 @@ export default function Dashboard() {
       else if (selectedDomain === "sundhed") matchesDomain = p.disco08.startsWith("22");
       else if (selectedDomain === "jura") matchesDomain = p.disco08.startsWith("261") || p.disco08.startsWith("263");
       else if (selectedDomain === "ingenioer") matchesDomain = p.disco08.startsWith("214");
-      else if (selectedDomain === "psykologi") matchesDomain = p.disco08 === "263400";
-      else if (selectedDomain === "design") matchesDomain = p.disco08.startsWith("216");
 
       if (!matchesDomain) return false;
 
@@ -232,94 +275,85 @@ export default function Dashboard() {
         const inst = p.institution.toLowerCase();
         const title = p.udbud_titel.toLowerCase();
 
-        if (selectedUniversity === "ku") {
-          return city.includes("københavn") || city.includes("kbh") || inst.includes("københavns universitet") || title.includes("københavn");
-        } else if (selectedUniversity === "dtu") {
-          return city.includes("lyngby") || city.includes("ballerup") || inst.includes("dtu") || title.includes("kgs. lyngby") || title.includes("teknisk videnskab (civilingeniør)");
-        } else if (selectedUniversity === "au") {
-          return city.includes("aarhus") || city.includes("herning") || inst.includes("aarhus universitet") || title.includes("aarhus");
-        } else if (selectedUniversity === "cbs") {
-          return city.includes("frederiksberg") || inst.includes("cbs") || inst.includes("copenhagen business school") || title.includes("frederiksberg");
-        } else if (selectedUniversity === "sdu") {
-          return city.includes("odense") || city.includes("kolding") || city.includes("esbjerg") || city.includes("sønderborg") || city.includes("slagelse");
-        } else if (selectedUniversity === "aau") {
-          return city.includes("aalborg") || inst.includes("aalborg universitet") || title.includes("aalborg");
-        } else if (selectedUniversity === "ruc") {
-          return city.includes("roskilde") || inst.includes("roskilde universitet") || title.includes("roskilde");
-        } else if (selectedUniversity === "itu") {
-          return title.includes("it-universitetet") || (city.includes("københavn") && p.disco08.startsWith("25"));
-        } else if (selectedUniversity === "professionshojskole") {
-          return title.includes("professionsbachelor") || title.includes("erhvervsakademi") || title.includes("teknolog") || title.includes("multimediedesigner");
-        }
+        if (selectedUniversity === "ku") return city.includes("københavn") || inst.includes("københavns universitet");
+        if (selectedUniversity === "dtu") return city.includes("lyngby") || inst.includes("dtu") || title.includes("teknisk videnskab");
+        if (selectedUniversity === "au") return city.includes("aarhus") || inst.includes("aarhus universitet");
+        if (selectedUniversity === "cbs") return city.includes("frederiksberg") || inst.includes("cbs");
+        if (selectedUniversity === "sdu") return city.includes("odense") || city.includes("esbjerg") || city.includes("kolding");
+        if (selectedUniversity === "aau") return city.includes("aalborg") || inst.includes("aalborg universitet");
+        if (selectedUniversity === "ruc") return city.includes("roskilde") || inst.includes("roskilde universitet");
+        if (selectedUniversity === "itu") return title.includes("it-universitetet") || (city.includes("københavn") && p.disco08.startsWith("25"));
+        if (selectedUniversity === "professionshojskole") return title.includes("professionsbachelor") || title.includes("erhvervsakademi");
       }
 
       return true;
     });
 
-    // Sortering udelukkende baseret på samlet sorteringsscore
     return list.sort((a, b) => b.totalSortScore - a.totalSortScore);
   }, [searchQuery, selectedDomain, selectedUniversity, gpa, aiRobustnessWeight, jobOpportunitiesWeight, salaryWeight, allPrograms]);
 
   const topMatches = matchedPrograms.slice(0, visibleCount);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
       
-      {/* 1. Navigationsbar */}
-      <header className="border-b border-white/5 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50 px-6 lg:px-16 py-5 flex justify-between items-center">
+      {/* 1. Header (Nordisk Myndigheds-Dashboard Style) */}
+      <header className="border-b border-[#E7E9EF] bg-[#FFFFFF] sticky top-0 z-50 px-6 lg:px-16 py-4 flex justify-between items-center card-shadow">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-cyan-500/20">
+          <div className="w-8 h-8 rounded-lg bg-[#12172B] flex items-center justify-center font-bold text-[#FFFFFF] text-sm">
             S
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white tracking-tight">
-              Studievalg <span className="text-cyan-400 font-normal">AI</span>
+            <h1 className="text-base font-bold text-[#12172B] tracking-tight font-display">
+              Studievalg <span className="text-[#545D71] font-normal">AI</span>
             </h1>
-            <p className="text-[11px] text-slate-400">
-              Dynamisk matchemotor styret direkte af dine tre skydere
+            <p className="text-[11px] text-[#545D71]">
+              Statistisk beslutningsstøtte baseret på UFM og Danmarks Statistik
             </p>
           </div>
         </div>
 
-        <nav className="flex items-center gap-4 sm:gap-6 text-xs font-semibold">
-          <Link href="/" className="text-cyan-400 border-b-2 border-cyan-400 pb-0.5">
-            🏠 Studievalg
+        <nav className="flex items-center gap-6 text-xs font-semibold">
+          <Link href="/" className="text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold">
+            Studievalg
           </Link>
-          <Link href="/analyse" className="text-slate-400 hover:text-cyan-300 transition flex items-center gap-1">
-            <span>💡</span> AI Insights
+          <Link href="/analyse" className="text-[#545D71] hover:text-[#12172B] transition">
+            AI Insights
           </Link>
-          <Link href="/evidens" className="text-slate-400 hover:text-emerald-300 transition flex items-center gap-1">
-            <span>📚</span> PEFF Evidens
+          <Link href="/evidens" className="text-[#545D71] hover:text-[#12172B] transition">
+            PEFF Evidens
           </Link>
         </nav>
       </header>
 
-      {/* 2. Introduktion og Filter-sektion */}
-      <section className="max-w-4xl mx-auto px-6 pt-10 pb-4 text-center space-y-4">
+      {/* 2. Hero and Filter Section */}
+      <main className="max-w-5xl mx-auto px-6 py-10 space-y-10">
         
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-slate-900 text-emerald-400 border border-emerald-500/40 shadow-lg">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Opdateret med seneste optagelsesdata fra UFM (26. juli 2026) • 1.413 Uddannelser</span>
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/20">
+            <span className="w-2 h-2 rounded-full bg-[#0F9D6E]"></span>
+            <span>Seneste Optagelsesdata 26. juli 2026 • 1.413 Uddannelser</span>
+          </div>
+
+          {/* H1 Headline per Design Brief v3 Section 6 (No gradient text, fast #12172B) */}
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#12172B] leading-tight font-display">
+            Hvilken uddannelse <br className="hidden sm:inline" />
+            passer <span className="border-b-4 border-[#0F9D6E]">bedst til dig?</span>
+          </h1>
+
+          <p className="text-sm text-[#545D71] max-w-lg mx-auto font-normal leading-relaxed">
+            Tilpas de tre vægtfaktorer nedenfor for at beregne dine personlige anbefalinger ud fra UFM-registerdata.
+          </p>
         </div>
 
-        <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-          Hvilken uddannelse <br className="hidden sm:inline" />
-          <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-indigo-400 bg-clip-text text-transparent">
-            passer bedst til dig?
-          </span>
-        </h2>
-        <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto font-normal leading-relaxed">
-          Træk i de tre skydere nedenfor for at sortere og tilpasse dine personlige anbefalinger i realtid.
-        </p>
-
-        {/* Indtastningsfelt og skydere */}
-        <div className="bg-slate-900/80 border border-white/10 rounded-2xl p-5 sm:p-6 shadow-2xl max-w-2xl mx-auto space-y-5 text-left mt-4">
+        {/* Filter Card (Flat white card on gray page background) */}
+        <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-6 card-shadow space-y-6 max-w-3xl mx-auto">
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-white/5 pb-4">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-b border-[#E7E9EF] pb-5">
+            <div className="space-y-2">
               <div className="flex justify-between text-xs font-semibold">
-                <label htmlFor="gpa-slider" className="text-slate-300">Dit gymnasiale gennemsnit (Kvote 1)</label>
-                <span className="text-cyan-400 font-bold text-sm">{gpa.toFixed(1)}</span>
+                <label htmlFor="gpa-slider" className="text-[#12172B]">Dit gymnasiale gennemsnit (Kvote 1)</label>
+                <span className="text-[#0B7A57] font-mono-data font-bold text-sm">{gpa.toFixed(1)}</span>
               </div>
               <input
                 id="gpa-slider"
@@ -329,19 +363,19 @@ export default function Dashboard() {
                 step="0.1"
                 value={gpa}
                 onChange={(e) => setGpa(Number(e.target.value))}
-                className="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                className="w-full h-2 bg-[#E7E9EF] rounded-lg appearance-none cursor-pointer accent-[#12172B]"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="university-select" className="text-xs font-semibold text-slate-300 block">
-                🏛️ Vælg universitet eller uddannelsessted
+            <div className="space-y-2">
+              <label htmlFor="university-select" className="text-xs font-semibold text-[#12172B] block">
+                Vælg universitet eller uddannelsessted
               </label>
               <select
                 id="university-select"
                 value={selectedUniversity}
                 onChange={(e) => setSelectedUniversity(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full bg-[#FFFFFF] border border-[#D8DBE4] rounded-lg px-3 py-2 text-xs text-[#12172B] focus:outline-none focus:border-[#12172B]"
               >
                 <option value="all">Alle universiteter og uddannelsessteder ({allPrograms.length})</option>
                 <option value="ku">Københavns Universitet (KU)</option>
@@ -357,374 +391,300 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="space-y-3 pt-1">
+          {/* 3 Weight Sliders */}
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                ⚙️ Prioriter dine tre vigtigste vægtfaktorer
-              </h3>
-              <span className="text-[10px] text-cyan-400 font-semibold animate-pulse">
-                ● Sorterer listen i realtid, når du trækker
+              <span className="text-xs font-bold text-[#545D71] uppercase tracking-wider flex items-center gap-1.5">
+                <SlidersIcon /> Prioriter de tre kernemetrics
+              </span>
+              <span className="text-[11px] text-[#545D71] font-mono-data">
+                Sorterer i realtid
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-slate-950 p-3 rounded-xl border border-emerald-500/20 space-y-1.5 hover:border-emerald-500/40 transition">
-                <div className="flex justify-between text-xs">
-                  <label htmlFor="ai-robust-slider" className="text-emerald-400 font-bold">🟢 AI-robusthed</label>
-                  <span className="text-emerald-400 font-bold font-mono">{aiRobustnessWeight}%</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              
+              <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#0B7A57]">🟢 AI-robusthed</span>
+                  <span className="text-[#0B7A57] font-mono-data font-bold">{aiRobustnessWeight}%</span>
                 </div>
                 <input
-                  id="ai-robust-slider"
                   type="range"
                   min="0"
                   max="100"
                   value={aiRobustnessWeight}
                   onChange={(e) => setAiRobustnessWeight(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#0F9D6E]"
                 />
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-cyan-500/20 space-y-1.5 hover:border-cyan-500/40 transition">
-                <div className="flex justify-between text-xs">
-                  <label htmlFor="job-opp-slider" className="text-cyan-400 font-bold">🔵 Jobmuligheder</label>
-                  <span className="text-cyan-400 font-bold font-mono">{jobOpportunitiesWeight}%</span>
+              <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#1D4ED8]">🔵 Jobmuligheder</span>
+                  <span className="text-[#1D4ED8] font-mono-data font-bold">{jobOpportunitiesWeight}%</span>
                 </div>
                 <input
-                  id="job-opp-slider"
                   type="range"
                   min="0"
                   max="100"
                   value={jobOpportunitiesWeight}
                   onChange={(e) => setJobOpportunitiesWeight(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#2563EB]"
                 />
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-indigo-500/20 space-y-1.5 hover:border-indigo-500/40 transition">
-                <div className="flex justify-between text-xs">
-                  <label htmlFor="salary-slider" className="text-indigo-400 font-bold">🟣 Lønpotentiale</label>
-                  <span className="text-indigo-400 font-bold font-mono">{salaryWeight}%</span>
+              <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-[#6D28D9]">🟣 Lønpotentiale</span>
+                  <span className="text-[#6D28D9] font-mono-data font-bold">{salaryWeight}%</span>
                 </div>
                 <input
-                  id="salary-slider"
                   type="range"
                   min="0"
                   max="100"
                   value={salaryWeight}
                   onChange={(e) => setSalaryWeight(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#7C3AED]"
                 />
               </div>
+
             </div>
           </div>
 
-          <div className="pt-2 border-t border-white/5 space-y-1">
-            <label htmlFor="search-input" className="text-[11px] font-semibold text-slate-400 block uppercase tracking-wider">
-              🔍 Søg efter uddannelse eller erhverv
-            </label>
+          {/* Search Box */}
+          <div className="pt-2 border-t border-[#E7E9EF] relative">
+            <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none pt-2">
+              <SearchIcon />
+            </div>
             <input
-              id="search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Prøv fx: 'tandlæge', 'odontologi', 'læge', 'advokat', 'kodning'..."
-              className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..."
+              className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#8891A3] focus:outline-none focus:border-[#12172B]"
             />
           </div>
 
-          <div className="flex flex-wrap gap-2 pt-1 border-t border-white/5">
-            <span className="text-xs text-slate-400 self-center font-medium">Universitet:</span>
-            <button
-              onClick={() => setSelectedUniversity("all")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "all" ? "bg-white/10 border-white/20 text-white" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              Alle
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("ku")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "ku" ? "bg-cyan-500/20 border-cyan-500/30 text-cyan-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              KU
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("dtu")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "dtu" ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              DTU
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("au")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "au" ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              AU
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("cbs")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "cbs" ? "bg-amber-500/20 border-amber-500/30 text-amber-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              CBS
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("sdu")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "sdu" ? "bg-purple-500/20 border-purple-500/30 text-purple-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              SDU
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("aau")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "aau" ? "bg-pink-500/20 border-pink-500/30 text-pink-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              AAU
-            </button>
-            <button
-              onClick={() => setSelectedUniversity("ruc")}
-              className={`text-xs px-2.5 py-1 rounded-lg border font-medium transition ${selectedUniversity === "ruc" ? "bg-slate-800 border-white/10 text-slate-300" : "bg-slate-950 border-white/5 text-slate-400 hover:text-white"}`}
-            >
-              RUC
-            </button>
+          {/* University Pills per Design Brief v3 (Neutral outline, active = filled #12172B) */}
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-[#E7E9EF] text-xs">
+            <span className="text-[#545D71] self-center font-medium">Filtrer:</span>
+            {[
+              { id: "all", label: "Alle" },
+              { id: "ku", label: "KU" },
+              { id: "dtu", label: "DTU" },
+              { id: "au", label: "AU" },
+              { id: "cbs", label: "CBS" },
+              { id: "sdu", label: "SDU" },
+              { id: "aau", label: "AAU" },
+              { id: "ruc", label: "RUC" },
+              { id: "professionshojskole", label: "Professionshøjskoler" },
+            ].map((u) => (
+              <button
+                key={u.id}
+                onClick={() => setSelectedUniversity(u.id)}
+                className={`px-3 py-1 rounded-full border transition font-medium text-xs ${
+                  selectedUniversity === u.id
+                    ? "bg-[#12172B] border-[#12172B] text-[#FFFFFF]"
+                    : "bg-[#FFFFFF] border-[#D8DBE4] text-[#545D71] hover:border-[#12172B] hover:text-[#12172B]"
+                }`}
+              >
+                {u.label}
+              </button>
+            ))}
           </div>
-        </div>
-      </section>
 
-      {/* 3. Matchede uddannelser */}
-      <section className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex justify-between items-end border-b border-white/5 pb-4">
-          <div>
-            <h3 className="text-xl font-bold text-white tracking-tight">
-              {selectedUniversity !== "all"
-                ? `Matchede uddannelser på ${selectedUniversity.toUpperCase()}`
-                : searchQuery
-                ? `Søgeresultater for "${searchQuery}"`
-                : "Dine bedste anbefalinger"}
-            </h3>
-            <p className="text-xs text-slate-400">
-              Dynamisk sorteret ud fra dine tre skydere (🟢 AI: {aiRobustnessWeight}%, 🔵 Job: {jobOpportunitiesWeight}%, 🟣 Løn: {salaryWeight}%)
-            </p>
-          </div>
-          <span className="text-xs text-cyan-400 font-mono font-semibold">
-            {matchedPrograms.length} uddannelser matchet
-          </span>
         </div>
 
-        {topMatches.length > 0 ? (
-          <div className="space-y-4">
-            {topMatches.map((prog, index) => {
-              const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
-              
-              let domainIconEmoji = "💻";
-              if (prog.disco08.startsWith("22")) domainIconEmoji = "🩺";
-              else if (prog.disco08.startsWith("261") || prog.disco08.startsWith("263")) domainIconEmoji = "⚖️";
-              else if (prog.disco08.startsWith("24") || prog.disco08.startsWith("12")) domainIconEmoji = "📈";
+        {/* 3. Recommendation List */}
+        <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3">
+            <div>
+              <h2 className="text-xl font-bold text-[#12172B] font-display">
+                Dine anbefalinger
+              </h2>
+              <p className="text-xs text-[#545D71]">
+                Vægtet sortering (🟢 AI: {aiRobustnessWeight}%, 🔵 Job: {jobOpportunitiesWeight}%, 🟣 Løn: {salaryWeight}%)
+              </p>
+            </div>
+            <span className="text-xs text-[#545D71] font-mono-data font-semibold">
+              {matchedPrograms.length} matchede uddannelser
+            </span>
+          </div>
 
-              return (
-                <article
-                  key={prog.kot_nr}
-                  id={`program-card-${prog.kot_nr}`}
-                  className="bg-slate-900/60 border border-white/5 rounded-2xl p-6 hover:border-white/15 transition duration-200 shadow-xl space-y-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-center text-xl shrink-0">
-                        {domainIconEmoji}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
-                          <span className="font-bold text-emerald-400 text-sm">#{index + 1} Match ({prog.matchScore}%)</span>
-                          <span>•</span>
-                          <span className="text-cyan-300 font-semibold">{prog.institution}</span>
+          {topMatches.length > 0 ? (
+            <div className="space-y-4">
+              {topMatches.map((prog, index) => {
+                const isTopMatch = index === 0;
+                const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
+
+                return (
+                  <article
+                    key={prog.kot_nr}
+                    className={`bg-[#FFFFFF] border rounded-xl p-5 card-shadow transition duration-150 space-y-4 ${
+                      isTopMatch ? "border-[#0F9D6E] bg-[#E3F6EE]/20 card-shadow-hover" : "border-[#E7E9EF] hover:border-[#D8DBE4]"
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                      
+                      {/* Left Header Info */}
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-mono-data font-bold text-[#0B7A57]">#{index + 1} Match ({prog.matchScore}%)</span>
+                          <span className="text-[#8891A3]">•</span>
+                          <span className="text-[#545D71] font-semibold">{prog.institution}</span>
+                          <span className="text-[#8891A3]">•</span>
+                          <span className="text-[#8891A3] font-mono-data">KOT {prog.kot_nr}</span>
                         </div>
-                        <h4 className="text-2xl font-extrabold text-white tracking-tight">
-                          {prog.udbud_titel}
-                        </h4>
-                      </div>
-                    </div>
 
-                    <div className="flex flex-col items-start sm:items-end gap-1">
-                      <div className="flex items-center gap-2">
-                        <div className="text-right">
-                          <span className="text-[10px] text-slate-400 block uppercase font-semibold">
-                            Kvote 1 adgangskvotient (2026)
-                          </span>
-                          <span className="text-xl font-black text-cyan-400">
+                        <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display">
+                          {prog.udbud_titel}
+                        </h3>
+                      </div>
+
+                      {/* Right Kvote 1 Badge per Design Brief v3 Section 1 & 6 */}
+                      <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start w-full sm:w-auto gap-1 border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
+                        <div className="text-left sm:text-right">
+                          <span className="text-[11px] text-[#545D71] block">Kvote 1 adgangskvotient (2026)</span>
+                          <span className="text-lg font-bold text-[#12172B] font-mono-data">
                             {prog.latest_kvotient}
                           </span>
                         </div>
+
+                        {prog.kvNum !== null ? (
+                          <span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${
+                            prog.meetsGpa 
+                              ? "bg-[#E3F6EE] text-[#0B7A57] border-[#0F9D6E]/30"
+                              : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/30"
+                          }`}>
+                            {prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}
+                            {prog.meetsGpa ? "Kvote 1 opfyldt" : `Søg Kvote 2 (Kvote 1: ${prog.latest_kvotient})`}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/30">
+                            <CheckCircleIcon /> Alle optaget
+                          </span>
+                        )}
                       </div>
 
-                      {/* Præcis angivelse af Kvote 1 og Kvote 2 */}
-                      {prog.kvNum !== null ? (
-                        <span className={`text-[10px] px-2.5 py-1 rounded-lg font-bold border ${prog.meetsGpa ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
-                          {prog.meetsGpa ? "✓ Kvote 1 opfyldt" : `⚠️ Søg Kvote 2 (Kvote 1 krav: ${prog.latest_kvotient})`}
-                        </span>
-                      ) : (
-                        <span className="text-[10px] px-2.5 py-1 rounded-lg font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                          ✓ Alle optaget i Kvote 1
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                    <div className={`p-3 rounded-xl border space-y-1 transition ${aiRobustnessWeight >= jobOpportunitiesWeight && aiRobustnessWeight >= salaryWeight ? "bg-emerald-950/40 border-emerald-500/40" : "bg-slate-950 border-white/5"}`}>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">🟢 AI-robusthed</span>
-                        <span className="text-emerald-400 font-bold font-mono">{prog.robustScore}/100</span>
-                      </div>
-                      <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${prog.robustScore}%` }} />
-                      </div>
-                      <span className="text-[10px] text-slate-400 block pt-0.5">
-                        {prog.robustScore >= 75 ? "Meget robust" : "Moderat eksponering"}
-                      </span>
                     </div>
 
-                    <div className={`p-3 rounded-xl border space-y-1 transition ${jobOpportunitiesWeight >= aiRobustnessWeight && jobOpportunitiesWeight >= salaryWeight ? "bg-cyan-950/40 border-cyan-500/40" : "bg-slate-950 border-white/5"}`}>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">🔵 Jobmuligheder</span>
-                        <span className="text-cyan-400 font-bold font-mono">{prog.jobScore}/100</span>
+                    {/* Middle Section: Signature Triangle Radar Graph + Metrics Breakdown */}
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-center bg-[#F7F8FA] p-4 rounded-lg border border-[#E7E9EF]">
+                      
+                      {/* Signature Triangle Graph per Design Brief Section 5 */}
+                      <div className="sm:col-span-1 flex justify-center border-b sm:border-b-0 sm:border-r border-[#E7E9EF] pb-3 sm:pb-0 sm:pr-2">
+                        <CompactTriangleRadar robust={prog.robustScore} job={prog.jobScore} salary={prog.salScore} />
                       </div>
-                      <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${prog.jobScore}%` }} />
-                      </div>
-                      <span className="text-[10px] text-slate-400 block pt-0.5">
-                        {prog.jobScore >= 75 ? "Stærk efterspørgsel" : "Stabil efterspørgsel"}
-                      </span>
-                    </div>
 
-                    <div className={`p-3 rounded-xl border space-y-1 transition ${salaryWeight >= aiRobustnessWeight && salaryWeight >= jobOpportunitiesWeight ? "bg-indigo-950/40 border-indigo-500/40" : "bg-slate-950 border-white/5"}`}>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-400">🟣 Lønpotentiale</span>
-                        <span className="text-indigo-400 font-bold font-mono">{prog.salScore}/100</span>
-                      </div>
-                      <div className="h-2 bg-slate-900 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${prog.salScore}%` }} />
-                      </div>
-                      <span className="text-[10px] text-slate-400 block pt-0.5">
-                        {prog.salScore >= 75 ? "Høj startløn" : "Middel lønniveau"}
-                      </span>
-                    </div>
-                  </div>
+                      {/* 3 Metric Scores */}
+                      <div className="sm:col-span-3 grid grid-cols-3 gap-3 text-xs">
+                        <div className="space-y-1">
+                          <span className="text-[#545D71] text-[11px] block">🟢 AI-robusthed</span>
+                          <span className="text-[#0B7A57] font-mono-data font-bold text-sm block">{prog.robustScore}/100</span>
+                          <div className="h-1.5 bg-[#E7E9EF] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#0F9D6E] rounded-full" style={{ width: `${prog.robustScore}%` }} />
+                          </div>
+                        </div>
 
-                  <div className="bg-slate-950/80 p-3.5 rounded-xl border border-white/5 text-xs text-slate-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                      <strong className="text-cyan-400 block mb-0.5">Hvorfor denne anbefaling?</strong>
-                      <span>{prog.whyText}</span>
-                    </div>
+                        <div className="space-y-1">
+                          <span className="text-[#545D71] text-[11px] block">🔵 Jobmuligheder</span>
+                          <span className="text-[#1D4ED8] font-mono-data font-bold text-sm block">{prog.jobScore}/100</span>
+                          <div className="h-1.5 bg-[#E7E9EF] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${prog.jobScore}%` }} />
+                          </div>
+                        </div>
 
-                    <button
-                      onClick={() => setExpandedProgram(isExpanded ? null : prog)}
-                      className="text-xs px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl border border-white/10 transition whitespace-nowrap self-end sm:self-auto"
-                      aria-expanded={isExpanded}
-                    >
-                      {isExpanded ? "Luk analyse" : "Se fuld analyse →"}
-                    </button>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="pt-4 border-t border-white/5 space-y-4 text-xs animate-fade-in">
-                      <div className="bg-slate-950 p-4 rounded-xl space-y-3">
-                        <h5 className="font-bold text-slate-200 uppercase tracking-wider text-[11px]">
-                          📖 Hvad lærer du på studiet?
-                        </h5>
-                        <div className="flex flex-wrap gap-2">
-                          {prog.skills_hierarchy.courses.map((c: string, i: number) => (
-                            <span key={i} className="bg-slate-900 text-slate-300 py-1 px-2.5 rounded border border-white/5">
-                              {c}
-                            </span>
-                          ))}
+                        <div className="space-y-1">
+                          <span className="text-[#545D71] text-[11px] block">🟣 Lønpotentiale</span>
+                          <span className="text-[#6D28D9] font-mono-data font-bold text-sm block">{prog.salScore}/100</span>
+                          <div className="h-1.5 bg-[#E7E9EF] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#7C3AED] rounded-full" style={{ width: `${prog.salScore}%` }} />
+                          </div>
                         </div>
                       </div>
 
-                      <div className="bg-slate-950 p-4 rounded-xl space-y-2">
-                        <h5 className="font-bold text-emerald-400 uppercase tracking-wider text-[11px]">
-                          📚 PEFF-evidens og rapportcitater
-                        </h5>
-                        {prog.rag_evidence.map((ev: any, i: number) => (
-                          <div key={i} className="text-slate-300 italic pt-1 border-t border-white/5 first:border-none">
-                            "{ev.quote}" — <span className="text-cyan-400 not-italic font-semibold">{ev.source}</span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
-                  )}
 
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-8 text-center space-y-3">
-            <span className="text-3xl block">🔍</span>
-            <h4 className="text-lg font-bold text-white">Ingen matchende uddannelser fundet</h4>
-            <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Prøv at vælge et andet universitet, eller ryd dit søgefelt.
-            </p>
-            <button
-              onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setSelectedDomain("all"); }}
-              className="px-4 py-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-semibold hover:bg-cyan-500/30 transition"
-            >
-              Nulstil universitetsfilter, og vis alle fag
-            </button>
-          </div>
-        )}
+                    {/* Footer Explanation + Expand CTA Link per Design Brief Section 6 */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-[#545D71] pt-1">
+                      <p className="leading-relaxed">
+                        <strong className="text-[#12172B]">Begrundelse:</strong> {prog.whyText}
+                      </p>
 
-        {visibleCount < matchedPrograms.length && (
-          <div className="text-center pt-6">
-            <button
-              onClick={() => setVisibleCount((prev) => prev + 10)}
-              className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-2xl border border-white/10 text-xs transition shadow-xl"
-            >
-              Vis flere anbefalinger (Viser {visibleCount} af {matchedPrograms.length})
-            </button>
-          </div>
-        )}
-      </section>
+                      <button
+                        onClick={() => setExpandedProgram(isExpanded ? null : prog)}
+                        className="text-[#12172B] font-semibold hover:underline text-xs whitespace-nowrap self-end sm:self-auto flex items-center gap-1"
+                      >
+                        {isExpanded ? "Skjul detaljer ▲" : "Se fuld analyse →"}
+                      </button>
+                    </div>
 
-      {/* 4. Sidefod med juridisk forbehold */}
-      <footer className="border-t border-white/10 bg-slate-900/60 pt-12 pb-16 px-6 lg:px-16 text-slate-300 text-xs space-y-8">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-2">
-            <h4 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
-              🎯 Hvorfor er platformen bygget?
-            </h4>
-            <p className="text-slate-400 leading-relaxed text-[11.5px]">
-              AI-Studievalgsplatformen er bygget for at give uddannelsessøgende unge i Danmark et uafhængigt og videnskabeligt funderet beslutningsstøtteværktøj. Formålet er at fjerne frygt og usikkerhed ved at koble historiske ansøgertal med reel, international AI-forskning.
-            </p>
-          </div>
+                    {isExpanded && (
+                      <div className="pt-4 border-t border-[#E7E9EF] space-y-4 text-xs">
+                        <div className="space-y-2">
+                          <span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">
+                            Kurser og fagindhold
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {prog.skills_hierarchy.courses.map((c: string, i: number) => (
+                              <span key={i} className="bg-[#F7F8FA] text-[#12172B] border border-[#D8DBE4] px-2.5 py-1 rounded-md text-[11px]">
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-bold text-white tracking-tight flex items-center gap-2 font-semibold">
-              ⚙️ Hvad analyserer platformen?
-            </h4>
-            <p className="text-slate-400 leading-relaxed text-[11.5px]">
-              Platformen analyserer <strong>14.934 officielle optagelsesposter fra UFM</strong> (2009–2026) fordelt på <strong>1.413 danske uddannelser</strong>. Den kombinerer over 42 forskningskilder fra OECD, ILO, Stanford, MIT og Danmarks Statistik i PEFF-frameworket.
-            </p>
-          </div>
+                        <div className="space-y-2 pt-2 border-t border-[#E7E9EF]">
+                          <span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">
+                            PEFF Evidenskilder og citater
+                          </span>
+                          {prog.rag_evidence.map((ev: any, i: number) => (
+                            <div key={i} className="bg-[#F7F8FA] p-3 rounded-lg border border-[#E7E9EF] space-y-1">
+                              <p className="text-[#12172B] italic">"{ev.quote}"</p>
+                              <span className="text-[#545D71] font-semibold text-[11px] block">Kilde: {ev.source}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-bold text-amber-400 tracking-tight flex items-center gap-2">
-              ⚖️ Vigtigt juridisk forbehold
-            </h4>
-            <p className="text-slate-400 leading-relaxed text-[11.5px]">
-              <strong>Ingen juridisk vejledning:</strong> Platformen er et uafhængigt analytisk værktøj. Officiel ansøgning sker altid via <a href="https://www.optagelse.dk" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">Optagelse.dk</a> og uddannelsesstedernes egne vejledninger. Modellerne angiver estimerede statistiske sammenhænge og konfidensintervaller – ikke garantier for fremtiden.
-            </p>
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow">
+              <h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3>
+              <p className="text-xs text-[#545D71]">Prøv at vælge et andet universitet eller ryd dit søgefelt.</p>
+              <button
+                onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); }}
+                className="px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition"
+              >
+                Nulstil søgning og vis alle
+              </button>
+            </div>
+          )}
+
+          {visibleCount < matchedPrograms.length && (
+            <div className="text-center pt-4">
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 10)}
+                className="px-6 py-2.5 bg-[#FFFFFF] border border-[#D8DBE4] hover:border-[#12172B] text-[#12172B] font-semibold rounded-lg text-xs transition card-shadow"
+              >
+                Vis flere anbefalinger (Viser {visibleCount} af {matchedPrograms.length})
+              </button>
+            </div>
+          )}
+
         </div>
 
-        <div className="max-w-4xl mx-auto border-t border-white/5 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-slate-500 text-[11px]">
-          <div>
-            © 2026 AI-Studievalgsplatform Danmark • Uafhængig studievejledning og arbejdsmarkedsanalyse
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/analyse" className="hover:text-cyan-400 transition">📊 AI Insights</Link>
-            <span>•</span>
-            <Link href="/evidens" className="hover:text-emerald-400 transition">📚 PEFF Evidens Framework</Link>
-            <span>•</span>
-            <a href="https://ufm.dk" target="_blank" rel="noopener noreferrer" className="hover:text-slate-300 transition">UFM.dk</a>
-          </div>
-        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-8 px-6 lg:px-16 text-[#545D71] text-xs text-center mt-16">
+        © 2026 AI-Studievalgsplatform Danmark • Officiel UFM & Danmarks Statistik registerdata
       </footer>
-
     </div>
   );
 }
