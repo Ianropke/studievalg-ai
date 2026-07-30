@@ -148,8 +148,24 @@ const ArrowRightIcon = () => (
   </svg>
 );
 
+interface ProgramItem {
+  kot_nr?: string;
+  udbud_titel?: string;
+  institution_navn?: string;
+  adgangskvotient_kvote1?: string;
+  scores?: {
+    automation_risk?: number;
+    labour_demand?: number;
+    salary_growth?: number;
+  };
+  skills_hierarchy?: { courses?: string[] };
+  rag_evidence?: Array<{ quote: string; source: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
 export default function Dashboard() {
-  const [allPrograms, setAllPrograms] = useState<any[]>([]);
+  const [allPrograms, setAllPrograms] = useState<ProgramItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -166,7 +182,6 @@ export default function Dashboard() {
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState("all");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
   const [gpa, setGpa] = useState(9.5);
   
@@ -174,11 +189,10 @@ export default function Dashboard() {
   const [jobOpportunitiesWeight, setJobOpportunitiesWeight] = useState(70);
   const [salaryWeight, setSalaryWeight] = useState(60);
 
-  const [expandedProgram, setExpandedProgram] = useState<any | null>(null);
+  const [expandedProgram, setExpandedProgram] = useState<ProgramItem | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
-  const deferredSelectedDomain = useDeferredValue(selectedDomain);
   const deferredSelectedUniversity = useDeferredValue(selectedUniversity);
   const deferredGpa = useDeferredValue(gpa);
   const deferredAiWeight = useDeferredValue(aiRobustnessWeight);
@@ -206,9 +220,9 @@ export default function Dashboard() {
       const kvNum = typeof latestKv === "number" ? latestKv : null;
       const meetsGpa = kvNum !== null ? deferredGpa >= kvNum : true;
       
-      const robustScore = 100 - prog.scores.automation_risk;
-      const jobScore = prog.scores.labour_demand;
-      const salScore = prog.scores.salary_growth;
+      const robustScore = 100 - (prog.scores?.automation_risk || 0);
+      const jobScore = prog.scores?.labour_demand || 50;
+      const salScore = prog.scores?.salary_growth || 50;
 
       const weightedComposite = (
         (robustScore * deferredAiWeight) +
@@ -221,12 +235,12 @@ export default function Dashboard() {
       score = Math.max(50, score);
 
       let relevanceBoost = 0;
-      const pTitle = prog.udbud_titel;
+      const pTitle = prog.udbud_titel || "";
       if (deferredSearchQuery.trim()) {
         const pTitleLow = pTitle.toLowerCase();
         const pNormTitle = normalizeSearchText(pTitleLow);
-        const pDisco = prog.disco_titel.toLowerCase();
-        const pKot = prog.kot_nr.toLowerCase();
+        const pDisco = (prog.disco_titel || "").toLowerCase();
+        const pKot = (prog.kot_nr || "").toLowerCase();
 
         const isExactMajor = exactMajors.some((major) => pTitleLow.startsWith(major) || pTitleLow.includes(major));
 
@@ -284,16 +298,20 @@ export default function Dashboard() {
         whyText = `Alle ansøgere blev optaget senest (ingen grænsekvotient). ${aiSection}`;
       }
 
-      return { ...prog, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore };
+      const institutionName = (prog.institution || prog.institution_navn || "") as string;
+      const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
+      return { ...prog, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore };
     });
 
     list = list.filter((p) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const item = p as Record<string, any>;
       if (deferredSearchQuery.trim()) {
-        const pTitle = p.udbud_titel.toLowerCase();
-        const pDisco = p.disco_titel.toLowerCase();
-        const pKot = p.kot_nr.toLowerCase();
-        const pCity = p.by.toLowerCase();
-        const pInst = p.institution.toLowerCase();
+        const pTitle = (item.udbud_titel || "").toLowerCase();
+        const pDisco = (item.disco_titel || "").toLowerCase();
+        const pKot = (item.kot_nr || "").toLowerCase();
+        const pCity = (item.by || "").toLowerCase();
+        const pInst = (item.institution || item.institution_navn || "").toLowerCase();
 
         const matchesSearch = expandedTerms.some((term) => {
           if (!term) return false;
@@ -311,18 +329,13 @@ export default function Dashboard() {
         if (!matchesSearch) return false;
       }
 
-      let matchesDomain = true;
-      if (deferredSelectedDomain === "it") matchesDomain = p.disco08.startsWith("25");
-      else if (deferredSelectedDomain === "sundhed") matchesDomain = p.disco08.startsWith("22");
-      else if (deferredSelectedDomain === "jura") matchesDomain = p.disco08.startsWith("261") || p.disco08.startsWith("263");
-      else if (deferredSelectedDomain === "ingenioer") matchesDomain = p.disco08.startsWith("214");
-
-      if (!matchesDomain) return false;
-
       if (deferredSelectedUniversity !== "all") {
-        const city = p.by.toLowerCase();
-        const inst = p.institution.toLowerCase();
-        const title = p.udbud_titel.toLowerCase();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const item = p as Record<string, any>;
+        const city = (item.by || "").toLowerCase();
+        const inst = (item.institution || item.institution_navn || "").toLowerCase();
+        const title = (item.udbud_titel || "").toLowerCase();
+        const disco = (item.disco08 || "").toString();
 
         if (deferredSelectedUniversity === "ku") return city.includes("københavn") || inst.includes("københavns universitet");
         if (deferredSelectedUniversity === "dtu") return city.includes("lyngby") || inst.includes("dtu") || title.includes("teknisk videnskab");
@@ -331,7 +344,7 @@ export default function Dashboard() {
         if (deferredSelectedUniversity === "sdu") return city.includes("odense") || city.includes("esbjerg") || city.includes("kolding");
         if (deferredSelectedUniversity === "aau") return city.includes("aalborg") || inst.includes("aalborg universitet");
         if (deferredSelectedUniversity === "ruc") return city.includes("roskilde") || inst.includes("roskilde universitet");
-        if (deferredSelectedUniversity === "itu") return title.includes("it-universitetet") || (city.includes("københavn") && p.disco08.startsWith("25"));
+        if (deferredSelectedUniversity === "itu") return title.includes("it-universitetet") || (city.includes("københavn") && disco.startsWith("25"));
         if (deferredSelectedUniversity === "professionshojskole") return title.includes("professionsbachelor") || title.includes("erhvervsakademi");
       }
 
@@ -339,7 +352,7 @@ export default function Dashboard() {
     });
 
     return list.sort((a, b) => b.totalSortScore - a.totalSortScore);
-  }, [deferredSearchQuery, deferredSelectedDomain, deferredSelectedUniversity, deferredGpa, deferredAiWeight, deferredJobWeight, deferredSalWeight, allPrograms]);
+  }, [deferredSearchQuery, deferredSelectedUniversity, deferredGpa, deferredAiWeight, deferredJobWeight, deferredSalWeight, allPrograms]);
 
   const topMatches = matchedPrograms.slice(0, visibleCount);
 
@@ -636,9 +649,9 @@ export default function Dashboard() {
                           <span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">
                             PEFF Evidenskilder og citater
                           </span>
-                          {prog.rag_evidence?.map((ev: any, i: number) => (
+                          {prog.rag_evidence?.map((ev: { quote: string; source: string }, i: number) => (
                             <div key={i} className="bg-[#F7F8FA] p-3 rounded-lg border border-[#E7E9EF] space-y-1">
-                              <p className="text-[#12172B] italic">"{ev.quote}"</p>
+                              <p className="text-[#12172B] italic">&quot;{ev.quote}&quot;</p>
                               <span className="text-[#545D71] font-semibold text-[11px] block">Kilde: {ev.source}</span>
                             </div>
                           ))}

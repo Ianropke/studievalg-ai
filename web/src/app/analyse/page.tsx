@@ -4,7 +4,22 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-const DualRadarGraph = dynamic(() => Promise.resolve(function DualRadarGraphComponent({ progA, progB }: { progA: any; progB: any }) {
+interface ProgramItem {
+  kot_nr?: string;
+  udbud_titel?: string;
+  institution?: string;
+  institution_navn?: string;
+  latest_kvotient?: React.ReactNode;
+  scores?: {
+    automation_risk?: number;
+    labour_demand?: number;
+    salary_growth?: number;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+const DualRadarGraph = dynamic(() => Promise.resolve(function DualRadarGraphComponent({ progA, progB }: { progA: ProgramItem; progB: ProgramItem }) {
   if (!progA || !progB) return null;
   const R = 45;
   const cx = 70;
@@ -41,6 +56,10 @@ const DualRadarGraph = dynamic(() => Promise.resolve(function DualRadarGraphComp
         <line x1={cx} y1={cy} x2={refJob.x} y2={refJob.y} stroke="#E7E9EF" strokeWidth="1" />
         <line x1={cx} y1={cy} x2={refSal.x} y2={refSal.y} stroke="#E7E9EF" strokeWidth="1" />
 
+        {/* Polygons */}
+        <polygon points={`${pRobA.x},${pRobA.y} ${pJobA.x},${pJobA.y} ${pSalA.x},${pSalA.y}`} fill="#2563EB" fillOpacity="0.25" stroke="#2563EB" strokeWidth="2" />
+        <polygon points={`${pRobB.x},${pRobB.y} ${pJobB.x},${pJobB.y} ${pSalB.x},${pSalB.y}`} fill="#7C3AED" fillOpacity="0.25" stroke="#7C3AED" strokeWidth="2" />
+
         {/* Labels */}
         <text x={cx} y={refRob.y - 6} fill="#0B7A57" fontSize="8" fontWeight="bold" textAnchor="middle">AI-robusthed</text>
         <text x={refJob.x - 4} y={refJob.y + 4} fill="#1D4ED8" fontSize="8" fontWeight="bold" textAnchor="end">Jobmuligheder</text>
@@ -67,7 +86,7 @@ const DualRadarGraph = dynamic(() => Promise.resolve(function DualRadarGraphComp
 }), { ssr: false });
 
 export default function AIInsightsPage() {
-  const [allPrograms, setAllPrograms] = useState<any[]>([]);
+  const [allPrograms, setAllPrograms] = useState<ProgramItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

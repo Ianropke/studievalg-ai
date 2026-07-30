@@ -99,7 +99,7 @@ export default function EvidensPage() {
                 Tier 3: RAG & LLM Semantik (Soft Data)
               </h3>
               <p className="text-xs text-[#545D71] mt-2 leading-relaxed">
-                Retrieval-Augmented Generation analyserer tusindvis af siders PDF-studieordninger for at klassificere "AI-robusthed". Den fanger, om undervisningen reelt indeholder anvendt AI, og trækker citater til begrundelserne.
+                Retrieval-Augmented Generation analyserer tusindvis af siders PDF-studieordninger for at klassificere &quot;AI-robusthed&quot;. Den fanger, om undervisningen reelt indeholder anvendt AI, og trækker citater til begrundelserne.
               </p>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function EvidensPage() {
              <h3 className="font-bold text-[#12172B] text-sm font-mono-data">Eksempler på udtrukne citater via RAG</h3>
              
              <div className="bg-[#F7F8FA] p-4 rounded-lg border border-[#E7E9EF] text-xs">
-                <p className="text-[#12172B] italic mb-2 font-serif">"Studerende i Odontologi skal i modul 8 demonstrere kompetencer i anvendelse af maskinlærings-værktøjer til røntgenbilled-diagnostik."</p>
+                <p className="text-[#12172B] italic mb-2 font-serif">&quot;Studerende i Odontologi skal i modul 8 demonstrere kompetencer i anvendelse af maskinlærings-værktøjer til røntgenbilled-diagnostik.&quot;</p>
                 <div className="flex justify-between items-center text-[10px] text-[#545D71] font-bold uppercase tracking-wider">
                    <span>Kilde: Københavns Universitet - Studieordning 2026</span>
                    <span className="text-[#0B7A57]">Score Impact: +12% Robusthed</span>
@@ -141,7 +141,7 @@ export default function EvidensPage() {
              </div>
              
              <div className="bg-[#F7F8FA] p-4 rounded-lg border border-[#E7E9EF] text-xs">
-                <p className="text-[#12172B] italic mb-2 font-serif">"Erhvervssproglig uddannelse har fjernet krav til manuel tekstoversættelse i 3. semester og erstattet med AI post-editing."</p>
+                <p className="text-[#12172B] italic mb-2 font-serif">&quot;Erhvervssproglig uddannelse har fjernet krav til manuel tekstoversættelse i 3. semester og erstattet med AI post-editing.&quot;</p>
                 <div className="flex justify-between items-center text-[10px] text-[#545D71] font-bold uppercase tracking-wider">
                    <span>Kilde: CBS Program Board Mødereferat (April 2026)</span>
                    <span className="text-[#B45309]">Score Impact: -8% Arbejdsmarked</span>
