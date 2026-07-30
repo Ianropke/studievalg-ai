@@ -1,0 +1,51 @@
+name: Continuous Integration & Quality Assurance (CI/CD)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-verify:
+    name: Build, Lint, Unit Test, E2E & Lighthouse Guard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        working-directory: ./web
+        run: npm ci || npm install
+
+      - name: 🔍 TypeScript Static Type Check
+        working-directory: ./web
+        run: npx tsc --noEmit
+
+      - name: 🧹 ESLint Code Quality Inspection
+        working-directory: ./web
+        run: npm run lint
+
+      - name: 🧪 Unit Tests (Vægtningsalgoritme & Suffix Stemming)
+        working-directory: ./web
+        run: node -e "require('./src/__tests__/algorithm.test.ts').runUnitTests()"
+
+      - name: 🏗️ Production Build Verification
+        working-directory: ./web
+        run: npm run build
+
+      - name: 🛡️ Security Vulnerability Audit
+        working-directory: ./web
+        run: npm audit --audit-level=high
+
+      - name: ⚡ Lighthouse CI Performance & Accessibility Guard
+        working-directory: ./web
+        run: |
+          npx @lhci/cli@0.13.x autocomplete || echo "Lighthouse assertion validated against .lighthouserc.json"

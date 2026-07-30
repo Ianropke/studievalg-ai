@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-// Synonymer for søgning
+// Synonymer for søgning & udvidet erhvervssprog
 const SYNONYM_MAP: Record<string, string[]> = {
   "tandlæge": ["odontologi", "tandpleje", "tandteknik"],
   "tændlæge": ["odontologi", "tandpleje", "tandteknik"],
@@ -15,31 +15,55 @@ const SYNONYM_MAP: Record<string, string[]> = {
   "læge": ["medicin", "lægemiddelvidenskab", "kirurgi"],
   "doktor": ["medicin"],
   "medicin": ["medicin", "læge"],
-  "dyrlæge": ["veterinær"],
+  "dyrlæge": ["veterinær", "veterinærmedicin"],
   "veterinær": ["veterinær", "dyrlæge"],
   "sygeplejerske": ["sygeplejerske", "sygepleje"],
+  "sygepleje": ["sygeplejerske", "sygepleje"],
   "jordemoder": ["jordemoder"],
-  "fysioterapeut": ["fysioterapi"],
-  "ergoterapeut": ["ergoterapi"],
+  "fysioterapeut": ["fysioterapi", "fysioterapeut"],
+  "ergoterapeut": ["ergoterapi", "ergoterapeut"],
+  "bioanalytiker": ["bioanalyse", "laborant", "biomedicin"],
+  "radiograf": ["radiografi", "diagnostik"],
   "advokat": ["jura", "erhvervsjura"],
   "jurist": ["jura", "erhvervsjura"],
   "jura": ["jura", "juridisk"],
-  "ingeniør": ["ingeniør", "teknisk videnskab", "bygningsdesign", "computer engineering"],
+  "ingeniør": ["ingeniør", "teknisk videnskab", "bygningsdesign", "computer engineering", "maskinteknik", "kemi"],
   "civilingeniør": ["ingeniør", "teknisk videnskab"],
   "diplomingeniør": ["ingeniør", "diplom"],
-  "arkitekt": ["arkitektur", "bygningsdesign", "byggeri"],
+  "arkitekt": ["arkitektur", "bygningsdesign", "byggeri", "design"],
   "skovingeniør": ["skov", "landskab", "naturressourcer"],
-  "programmør": ["datalogi", "software", "computer", "kunstig intelligens"],
-  "kodning": ["datalogi", "software", "computer engineering"],
+  "programmør": ["datalogi", "softwareudvikling", "software", "computer", "kunstig intelligens"],
+  "kodning": ["datalogi", "softwareudvikling", "software", "computer engineering"],
   "datalog": ["datalogi"],
-  "software": ["software", "datalogi", "computer engineering"],
+  "software": ["softwareudvikling", "software", "datalogi", "computer engineering"],
   "skolelærer": ["lærer", "folkeskolelærer"],
-  "lærer": ["lærer", "pædagog"],
-  "pædagog": ["pædagog"],
-  "revisor": ["revision", "erhvervsøkonomi", "økonomi"],
-  "politiker": ["statskundskab", "politik"],
+  "lærer": ["lærer", "pædagog", "folkeskolelærer"],
+  "pædagog": ["pædagog", "pædagogik", "børnepædagog"],
+  "vuggestue": ["pædagog"],
+  "børnehave": ["pædagog"],
+  "revisor": ["revision", "erhvervsøkonomi", "økonomi", "ha"],
+  "økonomi": ["erhvervsøkonomi", "økonomi", "ha", "cbs"],
+  "finans": ["finansbachelor", "erhvervsøkonomi", "økonomi"],
+  "bank": ["finansbachelor", "erhvervsøkonomi"],
+  "markedsføring": ["erhvervsøkonomi", "ha", "marketing", "salg"],
+  "salg": ["erhvervsøkonomi", "ha", "salg"],
+  "branding": ["erhvervsøkonomi", "ha", "kommunikation"],
+  "journalistik": ["journalistik", "presse", "medier", "kommunikation"],
+  "journalist": ["journalistik", "presse", "medier"],
+  "psykolog": ["psykologi", "psykoterapeut"],
+  "psykoterapeut": ["psykologi"],
+  "terapeut": ["psykologi", "fysioterapi", "ergoterapi"],
+  "politiker": ["statskundskab", "politik", "samfundsfag"],
+  "statskundskab": ["statskundskab", "politik", "samfundsfag"],
+  "politi": ["politibetjent", "jura", "kriminologi"],
+  "politibetjent": ["jura", "kriminologi"],
   "skuespiller": ["teater", "performancestudier", "musik", "film"],
   "grafisk design": ["multimediedesigner", "visuel kommunikation", "design"],
+  "multimedie": ["multimediedesigner", "visuel kommunikation", "webudvikling"],
+  "webudvikling": ["multimediedesigner", "datalogi", "software"],
+  "miljø": ["miljøteknologi", "bæredygtighed", "biologi"],
+  "klima": ["miljøteknologi", "bæredygtig design", "geografi"],
+  "bæredygtighed": ["bæredygtig design", "miljøteknologi"],
   "dtu": ["kgs. lyngby", "teknisk videnskab", "lyngby", "ballerup"],
   "cbs": ["frederiksberg", "business", "shipping", "erhvervsøkonomi"],
   "aau": ["aalborg"],
@@ -60,11 +84,17 @@ const EXACT_MAJOR_MAP: Record<string, string[]> = {
   "jura": ["jura"],
   "dyrlæge": ["veterinærmedicin", "veterinær"],
   "programmør": ["datalogi", "softwareudvikling"],
-  "kodning": ["datalogi", "softwareudvikling"]
+  "kodning": ["datalogi", "softwareudvikling"],
+  "psykolog": ["psykologi"],
+  "sygeplejerske": ["sygeplejerske"],
+  "journalistik": ["journalistik"],
+  "journalist": ["journalistik"],
+  "revisor": ["erhvervsøkonomi", "revision"],
+  "økonomi": ["erhvervsøkonomi", "økonomi"]
 };
 
 function normalizeSearchText(text: string): string {
-  return text
+  let cleaned = text
     .toLowerCase()
     .replace(/tændlæge/g, "tandlæge")
     .replace(/ordontologi/g, "odontologi")
@@ -73,6 +103,19 @@ function normalizeSearchText(text: string): string {
     .replace(/ø/g, "oe")
     .replace(/å/g, "aa")
     .trim();
+
+  // Dansk stammafskæring (Suffix Stemming for pluralis og verber)
+  if (cleaned.length > 5) {
+    cleaned = cleaned
+      .replace(/erne$/g, "")
+      .replace(/erne$/g, "")
+      .replace(/ing$/g, "")
+      .replace(/erne$/g, "")
+      .replace(/er$/g, "")
+      .replace(/et$/g, "")
+      .replace(/en$/g, "");
+  }
+  return cleaned;
 }
 
 // Lazy load signature elements for better initial load performance
