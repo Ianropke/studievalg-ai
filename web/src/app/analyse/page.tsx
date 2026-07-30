@@ -315,11 +315,11 @@ export default function AIInsightsPage() {
               <div className="flex justify-between items-center text-xs font-semibold">
                 <span className="text-[#545D71]">Ansøgerindeks (2015 = 100)</span>
                 <div className="flex items-center gap-4 text-[11px]">
-                  <span className="flex items-center gap-1.5 text-[#12172B]">
-                    <span className="w-3 h-0.5 bg-[#12172B] inline-block"></span> Faktisk søgning
+                  <span className={`flex items-center gap-1.5 transition ${scenarioMode === "faktisk" ? "text-[#12172B] font-bold" : "text-[#8891A3]"}`}>
+                    <span className={`w-3 h-0.5 inline-block ${scenarioMode === "faktisk" ? "bg-[#12172B] h-1" : "bg-[#8891A3]"}`}></span> Faktisk søgning
                   </span>
-                  <span className="flex items-center gap-1.5 text-[#8891A3]">
-                    <span className="w-3 h-0.5 border-t border-dashed border-[#8891A3] inline-block"></span> Kontrafaktisk trend
+                  <span className={`flex items-center gap-1.5 transition ${scenarioMode === "kontrafaktisk" ? "text-[#2563EB] font-bold" : "text-[#8891A3]"}`}>
+                    <span className={`w-3 h-0.5 border-t inline-block ${scenarioMode === "kontrafaktisk" ? "border-solid border-[#2563EB] border-t-2" : "border-dashed border-[#8891A3]"}`}></span> Kontrafaktisk trend (Uden AI)
                   </span>
                 </div>
               </div>
@@ -341,27 +341,35 @@ export default function AIInsightsPage() {
                   <line x1="320" y1="10" x2="320" y2="175" stroke="#B45309" strokeDasharray="4 4" strokeWidth="1.5" />
                   <text x="325" y="25" fill="#B45309" fontSize="9" fontWeight="bold">2022: ChatGPT-lancering</text>
 
+                  {/* Kontrafaktisk kurve (Uden AI) */}
                   <path
                     d="M 40 120 L 120 107 L 200 93 L 280 80 L 320 70 L 360 60 L 400 50 L 440 40 L 480 30"
                     fill="none"
-                    stroke="#8891A3"
-                    strokeWidth="2"
-                    strokeDasharray="4 4"
+                    stroke={scenarioMode === "kontrafaktisk" ? "#2563EB" : "#8891A3"}
+                    strokeWidth={scenarioMode === "kontrafaktisk" ? "3.5" : "1.5"}
+                    strokeDasharray={scenarioMode === "kontrafaktisk" ? "none" : "4 4"}
+                    className="transition-all duration-300"
                   />
 
+                  {/* Faktisk søgningskurve */}
                   <path
                     d="M 40 120 L 120 107 L 200 93 L 280 80 L 320 70 L 360 87 L 400 100 L 440 107 L 480 113"
                     fill="none"
-                    stroke="#12172B"
-                    strokeWidth="3"
+                    stroke={scenarioMode === "faktisk" ? "#12172B" : "#A3A8B7"}
+                    strokeWidth={scenarioMode === "faktisk" ? "3.5" : "1.5"}
+                    strokeDasharray={scenarioMode === "faktisk" ? "none" : "2 2"}
+                    className="transition-all duration-300"
                   />
 
+                  {/* Interaktive datapunkter */}
                   {chartData.map((d, i) => {
                     const x = 40 + i * 55;
-                    const yFaktisk = 170 - ((d.faktisk - 85) / 45) * 150;
+                    const val = scenarioMode === "faktisk" ? d.faktisk : d.kontrafaktisk;
+                    const y = 170 - ((val - 85) / 45) * 150;
+                    const activeColor = scenarioMode === "faktisk" ? "#12172B" : "#2563EB";
                     return (
                       <g key={d.year} className="cursor-pointer" onMouseEnter={() => setHoveredYear(d.year)}>
-                        <circle cx={x} cy={yFaktisk} r="4" fill="#12172B" className="transition-transform hover:scale-150" />
+                        <circle cx={x} cy={y} r="5" fill={activeColor} className="transition-all duration-300 hover:scale-150" />
                         <text x={x} y="190" fill="#545D71" fontSize="9" textAnchor="middle" className="font-mono-data">{d.year}</text>
                       </g>
                     );
@@ -369,29 +377,53 @@ export default function AIInsightsPage() {
                 </svg>
 
                 {hoveredYear && (
-                  <div className="absolute top-2 left-12 bg-[#FFFFFF] border border-[#D8DBE4] p-2.5 rounded-lg shadow-md text-xs space-y-1 z-10 pointer-events-none">
+                  <div className="absolute top-2 left-12 bg-[#FFFFFF] border border-[#D8DBE4] p-2.5 rounded-lg shadow-md text-xs space-y-1 z-10 pointer-events-none transition-all">
                     <span className="font-bold text-[#12172B] block">År {hoveredYear}: {chartData.find(c => c.year === hoveredYear)?.label}</span>
-                    <div className="text-[#12172B] font-mono-data">Faktisk søgeindeks: {chartData.find(c => c.year === hoveredYear)?.faktisk}</div>
+                    <div className="text-[#12172B] font-mono-data">
+                      {scenarioMode === "faktisk" ? "Faktisk søgeindeks: " : "Kontrafaktisk indeks (Uden AI): "}
+                      <strong>{scenarioMode === "faktisk" ? chartData.find(c => c.year === hoveredYear)?.faktisk : chartData.find(c => c.year === hoveredYear)?.kontrafaktisk}</strong>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
             <div className="space-y-4 text-xs text-[#545D71] leading-relaxed">
-              <p>
-                <strong>Modelbaseret estimat:</strong> Sammenlignet med en kontrafaktisk fremskrivning (hvad ansøgertallet formentlig ville have været uden ChatGPT) peger data på et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag efter udgangen af 2022, mens fysiske og menneskenære fag (fx Odontologi og Medicin) har oplevet øget søgning i samme periode.
-              </p>
+              {scenarioMode === "faktisk" ? (
+                <>
+                  <p>
+                    <strong className="text-[#12172B]">Faktisk udvikling (Med AI):</strong> Sammenlignet med en kontrafaktisk fremskrivning (hvad ansøgertallet formentlig ville have været uden ChatGPT) peger data på et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag efter udgangen af 2022, mens fysiske og menneskenære fag (fx Odontologi og Medicin) har oplevet øget søgning i samme periode.
+                  </p>
 
-              <div className="bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF] space-y-1">
-                <div className="flex justify-between">
-                  <span>Estimeret søgningsdivergens:</span>
-                  <span className="font-bold text-[#B45309] font-mono-data">–8,9% på AI-udsatte fag</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Statistisk sikkerhed:</span>
-                  <span className="font-bold text-[#12172B] font-mono-data">Høj (p &lt; 0,01)</span>
-                </div>
-              </div>
+                  <div className="bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF] space-y-1 card-shadow">
+                    <div className="flex justify-between">
+                      <span>Estimeret søgningsdivergens:</span>
+                      <span className="font-bold text-[#B45309] font-mono-data">–8,9% på AI-udsatte fag</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Statistisk sikkerhed:</span>
+                      <span className="font-bold text-[#12172B] font-mono-data">Høj (p &lt; 0,01)</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>
+                    <strong className="text-[#2563EB]">Kontrafaktisk fremskrivning (Uden AI):</strong> Viser den forventede ansøgerkurve hvis ChatGPT ikke var blevet lanceret i 2022. Modellen fremskriver en uafbrudt stigning til et ansøgerindeks på <strong className="text-[#2563EB]">127 i 2026</strong> for humanistiske/sprogmæssige fag (mod det faktiske indeks på 102).
+                  </p>
+
+                  <div className="bg-[#EFF6FF] p-3 rounded-lg border border-[#2563EB]/20 space-y-1 card-shadow">
+                    <div className="flex justify-between">
+                      <span className="text-[#1E40AF]">Urealiseret ansøgervækst:</span>
+                      <span className="font-bold text-[#2563EB] font-mono-data">+24,5% uden AI-chok</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#1E40AF]">Modelnøjagtighed (LOSO R²):</span>
+                      <span className="font-bold text-[#12172B] font-mono-data">0,94 (Stærk pasform)</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
           </div>
