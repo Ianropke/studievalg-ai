@@ -263,7 +263,7 @@ export default function AIInsightsPage() {
             AI Insights
           </Link>
           <Link href="/evidens" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            PEFF Evidens
+            Evidens
           </Link>
         </nav>
       </header>

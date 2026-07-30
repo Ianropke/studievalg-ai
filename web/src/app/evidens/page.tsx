@@ -33,10 +33,10 @@ export default function EvidensPage() {
             </div>
             <div>
               <h1 className="text-base font-bold text-[#12172B] tracking-tight font-display">
-                Studievalg <span className="text-[#545D71] font-normal">PEFF Evidens</span>
+                Studievalg <span className="text-[#545D71] font-normal">Evidensforklaring</span>
               </h1>
               <p className="text-[11px] text-[#545D71]">
-                Metode, datagrundlag og transparens
+                Pædagogisk guide til, hvordan vores AI-robusthedsscores beregnes
               </p>
             </div>
           </Link>
@@ -50,7 +50,7 @@ export default function EvidensPage() {
             AI Insights
           </Link>
           <Link href="/evidens" className="text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            PEFF Evidens
+            Evidens
           </Link>
         </nav>
       </header>
@@ -62,7 +62,7 @@ export default function EvidensPage() {
             Videnskabelig transparens
           </span>
           <h1 className="text-4xl font-bold tracking-tight text-[#12172B] font-display">
-            PEFF Evidensmotoren
+            Evidensmotoren
           </h1>
           <p className="text-sm text-[#545D71] leading-relaxed">
             Læs hvordan algoritmen vægter, parser og analyserer data fra officielle instanser.
@@ -76,30 +76,45 @@ export default function EvidensPage() {
           </div>
           
           <div className="space-y-4">
-            <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#0F9D6E] border-y border-r border-[#E7E9EF] shadow-sm">
-              <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">
-                Tier 1: Officiel Registerdata (Hard Data)
-              </h3>
-              <p className="text-xs text-[#545D71] mt-2 leading-relaxed">
-                Danmarks Statistik og UFM (KOT). Udgør det urokkelige fundament for alle adgangskvotienter, frafaldsprocenter og dimittendledighed. Vægtes som <strong>ground truth</strong> i alle beregninger og overrides aldrig af AI.
+            <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#0F9D6E] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">
+                  NIVEAU 1: OFFICIEL REGISTERDATA (HÅRDE TAL)
+                </h3>
+                <span className="font-mono-data text-[10px] text-[#0B7A57] bg-[#E3F6EE] px-2 py-0.5 rounded font-bold border border-[#0F9D6E]/20">
+                  Højeste vægt (100% fakta)
+                </span>
+              </div>
+              <p className="text-xs text-[#545D71] leading-relaxed">
+                Danmarks Statistik og UFM (KOT). Udgør det urokkelige fundament for alle adgangskvotienter, frafaldsprocenter og dimittendledighed. Vægtes som <strong>facit</strong> i alle beregninger og kan aldrig overstyres af AI.
               </p>
             </div>
             
-            <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#2563EB] border-y border-r border-[#E7E9EF] shadow-sm">
-              <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">
-                Tier 2: Økonometriske Modeller (Fremskrivninger)
-              </h3>
-              <p className="text-xs text-[#545D71] mt-2 leading-relaxed">
-                Udnytter 10 års tidsseriedata på tværs af de 1.413 udbud. Modeller forudsiger væksten i løn og efterspørgsel via Bayesiansk inferens, som justerer de lineære kvotienter ud fra observerede mega-trends i STEM og omsorg.
+            <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#2563EB] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">
+                  NIVEAU 2: ØKONOMETRISKE MODELLER (FREMSKRIVNINGER)
+                </h3>
+                <span className="font-mono-data text-[10px] text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded font-bold border border-[#2563EB]/20">
+                  Høj vægt (Statistisk evidens)
+                </span>
+              </div>
+              <p className="text-xs text-[#545D71] leading-relaxed">
+                Udnytter 10 års tidsseriedata på tværs af de 1.413 udbud. Modellerne forudsiger vækst i løn og efterspørgsel ved hjælp af statistiske sandsynlighedsmodeller (Bayesiansk inferens), der justerer kvotienterne ud fra observerede, langsigtede tendenser inden for fx STEM og omsorgsfag.
               </p>
             </div>
             
-            <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#7C3AED] border-y border-r border-[#E7E9EF] shadow-sm">
-              <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">
-                Tier 3: RAG & LLM Semantik (Soft Data)
-              </h3>
-              <p className="text-xs text-[#545D71] mt-2 leading-relaxed">
-                Retrieval-Augmented Generation analyserer tusindvis af siders PDF-studieordninger for at klassificere &quot;AI-robusthed&quot;. Den fanger, om undervisningen reelt indeholder anvendt AI, og trækker citater til begrundelserne.
+            <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#7C3AED] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">
+                  NIVEAU 3: AI-LÆSNING AF STUDIEORDNINGER (KVALITATIV VURDERING)
+                </h3>
+                <span className="font-mono-data text-[10px] text-[#7C3AED] bg-[#F5F3FF] px-2 py-0.5 rounded font-bold border border-[#7C3AED]/20">
+                  Moderat vægt (Strukturel viden)
+                </span>
+              </div>
+              <p className="text-xs text-[#545D71] leading-relaxed">
+                En AI gennemlæser tusindvis af sider studieordninger for at vurdere, om undervisningen reelt inddrager brug af AI-værktøjer — og finder konkrete citater som begrundelse for scoren. (Teknisk kaldet Retrieval-Augmented Generation, RAG.)
               </p>
             </div>
           </div>
