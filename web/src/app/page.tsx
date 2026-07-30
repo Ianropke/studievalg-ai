@@ -113,7 +113,7 @@ const CompactTriangleRadar = dynamic(() => Promise.resolve(function CompactTrian
         <circle cx={pJob.x} cy={pJob.y} r="3" fill="#2563EB" />
         <circle cx={pSal.x} cy={pSal.y} r="3" fill="#7C3AED" />
       </svg>
-      <span className="text-[10px] text-[#545D71] font-mono-data font-semibold">Trekant-profil</span>
+      <span className="text-[10px] text-[#545D71] font-mono-data font-semibold">Din matchprofil</span>
     </div>
   );
 }), { ssr: false });
@@ -191,7 +191,7 @@ export default function Dashboard() {
     const rawQuery = deferredSearchQuery.trim().toLowerCase();
     const normalizedQuery = normalizeSearchText(deferredSearchQuery);
 
-    let expandedTerms: string[] = [rawQuery, normalizedQuery];
+    const expandedTerms: string[] = [rawQuery, normalizedQuery];
     Object.keys(SYNONYM_MAP).forEach((key) => {
       if (rawQuery.includes(key) || normalizedQuery.includes(normalizeSearchText(key))) {
         expandedTerms.push(...SYNONYM_MAP[key]);
@@ -249,20 +249,39 @@ export default function Dashboard() {
 
       const totalSortScore = weightedComposite + relevanceBoost;
 
+      const normalizeTitle = (t: string) => {
+        if (!t) return t;
+        return t.split(' ').map((word, i) => {
+          if (word === word.toUpperCase() && word.length > 1) return word;
+          if (i === 0) return word;
+          return word.toLowerCase();
+        }).join(' ');
+      };
+      const normalizedTitle = normalizeTitle(prog.udbud_titel || "Uddannelsen");
+      prog.udbud_titel = normalizedTitle;
+
       let whyText = "";
-      let qual = "moderat";
-      if (jobScore > 80) qual = "stærk";
-      else if (jobScore > 60) qual = "stabil";
-      else if (jobScore < 40) qual = "svagere";
+      let qual = "moderat efterspørgsel";
+      if (jobScore > 80) qual = "stærke jobmuligheder";
+      else if (jobScore > 60) qual = "historisk stabil efterspørgsel";
+      else if (jobScore < 40) qual = "svagere jobmuligheder";
+
+      const aiQual = robustScore >= 75 ? "høj" : "mere moderat";
+      let aiSection = "";
+      if (robustScore >= 75) {
+        aiSection = `AI-robustheden er ${aiQual} (${robustScore}/100), og feltet har ${qual}.`;
+      } else {
+        aiSection = `${normalizedTitle} har en ${aiQual} AI-robusthedsscore (${robustScore}/100) — det betyder større usikkerhed om hvordan feltet udvikler sig, men jobmulighederne er fortsat stærke (${jobScore}/100).`;
+      }
 
       if (kvNum !== null) {
         if (meetsGpa) {
-          whyText = `Med et gennemsnit på ${deferredGpa.toFixed(1)} ligger du sikkert over adgangskvotienten på ${kvNum} for Kvote 1. ${pTitle} har en AI-robusthedsscore på ${robustScore}/100 og ${qual} arbejdsmarkeds-efterspørgsel.`;
+          whyText = `Med et snit på ${deferredGpa.toFixed(1)} er du sikkert inde på ${normalizedTitle}s Kvote 1-krav på ${kvNum.toFixed(1)}. ${aiSection}`;
         } else {
-          whyText = `Med et gennemsnit på ${deferredGpa.toFixed(1)} ligger du under adgangskvotienten på ${kvNum} for Kvote 1, så ansøgning bør ske via Kvote 2. ${pTitle} har en AI-robusthedsscore på ${robustScore}/100 og ${qual} arbejdsmarkeds-efterspørgsel.`;
+          whyText = `Kvote 1-kvotienten var senest ${kvNum.toFixed(1)} — med et snit på ${deferredGpa.toFixed(1)} anbefales ansøgning via Kvote 2. ${aiSection}`;
         }
       } else {
-        whyText = `Alle ansøgere blev optaget (ingen grænsekvotient). ${pTitle} har en AI-robusthedsscore på ${robustScore}/100 og ${qual} arbejdsmarkeds-efterspørgsel.`;
+        whyText = `Alle ansøgere blev optaget senest (ingen grænsekvotient). ${aiSection}`;
       }
 
       return { ...prog, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore };
@@ -656,8 +675,9 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-8 px-6 lg:px-16 text-[#545D71] text-xs text-center mt-16">
-        © 2026 AI-Studievalgsplatform Danmark • Officiel UFM & Danmarks Statistik registerdata
+      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-8 px-6 lg:px-16 text-[#545D71] text-xs text-center mt-16 space-y-2">
+        <p>© 2026 AI-Studievalgsplatform Danmark • Officiel UFM & Danmarks Statistik registerdata</p>
+        <p className="max-w-2xl mx-auto">Vi anbefaler desuden at tale med en studievejleder om dit konkrete valg — denne platform er ét godt input blandt flere, ikke en erstatning for personlig vejledning.</p>
       </footer>
     </div>
   );

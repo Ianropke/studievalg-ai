@@ -360,7 +360,7 @@ export default function AIInsightsPage() {
 
             <div className="space-y-4 text-xs text-[#545D71] leading-relaxed">
               <p>
-                <strong>Faktisk observeret udvikling:</strong> Efter lanceringen af ChatGPT har vi set et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag, hvorimod fysiske fag (fx Odontologi og Medicin) har oplevet øget søgning.
+                <strong>Modelbaseret estimat:</strong> Sammenlignet med en kontrafaktisk fremskrivning (hvad ansøgertallet formentlig ville have været uden ChatGPT) peger data på et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag efter udgangen af 2022, mens fysiske og menneskenære fag (fx Odontologi og Medicin) har oplevet øget søgning i samme periode.
               </p>
 
               <div className="bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF] space-y-1">
@@ -369,8 +369,8 @@ export default function AIInsightsPage() {
                   <span className="font-bold text-[#B45309] font-mono-data">–8,9% på AI-udsatte fag</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Statistisk evidens:</span>
-                  <span className="font-bold text-[#12172B] font-mono-data">p &lt; 0,01</span>
+                  <span>Statistisk sikkerhed:</span>
+                  <span className="font-bold text-[#12172B] font-mono-data">Høj (p &lt; 0,01)</span>
                 </div>
               </div>
             </div>
@@ -485,7 +485,7 @@ export default function AIInsightsPage() {
                   <h3 className="font-bold text-[#12172B] text-base">{currentGauge.name}</h3>
                   <p className="text-xs text-[#545D71]">{currentGauge.role}</p>
                 </div>
-                <span className="text-2xl font-bold text-[#0B7A57] font-mono-data">{currentGauge.score}%</span>
+                <span className="text-2xl font-bold text-[#0B7A57] font-mono-data">~{currentGauge.score}%</span>
               </div>
 
               <div className="space-y-2">
@@ -494,7 +494,7 @@ export default function AIInsightsPage() {
                   <div key={idx} className="space-y-1 text-xs">
                     <div className="flex justify-between text-[#12172B]">
                       <span>{t.name}</span>
-                      <span className="font-mono-data font-bold text-[#1D4ED8]">{t.aiShare}% AI</span>
+                      <span className="font-mono-data font-bold text-[#1D4ED8]">ca. {t.aiShare}% AI</span>
                     </div>
                     <div className="h-1.5 bg-[#D8DBE4] rounded-full overflow-hidden">
                       <div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${t.aiShare}%` }} />
@@ -502,6 +502,9 @@ export default function AIInsightsPage() {
                   </div>
                 ))}
               </div>
+              <p className="text-[10px] text-[#8891A3] mt-2 italic">
+                ~{currentGauge.score}% AI-støtte i hverdagen · Baseret på O*NET-opgavedata, se metode
+              </p>
             </div>
           </div>
         </section>
