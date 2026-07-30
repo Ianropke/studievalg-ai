@@ -120,9 +120,9 @@ function normalizeSearchText(text: string): string {
 
 // Lazy load signature elements for better initial load performance
 const CompactTriangleRadar = dynamic(() => Promise.resolve(function CompactTriangleRadarComponent({ robust, job, salary }: { robust: number; job: number; salary: number }) {
-  const R = 32;
-  const cx = 40;
-  const cy = 40;
+  const R = 34;
+  const cx = 50;
+  const cy = 48;
   
   const rRob = R * (robust / 100);
   const rJob = R * (job / 100);
@@ -132,31 +132,74 @@ const CompactTriangleRadar = dynamic(() => Promise.resolve(function CompactTrian
   const pJob = { x: cx - rJob * 0.866, y: cy + rJob * 0.5 };
   const pSal = { x: cx + rSal * 0.866, y: cy + rSal * 0.5 };
 
-  // Reference points (R=100)
-  const refRob = { x: cx, y: cy - R };
-  const refJob = { x: cx - R * 0.866, y: cy + R * 0.5 };
-  const refSal = { x: cx + R * 0.866, y: cy + R * 0.5 };
+  // Reference 100% outer triangle
+  const refRob100 = { x: cx, y: cy - R };
+  const refJob100 = { x: cx - R * 0.866, y: cy + R * 0.5 };
+  const refSal100 = { x: cx + R * 0.866, y: cy + R * 0.5 };
+
+  // Reference 50% benchmark inner triangle
+  const R50 = R * 0.5;
+  const refRob50 = { x: cx, y: cy - R50 };
+  const refJob50 = { x: cx - R50 * 0.866, y: cy + R50 * 0.5 };
+  const refSal50 = { x: cx + R50 * 0.866, y: cy + R50 * 0.5 };
+
+  // Color & status evaluation based on average composite score
+  const avg = Math.round((robust + job + salary) / 3);
+  let strokeColor = "#0F9D6E";
+  let fillColor = "#0F9D6E";
+  let badgeBg = "bg-[#E3F6EE]";
+  let badgeText = "text-[#0B7A57]";
+  let badgeBorder = "border-[#0F9D6E]/30";
+  let statusLabel = "Stærk";
+
+  if (avg < 65) {
+    strokeColor = "#D97706";
+    fillColor = "#D97706";
+    badgeBg = "bg-[#FEF3C7]";
+    badgeText = "text-[#B45309]";
+    badgeBorder = "border-[#B45309]/30";
+    statusLabel = "Lavere";
+  } else if (avg < 78) {
+    strokeColor = "#2563EB";
+    fillColor = "#2563EB";
+    badgeBg = "bg-[#EFF6FF]";
+    badgeText = "text-[#1D4ED8]";
+    badgeBorder = "border-[#2563EB]/30";
+    statusLabel = "Moderat";
+  }
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <svg viewBox="0 0 80 80" className="w-16 h-16 overflow-visible">
-        {/* Reference dotted triangle */}
-        <polygon points={`${refRob.x},${refRob.y} ${refJob.x},${refJob.y} ${refSal.x},${refSal.y}`} fill="none" stroke="#8891A3" strokeWidth="1" strokeDasharray="2 2" />
+    <div className="flex flex-col items-center gap-1.5 py-1">
+      <svg viewBox="0 0 100 92" className="w-24 h-22 overflow-visible">
+        {/* 100% Outer reference triangle */}
+        <polygon points={`${refRob100.x},${refRob100.y} ${refJob100.x},${refJob100.y} ${refSal100.x},${refSal100.y}`} fill="none" stroke="#D8DBE4" strokeWidth="1" strokeDasharray="2 2" />
         
-        {/* Center to vertices */}
-        <line x1={cx} y1={cy} x2={refRob.x} y2={refRob.y} stroke="#E7E9EF" strokeWidth="1" />
-        <line x1={cx} y1={cy} x2={refJob.x} y2={refJob.y} stroke="#E7E9EF" strokeWidth="1" />
-        <line x1={cx} y1={cy} x2={refSal.x} y2={refSal.y} stroke="#E7E9EF" strokeWidth="1" />
+        {/* 50% Benchmark inner triangle */}
+        <polygon points={`${refRob50.x},${refRob50.y} ${refJob50.x},${refJob50.y} ${refSal50.x},${refSal50.y}`} fill="none" stroke="#E7E9EF" strokeWidth="1" strokeDasharray="2 2" />
+
+        {/* Center axes to 100% vertices */}
+        <line x1={cx} y1={cy} x2={refRob100.x} y2={refRob100.y} stroke="#F0F2F5" strokeWidth="1" />
+        <line x1={cx} y1={cy} x2={refJob100.x} y2={refJob100.y} stroke="#F0F2F5" strokeWidth="1" />
+        <line x1={cx} y1={cy} x2={refSal100.x} y2={refSal100.y} stroke="#F0F2F5" strokeWidth="1" />
         
-        {/* Actual polygon: neutral teal fill per spec */}
-        <polygon points={`${pRob.x},${pRob.y} ${pJob.x},${pJob.y} ${pSal.x},${pSal.y}`} fill="#0F9D6E" fillOpacity="0.1" stroke="#0F9D6E" strokeWidth="1.5" />
+        {/* Color-coded actual score polygon */}
+        <polygon points={`${pRob.x},${pRob.y} ${pJob.x},${pJob.y} ${pSal.x},${pSal.y}`} fill={fillColor} fillOpacity="0.2" stroke={strokeColor} strokeWidth="2" />
         
-        {/* 3px corner dots in signature colors */}
-        <circle cx={pRob.x} cy={pRob.y} r="3" fill="#0F9D6E" />
-        <circle cx={pJob.x} cy={pJob.y} r="3" fill="#2563EB" />
-        <circle cx={pSal.x} cy={pSal.y} r="3" fill="#7C3AED" />
+        {/* Corner dots */}
+        <circle cx={pRob.x} cy={pRob.y} r="3.5" fill="#0F9D6E" />
+        <circle cx={pJob.x} cy={pJob.y} r="3.5" fill="#2563EB" />
+        <circle cx={pSal.x} cy={pSal.y} r="3.5" fill="#7C3AED" />
+
+        {/* Mini score labels near vertices */}
+        <text x={cx} y={refRob100.y - 4} fill="#0F9D6E" fontSize="7.5" fontWeight="bold" textAnchor="middle">AI: {robust}</text>
+        <text x={refJob100.x - 2} y={refJob100.y + 10} fill="#2563EB" fontSize="7.5" fontWeight="bold" textAnchor="end">Job: {job}</text>
+        <text x={refSal100.x + 2} y={refSal100.y + 10} fill="#7C3AED" fontSize="7.5" fontWeight="bold" textAnchor="start">Løn: {salary}</text>
       </svg>
-      <span className="text-[10px] text-[#545D71] font-mono-data font-semibold">Trekant-profil</span>
+
+      {/* Clear Status Badge */}
+      <span className={`text-[10px] font-bold font-mono-data px-2 py-0.5 rounded-full border ${badgeBg} ${badgeText} ${badgeBorder}`}>
+        Trekant-profil ({avg} · {statusLabel})
+      </span>
     </div>
   );
 }), { ssr: false });
