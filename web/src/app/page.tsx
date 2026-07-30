@@ -106,14 +106,14 @@ const CompactTriangleRadar = dynamic(() => Promise.resolve(function CompactTrian
         <line x1={cx} y1={cy} x2={refSal.x} y2={refSal.y} stroke="#E7E9EF" strokeWidth="1" />
         
         {/* Actual polygon: neutral teal fill per spec */}
-        <polygon points={`${pRob.x},${pRob.y} ${pJob.x},${pJob.y} ${pSal.x},${pSal.y}`} fill="#0e7490" fillOpacity="0.15" stroke="#0891b2" strokeWidth="1.5" />
+        <polygon points={`${pRob.x},${pRob.y} ${pJob.x},${pJob.y} ${pSal.x},${pSal.y}`} fill="#0F9D6E" fillOpacity="0.1" stroke="#0F9D6E" strokeWidth="1.5" />
         
         {/* 3px corner dots in signature colors */}
         <circle cx={pRob.x} cy={pRob.y} r="3" fill="#0F9D6E" />
         <circle cx={pJob.x} cy={pJob.y} r="3" fill="#2563EB" />
         <circle cx={pSal.x} cy={pSal.y} r="3" fill="#7C3AED" />
       </svg>
-      <span className="text-[10px] text-[#545D71] font-mono-data font-semibold">Din matchprofil</span>
+      <span className="text-[10px] text-[#545D71] font-mono-data font-semibold">Trekant-profil</span>
     </div>
   );
 }), { ssr: false });
@@ -142,11 +142,7 @@ const AlertTriangleIcon = () => (
   </svg>
 );
 
-const ArrowRightIcon = () => (
-  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-  </svg>
-);
+
 
 interface ProgramItem {
   kot_nr?: string;
@@ -275,27 +271,18 @@ export default function Dashboard() {
       prog.udbud_titel = normalizedTitle;
 
       let whyText = "";
-      let qual = "moderat efterspørgsel";
-      if (jobScore > 80) qual = "stærke jobmuligheder";
-      else if (jobScore > 60) qual = "historisk stabil efterspørgsel";
-      else if (jobScore < 40) qual = "svagere jobmuligheder";
-
-      const aiQual = robustScore >= 75 ? "høj" : "mere moderat";
-      let aiSection = "";
-      if (robustScore >= 75) {
-        aiSection = `AI-robustheden er ${aiQual} (${robustScore}/100), og feltet har ${qual}.`;
-      } else {
-        aiSection = `${normalizedTitle} har en ${aiQual} AI-robusthedsscore (${robustScore}/100) — det betyder større usikkerhed om hvordan feltet udvikler sig, men jobmulighederne er fortsat stærke (${jobScore}/100).`;
-      }
+      let qual = "stabil arbejdsmarkeds-efterspørgsel";
+      if (jobScore > 80) qual = "stærk efterspørgsel";
+      else if (jobScore < 40) qual = "svagere efterspørgsel";
 
       if (kvNum !== null) {
         if (meetsGpa) {
-          whyText = `Med et snit på ${deferredGpa.toFixed(1)} er du sikkert inde på ${normalizedTitle}s Kvote 1-krav på ${kvNum.toFixed(1)}. ${aiSection}`;
+          whyText = `Med et gennemsnit på ${deferredGpa.toFixed(1)} opfylder du sikkert Kvote 1-kravet på ${kvNum}. AI-robustheden er ${robustScore}/100 med ${qual}.`;
         } else {
-          whyText = `Kvote 1-kvotienten var senest ${kvNum.toFixed(1)} — med et snit på ${deferredGpa.toFixed(1)} anbefales ansøgning via Kvote 2. ${aiSection}`;
+          whyText = `Kvote 1-kvotienten var senest ${kvNum}. Med et snit på ${deferredGpa.toFixed(1)} anbefales ansøgning via Kvote 2. AI-robusthed er høj (${robustScore}/100).`;
         }
       } else {
-        whyText = `Alle ansøgere blev optaget senest (ingen grænsekvotient). ${aiSection}`;
+        whyText = `Alle ansøgere blev optaget i 2026. Uddannelsen har en AI-robusthedsscore på ${robustScore}/100 og ${qual}.`;
       }
 
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
@@ -563,63 +550,98 @@ export default function Dashboard() {
           ) : topMatches.length > 0 ? (
             <div className="space-y-4">
               {topMatches.map((prog, index) => {
-                const isTopMatch = index === 0;
                 const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
                 return (
                   <article
                     key={prog.kot_nr}
-                    className={`border rounded-xl p-5 transition duration-200 space-y-4 ${
-                      isTopMatch ? "border-[#0F9D6E] bg-[#E3F6EE]/30 card-shadow" : "border-[#E7E9EF] bg-[#FFFFFF] card-shadow card-shadow-hover"
-                    }`}
+                    className="border border-[#E7E9EF] bg-[#FFFFFF] rounded-xl p-5 card-shadow hover:border-[#D8DBE4] transition space-y-4"
                   >
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                       <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="font-mono-data font-bold text-[#12172B]">#{index + 1} Match ({prog.matchScore}%)</span>
-                          <span className="text-[#D8DBE4]">|</span>
-                          <span className="text-[#545D71] font-semibold">{prog.institution}</span>
-                          <span className="text-[#D8DBE4]">|</span>
-                          <span className="text-[#8891A3] font-mono-data">KOT {prog.kot_nr}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-[#545D71]">
+                          <span className="font-bold text-[#0B7A57]">#{index + 1} Match ({prog.matchScore}%)</span>
+                          <span>•</span>
+                          <span>{prog.institution}</span>
+                          <span>•</span>
+                          <span className="font-mono-data text-[#8891A3]">KOT {prog.kot_nr}</span>
                         </div>
                         <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display">
                           {prog.udbud_titel}
                         </h3>
                       </div>
-                      <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start w-full sm:w-auto gap-1 border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
-                        <div className="text-left sm:text-right">
-                          <span className="text-[11px] text-[#545D71] uppercase tracking-wider font-bold block">Adgangskvotient (2026)</span>
-                          <span className="text-lg font-bold text-[#12172B] font-mono-data">
-                            {prog.latest_kvotient}
-                          </span>
-                        </div>
+
+                      <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
+                        <span className="text-[11px] text-[#8891A3] block">Kvote 1 adgangskvotient (2026)</span>
                         {prog.kvNum !== null ? (
-                          <span className={`inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border ${
-                            prog.meetsGpa 
-                              ? "bg-[#E3F6EE] text-[#0B7A57] border-[#0F9D6E]/30"
-                              : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/30"
-                          }`}>
-                            {prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}
-                            {prog.meetsGpa ? "Kvote 1" : `Søg Kvote 2 (Krav: ${prog.kvNum})`}
-                          </span>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1">
+                            <span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.latest_kvotient}</span>
+                            <span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${
+                              prog.meetsGpa 
+                                ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20"
+                                : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"
+                            }`}>
+                              {prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}
+                              {prog.meetsGpa ? "Kvote 1 opfyldt" : `Søg Kvote 2 (Kvote 1: ${prog.kvNum})`}
+                            </span>
+                          </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/30">
-                            <CheckCircleIcon /> Alle optaget
-                          </span>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1">
+                            <span className="text-xl font-bold text-[#12172B] font-mono-data">Alle optaget</span>
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E6F4ED] text-[#0B7A57] border border-[#0F9D6E]/20">
+                              <CheckCircleIcon /> Alle optaget
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF]">
-                      <div className="flex justify-center shrink-0 border-b sm:border-b-0 sm:border-r border-[#E7E9EF] pb-3 sm:pb-0 sm:pr-4">
+
+                    {/* Middle Section: Triangle Radar + 3 Horizontal Progress Bars */}
+                    <div className="flex flex-col sm:flex-row items-center gap-6 bg-[#FFFFFF] p-4 rounded-xl border border-[#E7E9EF]">
+                      <div className="bg-[#F7F8FA] p-3 rounded-lg border border-[#E7E9EF] flex flex-col items-center justify-center shrink-0 w-36">
                         <CompactTriangleRadar robust={prog.robustScore} job={prog.jobScore} salary={prog.salScore} />
                       </div>
-                      <div className="flex-1 text-xs text-[#12172B] font-mono-data flex flex-col justify-center">
-                        <div className="flex gap-4">
-                           <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span>AI: {prog.robustScore}</div>
-                           <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span>Job: {prog.jobScore}</div>
-                           <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span>Løn: {prog.salScore}</div>
+                      <div className="flex-1 space-y-2.5 w-full">
+                        {/* Bar 1: AI-robusthed */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="flex items-center gap-1.5 text-[#12172B]">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-robusthed
+                            </span>
+                            <span className="font-mono-data font-bold text-[#0F9D6E]">{prog.robustScore}/100</span>
+                          </div>
+                          <div className="h-2 bg-[#E7E9EF] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#0F9D6E] rounded-full" style={{ width: `${prog.robustScore}%` }}></div>
+                          </div>
+                        </div>
+
+                        {/* Bar 2: Jobmuligheder */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="flex items-center gap-1.5 text-[#12172B]">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span> Jobmuligheder
+                            </span>
+                            <span className="font-mono-data font-bold text-[#2563EB]">{prog.jobScore}/100</span>
+                          </div>
+                          <div className="h-2 bg-[#E7E9EF] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${prog.jobScore}%` }}></div>
+                          </div>
+                        </div>
+
+                        {/* Bar 3: Lønpotentiale */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs font-semibold">
+                            <span className="flex items-center gap-1.5 text-[#12172B]">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span> Lønpotentiale
+                            </span>
+                            <span className="font-mono-data font-bold text-[#7C3AED]">{prog.salScore}/100</span>
+                          </div>
+                          <div className="h-2 bg-[#E7E9EF] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#7C3AED] rounded-full" style={{ width: `${prog.salScore}%` }}></div>
+                          </div>
                         </div>
                       </div>
                     </div>
+
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-[#545D71] pt-1">
                       <p className="leading-relaxed flex-1">
                         <strong className="text-[#12172B]">Begrundelse:</strong> {prog.whyText}
@@ -628,7 +650,7 @@ export default function Dashboard() {
                         onClick={() => setExpandedProgram(isExpanded ? null : prog)}
                         className="text-[#2563EB] font-semibold hover:underline text-xs whitespace-nowrap self-end sm:self-auto flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded"
                       >
-                        {isExpanded ? "Skjul detaljer" : "Se fuld analyse"} <ArrowRightIcon />
+                        {isExpanded ? "Skjul detaljer" : "Se fuld analyse →"}
                       </button>
                     </div>
                     {isExpanded && (
