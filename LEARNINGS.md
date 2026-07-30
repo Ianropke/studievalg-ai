@@ -1,6 +1,6 @@
 # Læringer & Designprincipper (AI-Studievalgsplatform)
 
-Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, baseret på input fra Claude, ChatGPT og iterative tests.
+Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, baseret på input fra Claude, ChatGPT (Senior QA/Architect review) og iterative tests.
 
 ## 1. UX & UI: "Nordisk Myndigheds-Dashboard"
 - **Data > Dekoration:** Undgå emojis, tunge kasser-i-kasser, gradienter og unødigt "støj". Et rent, køligt og stramt layout udstråler autoritet og tillid.
@@ -19,3 +19,10 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 - **Asynkron Statisk JSON:** I stedet for at server-siderendere 1.413 komplekse datalinjer, hentes de klient-side fra en statisk JSON (`/data/all_programs_catalog.json`). Det sikrer øjeblikkelige filtre.
 - **INP Optimering:** For ikke at fryse main-thread under søgning og slider-filtrering på store arrays, håndteres user-input (søgetermer og slider-værdier) via Reacts `useDeferredValue`.
 - **Intelligent Synonymsøgning:** Da brugere sjældent kender de eksakte akademiske titler, har appen implementeret et synonym-lag (fx "kodning" → Datalogi, "læge" → Medicin) der via Relevance Boost placerer disse som #1 hits uden eksakt tekst-match.
+
+## 4. QA & Testplan Standard (Enterprise & Academic Lead Level)
+- **Opdeling af Dokumenter:** Adskil altid *Technical Test Plan* (verificerbare mål, testmetoder, acceptkriterier og audit trails) fra *Release Notes* (visuelle udgivelser og produktfunktioner).
+- **Sporbar Evidens (Audit Trail):** Påstande om målinger (LCP, INP, Uptime, Security) skal have en direkte reference til et konkret artefakt (fx Git Commit Hash, Dataset SHA-256, Lighthouse log eller Build log ID).
+- **Negativ & Edge-Case Testing:** Testplanen må aldrig kun dække "happy path". Eksplicitte scenarier for offline resiliens, korrupt JSON, script-injection (XSS), 0%/100% slider-grænser og deaktiveret JS skal dokumenteres og verificeres.
+- **Videnskabelig Formulering:** Undgå absolutte påstande som "100% objektiv" eller "hallucinationsforbud". Formulér i stedet præcist (*"Eksklusion af demografiske variabler eliminerer direkte diskrimination, men udgør ikke empirisk bevis mod indirekte statistisk bias i kildedata"*).
+- **Nul-Tolerance Quality Gate:** En udgivelse kræver 0 ESLint errors/warnings, 0 TypeScript fejl (`npx tsc --noEmit`) og et grønt statisk produktion-build før den deklareres produktionstjenlig.
