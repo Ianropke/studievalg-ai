@@ -51,9 +51,10 @@ h1, h2, .font-display {
 
 /* Card Elevation Shadow per Design Brief v3 Section 4 */
 .card-shadow {
-  box-shadow: 0 1px 3px rgba(18, 23, 43, 0.04), 0 4px 12px rgba(18, 23, 43, 0.04);
+  box-shadow: 0 1px 2px rgba(18, 23, 43, 0.04), 0 4px 12px rgba(18, 23, 43, 0.04);
 }
 
 .card-shadow-hover:hover {
   box-shadow: 0 4px 12px rgba(18, 23, 43, 0.08), 0 8px 24px rgba(18, 23, 43, 0.06);
+  transform: translateY(-2px);
 }
