@@ -1,5 +1,3 @@
 {
-  "name": "studievalg-ai",
-  "framework": "nextjs",
-  "rootDirectory": "web"
+  "framework": "nextjs"
 }

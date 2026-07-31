@@ -109,9 +109,20 @@ function ComparisonContent() {
   }, [searchParams]);
 
   const selectedPrograms = useMemo(() => {
-    return selectedSlugs
-      .map((slug) => getProgramBySlug(slug) || allPrograms.find((p) => String(p.kot_nr) === slug))
+    const list = selectedSlugs
+      .map((slug) => {
+        const bySlug = getProgramBySlug(slug);
+        if (bySlug) return bySlug;
+        const kotPrefix = slug.split("-")[0];
+        return allPrograms.find((p) => String(p.kot_nr) === kotPrefix || String(p.kot_nr) === slug);
+      })
       .filter(Boolean) as ProgramItem[];
+
+    // Fallback to first 2 programs if selection is empty
+    if (list.length === 0 && allPrograms.length >= 2) {
+      return [allPrograms[0], allPrograms[1]];
+    }
+    return list;
   }, [selectedSlugs, allPrograms]);
 
   const searchResults = useMemo(() => {
