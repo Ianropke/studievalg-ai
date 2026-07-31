@@ -343,7 +343,8 @@ export default function Dashboard() {
         }
       }
 
-      const totalSortScore = weightedComposite + relevanceBoost;
+      const gpaEligibilityBonus = (kvNum !== null && meetsGpa) ? 15 : 0;
+      const totalSortScore = weightedComposite + relevanceBoost + gpaEligibilityBonus;
 
       const normalizeTitle = (t: string) => {
         if (!t) return t;

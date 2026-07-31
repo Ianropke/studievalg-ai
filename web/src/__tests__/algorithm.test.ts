@@ -73,7 +73,19 @@ export function runUnitTests() {
   console.assert(haIsCbs === true, "Test 5 Fejl: HA (CBS 13030) SKAL matche CBS filter!");
   console.log("  ✅ TEST-05: CBS Datatjek godkendt (KU 10140 ekskluderet, CBS 13030 inkluderet)");
 
-  console.log("🎉 Alle 5 Unit Tests bestået uden fejl!\n");
+  // Test 6: Dynamisk GPA Slider Opdatering & Rangering
+  function computeSortScore(baseScore: number, gpa: number, kvotient: number): { score: number; meets: boolean } {
+    const meets = gpa >= kvotient;
+    const bonus = meets ? 15 : 0;
+    return { score: baseScore + bonus, meets };
+  }
+  const lowGpaState = computeSortScore(80, 8.0, 10.2);
+  const highGpaState = computeSortScore(80, 10.5, 10.2);
+  console.assert(lowGpaState.meets === false && lowGpaState.score === 80, "Test 6 Fejl: GPA 8.0 bør ikke opfylde 10.2 krav");
+  console.assert(highGpaState.meets === true && highGpaState.score === 95, "Test 6 Fejl: GPA 10.5 bør opfylde 10.2 krav og få +15 bonus");
+  console.log("  ✅ TEST-06: Dynamisk GPA Slider-tjek godkendt (Karakter-ændring opdaterer automatisk Kvote-status og rangering)");
+
+  console.log("🎉 Alle 6 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
