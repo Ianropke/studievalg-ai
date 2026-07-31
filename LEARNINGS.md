@@ -73,4 +73,9 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 ## 13. CI/CD Pipeline & TypeScript Test Runner
 - **npx tsx i GitHub Actions:** Da standard Node.js ikke kan fortolke `.ts`-filer direkte via `node -e`, skal GitHub CI-workflowet (`.github/workflows/ci.yml`) afvikle unit-test suiterne via `npx tsx src/__tests__/algorithm.test.ts` for 100% konsistent og grøn CI/CD validering.
 
+## 14. v2.6 Virale Lister & Sammenligningsarkitektur
+- **ItemList Schema.org for AI-Svarmaskiner:** De 7 statistiske top 10/20 listersider (`/lister/[slug]`) injecter `ItemList` og `ListItem` JSON-LD direkte i HTML-hovedet. Det gør listerne lynhurtige at hente for ChatGPT, Claude og Perplexity samt forbedrer muligheden for Google Rich Snippets.
+- **Sikker String-Normalisering af Kvotienter:** Ved sortering af `latest_kvotient` (som i JSON-kataloget kan være et tal som `10.2` eller en tekst som `"Alle optaget"`), skal feltet altid eksplicit konverteres via `String(p.latest_kvotient || "")` før strengoperationer (som `.toLowerCase()` eller `.includes()`) udføres.
+- **Multi-Polygon SVG Radar:** Side-om-side sammenligningsværktøjet (`/sammenlign`) benytter ren, vægtløs SVG-geometri til at tegne op til 3 overlappende polygoner i samme koordinatsystem uden eksterne tungvægts-grafbiblioteker.
+
 
