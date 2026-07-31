@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import { Header } from "@/components/Header";
 
 export default function EvidensPage() {
   const [dataStats, setDataStats] = useState<{ total: number; latest: string; params: number }>({
@@ -25,35 +25,7 @@ export default function EvidensPage() {
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
-      <header className="border-b border-[#E7E9EF] bg-[#FFFFFF] sticky top-0 z-50 px-6 lg:px-16 py-4 flex justify-between items-center card-shadow">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            <div className="w-8 h-8 rounded-lg bg-[#12172B] flex items-center justify-center font-bold text-[#FFFFFF] text-sm">
-              U
-            </div>
-            <div>
-              <h1 className="text-base font-bold text-[#12172B] tracking-tight font-display">
-                Uddannelsesindsigt <span className="text-[#545D71] font-normal">Evidensforklaring</span>
-              </h1>
-              <p className="text-[11px] text-[#545D71]">
-                Pædagogisk guide til, hvordan vores AI-robusthedsscores beregnes
-              </p>
-            </div>
-          </Link>
-        </div>
-
-        <nav className="flex items-center gap-6 text-xs font-semibold">
-          <Link href="/" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Matchværktøj
-          </Link>
-          <Link href="/analyse" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            AI Insights
-          </Link>
-          <Link href="/evidens" className="text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Evidens
-          </Link>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
         

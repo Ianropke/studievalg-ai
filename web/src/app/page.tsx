@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
@@ -462,38 +463,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
-      <header className="border-b border-[#E7E9EF] bg-[#FFFFFF] sticky top-0 z-50 px-6 lg:px-16 py-4 flex justify-between items-center card-shadow">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#12172B] flex items-center justify-center font-bold text-[#FFFFFF] text-sm focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 transition">
-            U
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-[#12172B] tracking-tight font-display">
-              Uddannelsesindsigt
-            </h1>
-            <p className="text-[11px] text-[#545D71]">
-              Statistisk beslutningsstøtte baseret på UFM og Danmarks Statistik
-            </p>
-          </div>
-        </div>
-        <nav className="flex items-center gap-5 text-xs font-semibold">
-          <Link href="/" className="text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Matchværktøj
-          </Link>
-          <Link href="/lister/top-10-mest-ai-robuste-uddannelser" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Toplister
-          </Link>
-          <Link href="/sammenlign" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Sammenlign
-          </Link>
-          <Link href="/analyse" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            AI Insights
-          </Link>
-          <Link href="/evidens" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Evidens
-          </Link>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-5xl mx-auto px-6 py-10 space-y-10">
         <div className="text-center max-w-3xl mx-auto space-y-3">

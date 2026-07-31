@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 import { createProgramSlug, getProgramBySlug } from "@/lib/slugs";
 import { ProgramItem } from "@/lib/lists";
+import { Header } from "@/components/Header";
 
 // Pure SVG multi-triangle radar for 2-3 programs
 function MultiTriangleRadar({ programs }: { programs: ProgramItem[] }) {
@@ -175,26 +176,7 @@ function ComparisonContent() {
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
-      {/* Header */}
-      <header className="border-b border-[#E7E9EF] bg-[#FFFFFF] sticky top-0 z-50 px-6 lg:px-16 py-4 flex justify-between items-center card-shadow">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="w-8 h-8 rounded-lg bg-[#12172B] text-[#FFFFFF] flex items-center justify-center font-bold text-sm font-display hover:opacity-90 transition">
-            U
-          </Link>
-          <div>
-            <Link href="/" className="font-bold text-sm text-[#12172B] tracking-tight hover:underline">
-              Uddannelsesindsigt
-            </Link>
-            <p className="text-[10px] text-[#545D71]">Side-om-side Uddannelsessammenligning</p>
-          </div>
-        </div>
-        <nav className="flex gap-4 text-xs font-semibold">
-          <Link href="/" className="text-[#545D71] hover:text-[#12172B]">Matchværktøj</Link>
-          <Link href="/lister/top-10-mest-ai-robuste-uddannelser" className="text-[#545D71] hover:text-[#12172B]">Toplister</Link>
-          <Link href="/analyse" className="text-[#545D71] hover:text-[#12172B]">AI Insights</Link>
-          <Link href="/evidens" className="text-[#545D71] hover:text-[#12172B]">Evidens</Link>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
         {/* Breadcrumbs & Title */}
