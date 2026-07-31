@@ -274,6 +274,29 @@ export default function Dashboard() {
 
   const [expandedProgram, setExpandedProgram] = useState<ProgramItem | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlGpa = params.get("gpa");
+      const urlAi = params.get("wAi");
+      const urlJob = params.get("wJob");
+      const urlSal = params.get("wSal");
+      const urlQ = params.get("q");
+
+      if (urlGpa || urlAi || urlJob || urlSal || urlQ) {
+        requestAnimationFrame(() => {
+          if (urlGpa && !isNaN(Number(urlGpa))) setGpa(Number(urlGpa));
+          if (urlAi && !isNaN(Number(urlAi))) setAiRobustnessWeight(Number(urlAi));
+          if (urlJob && !isNaN(Number(urlJob))) setJobOpportunitiesWeight(Number(urlJob));
+          if (urlSal && !isNaN(Number(urlSal))) setSalaryWeight(Number(urlSal));
+          if (urlQ) setSearchQuery(urlQ);
+        });
+      }
+    }
+  }, []);
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const deferredSelectedUniversity = useDeferredValue(selectedUniversity);
@@ -640,9 +663,18 @@ export default function Dashboard() {
                 Vægtet sortering (AI: {aiRobustnessWeight}% · Job: {jobOpportunitiesWeight}% · Løn: {salaryWeight}%)
               </p>
             </div>
-            <span className="text-xs text-[#545D71] font-mono-data font-semibold">
-              {loading ? "Henter..." : `${matchedPrograms.length} matchede uddannelser`}
-            </span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
+              >
+                <span>✨</span>
+                <span>Del dit match</span>
+              </button>
+              <span className="text-xs text-[#545D71] font-mono-data font-semibold hidden sm:inline">
+                {loading ? "Henter..." : `${matchedPrograms.length} matchede uddannelser`}
+              </span>
+            </div>
           </div>
 
           {loading ? (
@@ -662,12 +694,24 @@ export default function Dashboard() {
                   >
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                       <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-1.5 text-xs text-[#545D71]">
-                          <span className="font-bold text-[#0B7A57]">#{index + 1} Match ({prog.matchScore}%)</span>
-                          <span>•</span>
-                          <span>{prog.institution}</span>
-                          <span>•</span>
-                          <span className="font-mono-data text-[#8891A3]">KOT {prog.kot_nr}</span>
+                        <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-[#0B7A57]">#{index + 1} Match ({prog.matchScore}%)</span>
+                            <span>•</span>
+                            <span>{prog.institution}</span>
+                            <span>•</span>
+                            <span className="font-mono-data text-[#8891A3]">KOT {prog.kot_nr}</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowShareModal(true);
+                            }}
+                            title="Del dette match"
+                            className="p-1 text-[#8891A3] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition"
+                          >
+                            🔗 <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
+                          </button>
                         </div>
                         <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition">
                           <Link href={`/uddannelse/${createProgramSlug(prog)}`}>
@@ -872,6 +916,117 @@ export default function Dashboard() {
           </div>
         </div>
       </footer>
+
+      {/* Share Match Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-[#12172B]/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-2xl p-6 sm:p-8 max-w-lg w-full card-shadow space-y-6 relative animate-in fade-in zoom-in-95 duration-150 text-left">
+            <button
+              onClick={() => setShowShareModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#F7F8FA] hover:bg-[#E7E9EF] text-[#545D71] font-bold flex items-center justify-center transition"
+              aria-label="Luk modal"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/20">
+                <span>🎯 Dit Personlige Uddannelsesmatch</span>
+              </div>
+              <h3 className="text-2xl font-bold text-[#12172B] tracking-tight font-display">
+                Del dit resultat
+              </h3>
+              <p className="text-xs text-[#545D71]">
+                Generér et direkte link eller kopiér dit top-match til Instagram Stories, Facebook eller gruppechats.
+              </p>
+            </div>
+
+            {/* Social Card Preview */}
+            {matchedPrograms.length > 0 && (
+              <div className="bg-gradient-to-br from-[#12172B] to-[#1E293B] text-[#FFFFFF] rounded-xl p-5 space-y-4 shadow-md">
+                <div className="flex justify-between items-center text-[11px] text-[#A1A1AA] border-b border-[#3F3F46] pb-3">
+                  <span className="font-bold text-[#38BDF8]">UDDANNELSESINDSIGT.DK</span>
+                  <span className="bg-[#0F9D6E] text-white font-mono-data px-2 py-0.5 rounded text-[10px] font-bold">
+                    {matchedPrograms[0].matchScore}% MATCH
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-[#10B981] uppercase tracking-wider">#1 Top Anbefaling</span>
+                  <h4 className="text-xl font-bold tracking-tight text-white font-display">
+                    {matchedPrograms[0].udbud_titel}
+                  </h4>
+                  <p className="text-xs text-[#D4D4D8]">
+                    {matchedPrograms[0].institution} • KOT {matchedPrograms[0].kot_nr}
+                  </p>
+                </div>
+                <div className="bg-[#27272A] p-3 rounded-lg flex flex-wrap justify-between text-[11px] text-[#A1A1AA] gap-2 font-mono-data">
+                  <span>Snit: {gpa.toFixed(1)}</span>
+                  <span>AI-vægt: {aiRobustnessWeight}%</span>
+                  <span>Job: {jobOpportunitiesWeight}%</span>
+                  <span>Løn: {salaryWeight}%</span>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                  navigator.clipboard.writeText(shareUrl);
+                  setCopiedToast(true);
+                  setTimeout(() => setCopiedToast(false), 3000);
+                }}
+                className="w-full py-3 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+              >
+                <span>📋</span>
+                <span>Kopiér direkte match-link</span>
+              </button>
+
+              {typeof navigator !== "undefined" && "share" in navigator && (
+                <button
+                  onClick={() => {
+                    const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                    const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
+                    const topScore = matchedPrograms.length > 0 ? matchedPrograms[0].matchScore : "89";
+                    navigator.share({
+                      title: `Mit match: ${topTitle} (${topScore}%)`,
+                      text: `Jeg matcher ${topScore}% med ${topTitle} på Uddannelsesindsigt! Se hvad du matcher med:`,
+                      url: shareUrl,
+                    }).catch(() => {});
+                  }}
+                  className="w-full py-3 bg-[#E3F6EE] hover:bg-[#D2F1E4] text-[#0B7A57] border border-[#0F9D6E]/30 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-[#0F9D6E]"
+                >
+                  <span>📱</span>
+                  <span>Del via apps (Instagram, Beskeder, Messenger)</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => {
+                  const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
+                  const topScore = matchedPrograms.length > 0 ? matchedPrograms[0].matchScore : "89";
+                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                  const storyText = `🎯 Mit top-match er ${topTitle} (${topScore}% match) på Uddannelsesindsigt!\n\nFind dit eget match her: ${shareUrl}`;
+                  navigator.clipboard.writeText(storyText);
+                  setCopiedToast(true);
+                  setTimeout(() => setCopiedToast(false), 3000);
+                }}
+                className="w-full py-3 bg-[#F7F8FA] hover:bg-[#E7E9EF] text-[#12172B] border border-[#E7E9EF] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+              >
+                <span>💬</span>
+                <span>Kopiér teksten til Socials / Chat</span>
+              </button>
+            </div>
+
+            {copiedToast && (
+              <div className="p-3 bg-[#E3F6EE] border border-[#0F9D6E]/30 text-[#0B7A57] text-xs font-bold rounded-xl text-center animate-in fade-in">
+                ✅ Kopieret til udklipsholder! Klar til at dele.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
