@@ -29,11 +29,11 @@ export default function EvidensPage() {
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
             <div className="w-8 h-8 rounded-lg bg-[#12172B] flex items-center justify-center font-bold text-[#FFFFFF] text-sm">
-              S
+              U
             </div>
             <div>
               <h1 className="text-base font-bold text-[#12172B] tracking-tight font-display">
-                Studievalg <span className="text-[#545D71] font-normal">Evidensforklaring</span>
+                Uddannelsesindsigt <span className="text-[#545D71] font-normal">Evidensforklaring</span>
               </h1>
               <p className="text-[11px] text-[#545D71]">
                 Pædagogisk guide til, hvordan vores AI-robusthedsscores beregnes
@@ -44,7 +44,7 @@ export default function EvidensPage() {
 
         <nav className="flex items-center gap-6 text-xs font-semibold">
           <Link href="/" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
-            Studievalg
+            Matchværktøj
           </Link>
           <Link href="/analyse" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
             AI Insights
@@ -168,12 +168,12 @@ export default function EvidensPage() {
 
       <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-12 px-6 lg:px-16 text-[#545D71] text-xs mt-16">
         <div className="max-w-6xl mx-auto space-y-8 text-left">
-          {/* Section 1: Om Studievalg AI & Legal Disclaimer */}
+          {/* Section 1: Om Uddannelsesindsigt & Legal Disclaimer */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-3 md:col-span-2">
-              <h4 className="text-sm font-bold text-[#12172B]">Om Studievalg AI</h4>
+              <h4 className="text-sm font-bold text-[#12172B]">Om Uddannelsesindsigt</h4>
               <p className="leading-relaxed">
-                Studievalg AI er en uafhængig, ikke-kommerciel informationsplatform, der tilbyder pædagogisk beslutningsstøtte til uddannelsessøgende. Formålet er at belyse, hvordan kunstig intelligens forventes at påvirke arbejdsmarkedet og specifikke uddannelser.
+                Uddannelsesindsigt er en uafhængig, ikke-kommerciel informationsplatform, der tilbyder pædagogisk beslutningsstøtte til uddannelsessøgende. Formålet er at belyse, hvordan kunstig intelligens forventes at påvirke arbejdsmarkedet og specifikke uddannelser.
               </p>
               <p className="leading-relaxed">
                 Denne platform vurderer ikke mennesker eller deres fremtidige jobmuligheder. Den analyserer udelukkende statistiske mønstre på uddannelses- og arbejdsmarkedsniveau baseret på offentlig forskning og tilgængelige data. Alle beregninger udføres deterministisk ud fra dokumenterede modeller og datakilder.
@@ -217,7 +217,7 @@ export default function EvidensPage() {
 
           {/* Bottom Copyright & Datostempel */}
           <div className="pt-4 border-t border-[#E7E9EF] flex flex-col sm:flex-row justify-between items-center text-[11px] text-[#8891A3] gap-2">
-            <p>© 2026 Studievalg AI • Uafhængig pædagogisk beslutningsstøtte</p>
+            <p>© 2026 Uddannelsesindsigt • Uafhængig pædagogisk beslutningsstøtte</p>
             <p className="font-mono-data font-semibold">Data senest opdateret: Juli 2026</p>
           </div>
         </div>

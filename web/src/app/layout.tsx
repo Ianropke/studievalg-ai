@@ -21,31 +21,42 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI-Studievalgsplatform 2026 | Fremtidssikret Studievejledning & AI-Arbejdsmarkedsanalyse",
-  description: "Uafhængig dansk studievejledningsplatform baseret på 14.934 officielle UFM KOT-ansøgninger (2009–2026), DuckDB og 42+ forskningskilder fra OECD, ILO, Stanford og Danmarks Statistik.",
+  metadataBase: new URL("https://uddannelsesindsigt.dk"),
+  title: "Uddannelsesindsigt | Fremtidssikret Studievejledning & AI-Arbejdsmarkedsanalyse",
+  description:
+    "Uddannelsesindsigt tilbyder uafhængig statistisk beslutningsstøtte til danske uddannelsessøgende baseret på UFM optagelsesdata, Danmarks Statistik og AI-arbejdsmarkedsmodeller.",
   keywords: [
-    "studievalg", "udvikling", "AI arbejdsmarked", "KOT optagelse 2026", "grænsekvotienter",
-    "uddannelser i Danmark", "fremtidssikret uddannelse", "studievejledning AI", "OECD employment outlook"
+    "uddannelsesindsigt",
+    "studievalg",
+    "udvikling",
+    "AI arbejdsmarked",
+    "KOT optagelse 2026",
+    "grænsekvotienter",
+    "lønniveau",
+    "jobmuligheder",
   ],
-  authors: [{ name: "AI-Studievalgsplatform Danmark" }],
-  creator: "AI-Studievalgsplatform",
-  publisher: "AI-Studievalgsplatform",
-  robots: { index: true, follow: true },
+  authors: [{ name: "Uddannelsesindsigt Danmark" }],
+  creator: "Uddannelsesindsigt",
+  publisher: "Uddannelsesindsigt",
   openGraph: {
-    title: "AI-Studievalgsplatform 2026 | Hvilken uddannelse passer til dig?",
-    description: "Fremtidssikret dansk studievejledning. Kobler officielle UFM-adgangskvotienter med 42+ internationale AI-forskningsstudier.",
-    url: "https://studievalg-ai.dk",
-    siteName: "AI-Studievalgsplatform",
+    title: "Uddannelsesindsigt | Hvilken uddannelse passer til dig?",
+    description: "Sammenlign 1.413 danske videregående uddannelser på AI-robusthed, jobmuligheder og lønpotentiale med dit eget snit.",
+    url: "https://uddannelsesindsigt.dk",
+    siteName: "Uddannelsesindsigt",
     locale: "da_DK",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI-Studievalgsplatform 2026",
-    description: "Find din fremtidssikrede uddannelse baseret på UFM-registerdata og AI-resiliens.",
+    title: "Uddannelsesindsigt",
+    description: "Fremtidssikret pædagogisk studievejledning baseret på registerdata og AI-opgavetaksonomi.",
   },
   alternates: {
-    canonical: "https://studievalg-ai.dk",
+    canonical: "https://uddannelsesindsigt.dk",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -56,15 +67,14 @@ export default function RootLayout({
 }>) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "AI-Studievalgsplatform Danmark",
-    "url": "https://studievalg-ai.dk",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "All",
-    "description": "Fremtidssikret dansk studievejledningsplatform baseret på UFM-registerdata, DuckDB og 42+ forskningskilder.",
-    "publisher": {
+    "@type": "EducationalOrganization",
+    "name": "Uddannelsesindsigt Danmark",
+    "url": "https://uddannelsesindsigt.dk",
+    "description": "Uafhængig pædagogisk beslutningsstøtte og datadrevet studievejledning for videregående uddannelser i Danmark.",
+    "sameAs": [],
+    "provider": {
       "@type": "Organization",
-      "name": "AI-Studievalgsplatform Danmark"
+      "name": "Uddannelsesindsigt Danmark"
     }
   };
 
