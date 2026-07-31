@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Metadata } from "next";
 import { getAllPrograms, getProgramBySlug, createProgramSlug } from "@/lib/slugs";
+import { getEnrichedScores } from "@/lib/domainScoring";
 
 // Pure server SVG triangle radar component
 function CompactTriangleRadar({ robust, job, salary }: { robust: number; job: number; salary: number }) {
@@ -125,9 +126,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
   const kot = String(prog.kot_nr || "");
   const kv = prog.latest_kvotient || "Alle optaget";
 
-  const robustScore = 100 - (prog.scores?.automation_risk || 0);
-  const jobScore = prog.scores?.labour_demand || 50;
-  const salScore = prog.scores?.salary_growth || 50;
+  const enriched = getEnrichedScores(title, prog.scores);
+  const robustScore = 100 - (enriched.automation_risk || 0);
+  const jobScore = enriched.labour_demand || 50;
+  const salScore = enriched.salary_growth || 50;
 
   // Schema.org Structured Data
   const jsonLd = {

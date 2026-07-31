@@ -7,6 +7,7 @@ import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 import { createProgramSlug, getProgramBySlug } from "@/lib/slugs";
 import { ProgramItem } from "@/lib/lists";
 import { Header } from "@/components/Header";
+import { getEnrichedScores } from "@/lib/domainScoring";
 
 // Pure SVG multi-triangle radar for 2-3 programs
 function MultiTriangleRadar({ programs }: { programs: ProgramItem[] }) {
@@ -44,9 +45,10 @@ function MultiTriangleRadar({ programs }: { programs: ProgramItem[] }) {
         {/* Polygons for each program */}
         {programs.map((prog, idx) => {
           const color = colors[idx % colors.length];
-          const robust = 100 - (prog.scores?.automation_risk || 0);
-          const job = prog.scores?.labour_demand || 50;
-          const salary = prog.scores?.salary_growth || 50;
+          const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
+          const robust = 100 - (enriched.automation_risk || 0);
+          const job = enriched.labour_demand || 50;
+          const salary = enriched.salary_growth || 50;
 
           const rRob = R * (robust / 100);
           const rJob = R * (job / 100);
@@ -335,7 +337,8 @@ function ComparisonContent() {
                 <tr>
                   <td className="p-4 font-semibold text-[#545D71]">AI-robusthedsscore</td>
                   {selectedPrograms.map((prog) => {
-                    const rob = 100 - (prog.scores?.automation_risk || 0);
+                    const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
+                    const rob = 100 - (enriched.automation_risk || 0);
                     return (
                       <td key={prog.id} className="p-4">
                         <span className="font-mono-data font-bold text-sm text-[#0F9D6E] block">{rob}/100</span>
@@ -351,7 +354,8 @@ function ComparisonContent() {
                 <tr>
                   <td className="p-4 font-semibold text-[#545D71]">Jobmuligheder &amp; Efterspørgsel</td>
                   {selectedPrograms.map((prog) => {
-                    const job = prog.scores?.labour_demand || 50;
+                    const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
+                    const job = enriched.labour_demand || 50;
                     return (
                       <td key={prog.id} className="p-4">
                         <span className="font-mono-data font-bold text-sm text-[#2563EB] block">{job}/100</span>
@@ -367,7 +371,8 @@ function ComparisonContent() {
                 <tr>
                   <td className="p-4 font-semibold text-[#545D71]">Lønpotentiale</td>
                   {selectedPrograms.map((prog) => {
-                    const sal = prog.scores?.salary_growth || 50;
+                    const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
+                    const sal = enriched.salary_growth || 50;
                     return (
                       <td key={prog.id} className="p-4">
                         <span className="font-mono-data font-bold text-sm text-[#7C3AED] block">{sal}/100</span>

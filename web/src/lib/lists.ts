@@ -1,4 +1,5 @@
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
+import { getEnrichedScores } from "./domainScoring";
 
 export interface ProgramItem {
   id: string;
@@ -18,7 +19,7 @@ export interface ProgramItem {
     skills?: string[];
     learning_outcomes?: string;
   };
-  rag_evidence?: Array<{ quote: string; source: string }>;
+  rag_evidence?: Array<{ source?: string; page?: string; quote?: string }>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
@@ -31,8 +32,7 @@ export interface ListConfig {
   introHedge: string;
   metricLabel: string;
   limit: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getValue: (p: ProgramItem) => { display: string; numeric: number; raw: any };
+  getValue: (p: ProgramItem) => { display: string; numeric: number; raw: unknown };
   sortOrder: "asc" | "desc";
 }
 
@@ -46,7 +46,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
-      const val = 100 - (p.scores?.automation_risk || 0);
+      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
+      const val = 100 - (enriched.automation_risk || 0);
       return { display: `${val}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
@@ -60,7 +61,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     metricLabel: "Lønpotentiale",
     limit: 10,
     getValue: (p) => {
-      const val = p.scores?.salary_growth || 50;
+      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
+      const val = enriched.salary_growth || 50;
       return { display: `${val}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
@@ -74,7 +76,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     metricLabel: "Jobmuligheder",
     limit: 10,
     getValue: (p) => {
-      const val = p.scores?.labour_demand || 50;
+      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
+      const val = enriched.labour_demand || 50;
       return { display: `${val}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
@@ -88,9 +91,10 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     metricLabel: "Samlet Trekant-score",
     limit: 20,
     getValue: (p) => {
-      const rob = 100 - (p.scores?.automation_risk || 0);
-      const job = p.scores?.labour_demand || 50;
-      const sal = p.scores?.salary_growth || 50;
+      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
+      const rob = 100 - (enriched.automation_risk || 0);
+      const job = enriched.labour_demand || 50;
+      const sal = enriched.salary_growth || 50;
       const avg = Math.round((rob + job + sal) / 3);
       return { display: `${avg}/100`, numeric: avg, raw: avg };
     },
@@ -105,7 +109,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
-      const val = 100 - (p.scores?.automation_risk || 0);
+      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
+      const val = 100 - (enriched.automation_risk || 0);
       return { display: `${val}/100 (Lav)`, numeric: val, raw: val };
     },
     sortOrder: "asc",

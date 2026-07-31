@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
+import { getEnrichedScores } from "@/lib/domainScoring";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -313,9 +314,10 @@ export default function Dashboard() {
       const kvNum = typeof latestKv === "number" ? latestKv : null;
       const meetsGpa = kvNum !== null ? gpa >= kvNum : true;
       
-      const robustScore = 100 - (prog.scores?.automation_risk || 0);
-      const jobScore = prog.scores?.labour_demand || 50;
-      const salScore = prog.scores?.salary_growth || 50;
+      const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
+      const robustScore = 100 - (enriched.automation_risk || 0);
+      const jobScore = enriched.labour_demand || 50;
+      const salScore = enriched.salary_growth || 50;
 
       const weightedComposite = (
         (robustScore * aiRobustnessWeight) +
