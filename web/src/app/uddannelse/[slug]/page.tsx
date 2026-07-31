@@ -102,10 +102,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const robust = 100 - (prog.scores?.automation_risk || 0);
 
   return {
-    title: `${title} — Adgangskvotient, AI-robusthed & Jobudsigter | Studievalg AI`,
+    title: `${title} — Adgangskvotient, AI-robusthed & Jobudsigter | Uddannelsesindsigt`,
     description: `${title} ved ${inst}: Seneste Kvote 1 adgangskvotient ${kv}. AI-robusthedsscore ${robust}/100, jobmuligheder ${prog.scores?.labour_demand || 50}/100. Se fuld analyse og sammenlign med dine egne prioriteter.`,
     alternates: {
-      canonical: `https://studievalg-ai.vercel.app/uddannelse/${slug}`,
+      canonical: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
     },
   };
 }

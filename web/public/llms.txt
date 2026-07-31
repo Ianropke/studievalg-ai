@@ -1,15 +1,15 @@
-# Studievalg AI
+# Uddannelsesindsigt.dk / Uddannelsesindsigt.com
 
 > Uafhængig statistisk beslutningsstøtte til danske uddannelsessøgende, baseret på officielle UFM- og Danmarks Statistik-registerdata samt videnskabelig forskning.
 
-Studievalg AI hjælper unge med at finde uddannelser der matcher deres eget gymnasiale gennemsnit og prioriteter på tre akser: AI-robusthed, jobmuligheder og lønpotentiale. Data opdateres løbende med de nyeste optagelsestal.
+Uddannelsesindsigt hjælper unge med at finde uddannelser der matcher deres eget gymnasiale gennemsnit og prioriteter på tre akser: AI-robusthed, jobmuligheder og lønpotentiale. Data opdateres løbende med de nyeste optagelsestal.
 
 ## Vigtige Sider
 
-- [Forside / Matchværktøj](https://studievalg-ai.vercel.app/): Interaktivt værktøj til at finde uddannelser ud fra eget snit og prioriteter.
-- [AI Insights](https://studievalg-ai.vercel.app/analyse): Dataanalyser af hvordan AI påvirker studievalg og arbejdsmarkedet (2015-2026).
-- [PEFF Evidens Hub](https://studievalg-ai.vercel.app/evidens): Pædagogisk metode og datagrundlag bag AI-robusthedsscorerne.
-- [Uddannelsesdatabase](https://studievalg-ai.vercel.app/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og scorer.
+- [Forside / Matchværktøj](https://uddannelsesindsigt.com/): Interaktivt værktøj til at finde uddannelser ud fra eget snit og prioriteter.
+- [AI Insights](https://uddannelsesindsigt.com/analyse): Dataanalyser af hvordan AI påvirker studievalg og arbejdsmarkedet (2015-2026).
+- [PEFF Evidens Hub](https://uddannelsesindsigt.com/evidens): Pædagogisk metode og datagrundlag bag AI-robusthedsscorerne.
+- [Uddannelsesdatabase](https://uddannelsesindsigt.com/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og scorer.
 
 ## Datakilder & Metode
 
