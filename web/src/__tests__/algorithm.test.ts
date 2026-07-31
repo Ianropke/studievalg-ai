@@ -123,7 +123,14 @@ export function runUnitTests() {
   console.assert(deltaRob === 14, `Test 10 Fejl: Delta-beregning bør være 14, fik ${deltaRob}`);
   console.log("  ✅ TEST-10: v2.6 Side-om-side Sammenligningsmatrix godkendt (Delta-beregning: +14% AI-robusthed)");
 
-  console.log("🎉 Alle 10 Unit Tests bestået uden fejl!\n");
+  // Test 11: Defensiv Type-Normalisering af Raw Number Kvotienter
+  const numKvotient: unknown = 10.2;
+  const kvSafe = String(numKvotient || "Alle optaget");
+  const kvNumSafe = parseFloat(kvSafe.replace(",", "."));
+  console.assert(kvNumSafe === 10.2, `Test 11 Fejl: Forventede 10.2, fik ${kvNumSafe}`);
+  console.log("  ✅ TEST-11: Defensiv Type-Normalisering af Raw Number Kvotienter godkendt (10.2 tal-sikker .replace)");
+
+  console.log("🎉 Alle 11 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {

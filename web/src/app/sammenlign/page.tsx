@@ -335,7 +335,7 @@ function ComparisonContent() {
                 <tr>
                   <td className="p-4 font-semibold text-[#545D71]">Kvote 1 Adgangskvotient</td>
                   {selectedPrograms.map((prog) => {
-                    const kv = prog.latest_kvotient || "Alle optaget";
+                    const kv = String(prog.latest_kvotient || "Alle optaget");
                     const kvNum = parseFloat(kv.replace(",", "."));
                     const meets = isNaN(kvNum) || userGpa >= kvNum;
                     return (
