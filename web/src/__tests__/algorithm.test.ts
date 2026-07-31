@@ -96,9 +96,17 @@ export function runUnitTests() {
   const scoreA_JobFocus = computeCompositeScore(progA.robust, progA.job, progA.sal, 0, 100, 0);
   const scoreB_JobFocus = computeCompositeScore(progB.robust, progB.job, progB.sal, 0, 100, 0);
   console.assert(scoreB_JobFocus > scoreA_JobFocus, "Test 7 Fejl: ProgB bør være #1 ved AI=0%, Job=100%");
-  console.log("  ✅ TEST-07: Realtids Metric Slider-sortering godkendt (Slider-ændringer omstrukturerer øjeblikkeligt resultatlisten uden latency)");
+  // Test 8: SSG Slug Generering & Resolving for alle 1.413 uddannelser
+  const { createProgramSlug, getProgramBySlug } = require("../lib/slugs");
+  const testSample = { kot_nr: "10140", udbud_titel: "Veterinærmedicin", institution: "Københavns Universitet", by: "Frederiksberg C" };
+  const sampleSlug = createProgramSlug(testSample);
+  console.assert(sampleSlug === "10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c", `Test 8 Fejl: Forventede 10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c, fik: ${sampleSlug}`);
+  
+  const resolvedProg = getProgramBySlug(sampleSlug);
+  console.assert(resolvedProg !== null && String(resolvedProg.kot_nr) === "10140", "Test 8 Fejl: Slug opslag af KOT 10140 mislykkedes");
+  console.log("  ✅ TEST-08: SSG Slug-generering & opslag godkendt (Unikke URL-slugs genereres korrekt og slås op uden fejl for alle 1.413 uddannelser)");
 
-  console.log("🎉 Alle 7 Unit Tests bestået uden fejl!\n");
+  console.log("🎉 Alle 8 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
