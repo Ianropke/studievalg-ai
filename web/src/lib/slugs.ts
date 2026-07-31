@@ -1,4 +1,4 @@
-import allProgramsCatalog from "../../public/data/all_programs_catalog.json";
+import allProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 export interface CatalogProgramItem {
   [key: string]: unknown;

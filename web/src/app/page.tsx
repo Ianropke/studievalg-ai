@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createProgramSlug } from "@/lib/slugs";
-import initialProgramsCatalog from "../../public/data/all_programs_catalog.json";
+import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
 const SYNONYM_MAP: Record<string, string[]> = {

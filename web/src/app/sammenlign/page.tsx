@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import initialProgramsCatalog from "../../../public/data/all_programs_catalog.json";
+import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 import { createProgramSlug, getProgramBySlug } from "@/lib/slugs";
 import { ProgramItem } from "@/lib/lists";
 
