@@ -5,8 +5,8 @@ import Link from "next/link";
 
 export default function EvidensPage() {
   const [dataStats, setDataStats] = useState<{ total: number; latest: string; params: number }>({
-    total: 0,
-    latest: "Henter...",
+    total: 1413,
+    latest: "26. juli 2026",
     params: 42
   });
 
@@ -145,7 +145,12 @@ export default function EvidensPage() {
           </div>
 
           <div className="pt-6 border-t border-[#E7E9EF] space-y-4">
-             <h3 className="font-bold text-[#12172B] text-sm font-mono-data">Eksempler på udtrukne citater via RAG</h3>
+             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+               <h3 className="font-bold text-[#12172B] text-sm font-mono-data">Eksempler på udtrukne citater via RAG</h3>
+               <span className="bg-[#EFF6FF] text-[#2563EB] text-[10px] px-2.5 py-0.5 rounded-full font-bold border border-[#2563EB]/20">
+                 Illustrativt eksempel på RAG-udtræk fra studieordning
+               </span>
+             </div>
              
              <div className="bg-[#F7F8FA] p-4 rounded-lg border border-[#E7E9EF] text-xs">
                 <p className="text-[#12172B] italic mb-2 font-serif">&quot;Studerende i Odontologi skal i modul 8 demonstrere kompetencer i anvendelse af maskinlærings-værktøjer til røntgenbilled-diagnostik.&quot;</p>

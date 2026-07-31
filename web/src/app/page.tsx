@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { createProgramSlug } from "@/lib/slugs";
+import initialProgramsCatalog from "../../public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
 const SYNONYM_MAP: Record<string, string[]> = {
@@ -248,21 +249,10 @@ interface ProgramItem {
 }
 
 export default function Dashboard() {
-  const [allPrograms, setAllPrograms] = useState<ProgramItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/data/all_programs_catalog.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllPrograms(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load programs:", err);
-        setLoading(false);
-      });
-  }, []);
+  const [allPrograms] = useState<ProgramItem[]>(
+    initialProgramsCatalog as unknown as ProgramItem[]
+  );
+  const loading = false;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUniversity, setSelectedUniversity] = useState("all");

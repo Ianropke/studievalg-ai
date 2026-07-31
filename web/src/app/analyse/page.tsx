@@ -170,8 +170,8 @@ export default function AIInsightsPage() {
           { title: "Medicin (Læge)", kvotient: "10.5", change: "Høj efterspørgsel (92% robust)" }
         ],
         lowHype: [
-          { title: "Sundhedsadministrativ Koordinator", kvotient: "Alle optaget", change: "–14% AI-skifte" },
-          { title: "Erhvervssprog & Tekstredigering", kvotient: "Alle optaget", change: "–16% AI-skifte" }
+          { title: "Sundhedsadministrativ koordinator", kvotient: "Alle optaget", change: "–14% AI-skifte" },
+          { title: "Erhvervssprog og tekstredigering", kvotient: "Alle optaget", change: "–16% AI-skifte" }
         ]
       };
     } else {
@@ -392,7 +392,7 @@ export default function AIInsightsPage() {
               {scenarioMode === "faktisk" ? (
                 <>
                   <p>
-                    <strong className="text-[#12172B]">Faktisk udvikling (Med AI):</strong> Sammenlignet med en kontrafaktisk fremskrivning (hvad ansøgertallet formentlig ville have været uden ChatGPT) peger data på et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag efter udgangen af 2022, mens fysiske og menneskenære fag (fx Odontologi og Medicin) har oplevet øget søgning i samme periode.
+                    <strong className="text-[#12172B]">Modelbaseret sammenligning (med vs. uden AI):</strong> Sammenlignet med en kontrafaktisk fremskrivning (hvad ansøgertallet formentlig ville have været uden ChatGPT) peger data på et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag efter udgangen af 2022, mens fysiske og menneskenære fag (fx Odontologi og Medicin) har oplevet øget søgning i samme periode.
                   </p>
 
                   <div className="bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF] space-y-1 card-shadow">
