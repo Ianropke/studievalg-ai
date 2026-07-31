@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { createProgramSlug } from "@/lib/slugs";
 
 // Synonymer for søgning & udvidet erhvervssprog
 const SYNONYM_MAP: Record<string, string[]> = {
@@ -668,8 +669,10 @@ export default function Dashboard() {
                           <span>•</span>
                           <span className="font-mono-data text-[#8891A3]">KOT {prog.kot_nr}</span>
                         </div>
-                        <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display">
-                          {prog.udbud_titel}
+                        <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition">
+                          <Link href={`/uddannelse/${createProgramSlug(prog)}`}>
+                            {prog.udbud_titel}
+                          </Link>
                         </h3>
                       </div>
 
