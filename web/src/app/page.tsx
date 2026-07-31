@@ -405,20 +405,40 @@ export default function Dashboard() {
       if (deferredSelectedUniversity !== "all") {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const item = p as Record<string, any>;
-        const city = (item.by || "").toLowerCase();
+        const kot = String(item.kot_nr || "");
         const inst = (item.institution || item.institution_navn || "").toLowerCase();
         const title = (item.udbud_titel || "").toLowerCase();
-        const disco = (item.disco08 || "").toString();
 
-        if (deferredSelectedUniversity === "ku") return city.includes("københavn") || inst.includes("københavns universitet");
-        if (deferredSelectedUniversity === "dtu") return city.includes("lyngby") || inst.includes("dtu") || title.includes("teknisk videnskab");
-        if (deferredSelectedUniversity === "au") return city.includes("aarhus") || inst.includes("aarhus universitet");
-        if (deferredSelectedUniversity === "cbs") return city.includes("frederiksberg") || inst.includes("cbs");
-        if (deferredSelectedUniversity === "sdu") return city.includes("odense") || city.includes("esbjerg") || city.includes("kolding");
-        if (deferredSelectedUniversity === "aau") return city.includes("aalborg") || inst.includes("aalborg universitet");
-        if (deferredSelectedUniversity === "ruc") return city.includes("roskilde") || inst.includes("roskilde universitet");
-        if (deferredSelectedUniversity === "itu") return title.includes("it-universitetet") || (city.includes("københavn") && disco.startsWith("25"));
-        if (deferredSelectedUniversity === "professionshojskole") return title.includes("professionsbachelor") || title.includes("erhvervsakademi");
+        const isUniv = kot.length === 5 && parseInt(kot, 10) >= 10000 && parseInt(kot, 10) < 30000;
+
+        if (deferredSelectedUniversity === "cbs") {
+          return kot.startsWith("13") || inst.includes("cbs") || inst.includes("copenhagen business school") || title.includes("copenhagen business school");
+        }
+        if (deferredSelectedUniversity === "ku") {
+          return kot.startsWith("10") || inst.includes("københavns universitet") || inst.includes("ku,") || inst === "ku";
+        }
+        if (deferredSelectedUniversity === "dtu") {
+          return kot.startsWith("14") || kot.startsWith("15") || kot.startsWith("23") || inst.includes("dtu") || inst.includes("danmarks tekniske");
+        }
+        if (deferredSelectedUniversity === "au") {
+          return kot.startsWith("20") || kot.startsWith("21") || kot.startsWith("22") || inst.includes("aarhus universitet") || inst.includes("au,");
+        }
+        if (deferredSelectedUniversity === "sdu") {
+          return kot.startsWith("17") || kot.startsWith("18") || kot.startsWith("19") || inst.includes("syddansk") || inst.includes("sdu,");
+        }
+        if (deferredSelectedUniversity === "aau") {
+          return kot.startsWith("25") || kot.startsWith("26") || inst.includes("aalborg universitet") || inst.includes("aau,");
+        }
+        if (deferredSelectedUniversity === "ruc") {
+          return kot.startsWith("16") || inst.includes("roskilde universitet") || inst.includes("ruc,");
+        }
+        if (deferredSelectedUniversity === "itu") {
+          return kot.startsWith("24") || inst.includes("it-universitet") || inst.includes("itu,") || title.includes("it-universitet");
+        }
+        if (deferredSelectedUniversity === "professionshojskole") {
+          if (isUniv) return false;
+          return (kot.length === 5 && parseInt(kot, 10) >= 30000) || title.includes("professionsbachelor") || title.includes("erhvervsakademi") || inst.includes("professionshøjskole") || inst.includes("erhvervsakademi");
+        }
       }
 
       return true;

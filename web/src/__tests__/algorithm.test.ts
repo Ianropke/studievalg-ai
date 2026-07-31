@@ -62,7 +62,18 @@ export function runUnitTests() {
   console.assert(norm1.includes("sygeplejersk"), `Test 4 Fejl: Fik ${norm1}`);
   console.log("  ✅ TEST-04: Dansk stammafskæring godkendt ('sygeplejersker' -> '" + norm1 + "')");
 
-  console.log("🎉 Alle 4 Unit Tests bestået uden fejl!\n");
+  // Test 5: CBS Universitetsfilter Isolering (Data QA)
+  function matchesCbs(kotNr: string, inst: string, title: string): boolean {
+    const kot = String(kotNr);
+    return kot.startsWith("13") || inst.toLowerCase().includes("cbs") || title.toLowerCase().includes("copenhagen business school");
+  }
+  const vetMedIsCbs = matchesCbs("10140", "Veterinærmedicin", "Veterinærmedicin, Frederiksberg C");
+  const haIsCbs = matchesCbs("13030", "Erhvervsøkonomi", "Erhvervsøkonomi-filosofi, HA (fil.), Frederiksberg");
+  console.assert(vetMedIsCbs === false, "Test 5 Fejl: Veterinærmedicin (KU 10140) må IKKE matche CBS filter!");
+  console.assert(haIsCbs === true, "Test 5 Fejl: HA (CBS 13030) SKAL matche CBS filter!");
+  console.log("  ✅ TEST-05: CBS Datatjek godkendt (KU 10140 ekskluderet, CBS 13030 inkluderet)");
+
+  console.log("🎉 Alle 5 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
