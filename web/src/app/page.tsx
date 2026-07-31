@@ -813,9 +813,61 @@ export default function Dashboard() {
         </div>
       </main>
 
-      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-8 px-6 lg:px-16 text-[#545D71] text-xs text-center mt-16 space-y-2">
-        <p>© 2026 AI-Studievalgsplatform Danmark • Officiel UFM & Danmarks Statistik registerdata</p>
-        <p className="max-w-2xl mx-auto">Vi anbefaler desuden at tale med en studievejleder om dit konkrete valg — denne platform er ét godt input blandt flere, ikke en erstatning for personlig vejledning.</p>
+      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-12 px-6 lg:px-16 text-[#545D71] text-xs mt-16">
+        <div className="max-w-6xl mx-auto space-y-8 text-left">
+          {/* Section 1: Om Studievalg AI & Legal Disclaimer */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-3 md:col-span-2">
+              <h4 className="text-sm font-bold text-[#12172B]">Om Studievalg AI</h4>
+              <p className="leading-relaxed">
+                Studievalg AI er en uafhængig, ikke-kommerciel informationsplatform, der tilbyder pædagogisk beslutningsstøtte til uddannelsessøgende. Formålet er at belyse, hvordan kunstig intelligens forventes at påvirke arbejdsmarkedet og specifikke uddannelser.
+              </p>
+              <p className="leading-relaxed">
+                Denne platform vurderer ikke mennesker eller deres fremtidige jobmuligheder. Den analyserer udelukkende statistiske mønstre på uddannelses- og arbejdsmarkedsniveau baseret på offentlig forskning og tilgængelige data. Alle beregninger udføres deterministisk ud fra dokumenterede modeller og datakilder.
+              </p>
+              <p className="leading-relaxed text-[#545D71]">
+                De viste AI-scorer, kvotienter og analyser er statistiske modelestimater og udgør ikke forudsigelser eller garantier for den enkelte uddannelse, optagelse eller karriere. Officiel ansøgning og optagelse sker altid via Optagelse.dk, og det anbefales at supplere med information fra uddannelsesinstitutionernes egne beskrivelser samt officiel studievejledning.
+              </p>
+            </div>
+
+            {/* Section 2: Transparens Badges */}
+            <div className="space-y-3 bg-[#F7F8FA] p-5 rounded-xl border border-[#E7E9EF]">
+              <h4 className="text-sm font-bold text-[#12172B]">Transparens</h4>
+              <ul className="space-y-2 font-medium text-[#12172B]">
+                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Offentlige datakilder</li>
+                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Dokumenteret metode (Open methodology)</li>
+                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen behandling af personoplysninger</li>
+                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen brugertracking eller cookies</li>
+                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen reklamer eller kommercielle interesser</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Section 3: Datakilder List */}
+          <div className="pt-6 border-t border-[#E7E9EF] space-y-3">
+            <h4 className="text-xs font-bold text-[#12172B] uppercase tracking-wider">Datakilder</h4>
+            <p className="leading-relaxed text-[#545D71]">
+              Platformen bygger på aggregerede data fra følgende institutioner og forskningspublikationer:
+            </p>
+            <div className="flex flex-wrap gap-2 text-[11px] font-medium text-[#545D71]">
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Uddannelses- og Forskningsministeriet (KOT)</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Danmarks Statistik</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">OECD & ILO</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">ESCO & O*NET</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">OpenAI / Eloundou et al.</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Felten et al.</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Kraka & Deloitte</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">PwC AI Jobs Barometer</span>
+              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">McKinsey Global Institute</span>
+            </div>
+          </div>
+
+          {/* Bottom Copyright & Datostempel */}
+          <div className="pt-4 border-t border-[#E7E9EF] flex flex-col sm:flex-row justify-between items-center text-[11px] text-[#8891A3] gap-2">
+            <p>© 2026 Studievalg AI • Uafhængig pædagogisk beslutningsstøtte</p>
+            <p className="font-mono-data font-semibold">Data senest opdateret: Juli 2026</p>
+          </div>
+        </div>
       </footer>
     </div>
   );
