@@ -76,6 +76,10 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 ## 14. v2.6 Virale Lister & Sammenligningsarkitektur
 - **ItemList Schema.org for AI-Svarmaskiner:** De 7 statistiske top 10/20 listersider (`/lister/[slug]`) injecter `ItemList` og `ListItem` JSON-LD direkte i HTML-hovedet. Det gør listerne lynhurtige at hente for ChatGPT, Claude og Perplexity samt forbedrer muligheden for Google Rich Snippets.
 - **Sikker String-Normalisering af Kvotienter:** Ved sortering af `latest_kvotient` (som i JSON-kataloget kan være et tal som `10.2` eller en tekst som `"Alle optaget"`), skal feltet altid eksplicit konverteres via `String(p.latest_kvotient || "")` før strengoperationer (som `.toLowerCase()` eller `.includes()`) udføres.
-- **Multi-Polygon SVG Radar:** Side-om-side sammenligningsværktøjet (`/sammenlign`) benytter ren, vægtløs SVG-geometri til at tegne op til 3 overlappende polygoner i samme koordinatsystem uden eksterne tungvægts-grafbiblioteker.
+## 15. Systematisk Fejlanalyse & Forebyggelsesprotokol
+- **Sikker Type-støbning af JSON-felter (Defensiv Kodning):** Eksterne og udtrudte JSON-felter kan have hybride typer (fx `latest_kvotient` kan være både `number` som `10.2` og `string` som `"Alle optaget"`). Udfør ALTDIG eksplicit `String(val || "")` før der kaldes strengmetoder som `.toLowerCase()`.
+- **Minimal Vercel Schema v3:** Undgå forældede Vercel JSON-nøgler (`name`, `rootDirectory`) inde i `vercel.json`. Brug altid den minimalistiske v3-standard `{"framework": "nextjs"}` i repositoriets rod for at undgå CLI-skemavalideringsfejl.
+- **Python / Node Hybrid Repositories:** Når et git-repo indeholder både Python-scripting (`requirements.txt`, `engine/`) og et Next.js webapp-projekt (`web/`), SKAL der ligge en `vercel.json` i repo-roden fra dag 1. Ellers gætter Vercels GitHub-integration at projektet er Python og fejler ved automatiske git push triggers.
+- **Lokal Build-validering før Push:** Afvikl altid `npm run build` og `npx tsc --noEmit` lokalt i `web/` mappen før der laves git commit/push, for at fange SSG-prerender fejl med det samme.
 
 
