@@ -476,9 +476,15 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-        <nav className="flex items-center gap-6 text-xs font-semibold">
+        <nav className="flex items-center gap-5 text-xs font-semibold">
           <Link href="/" className="text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
             Matchværktøj
+          </Link>
+          <Link href="/lister/top-10-mest-ai-robuste-uddannelser" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
+            Toplister
+          </Link>
+          <Link href="/sammenlign" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
+            Sammenlign
           </Link>
           <Link href="/analyse" className="text-[#545D71] hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">
             AI Insights

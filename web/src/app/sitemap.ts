@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { getAllPrograms, createProgramSlug } from "@/lib/slugs";
+import { LIST_CONFIGS } from "@/lib/lists";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://uddannelsesindsigt.dk";
@@ -12,12 +13,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const listUrls = Object.keys(LIST_CONFIGS).map((slug) => ({
+    url: `${baseUrl}/lister/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
+  }));
+
   const mainUrls = [
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/sammenlign`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/analyse`,
@@ -33,5 +47,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...mainUrls, ...programUrls];
+  return [...mainUrls, ...listUrls, ...programUrls];
 }
