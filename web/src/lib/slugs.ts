@@ -1,6 +1,7 @@
 import allProgramsCatalog from "../../public/data/all_programs_catalog.json";
 
 export interface CatalogProgramItem {
+  [key: string]: unknown;
   kot_nr?: string;
   udbud_titel?: string;
   institution?: string;
@@ -41,7 +42,7 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function createProgramSlug(prog: { kot_nr?: any; udbud_titel?: any; institution?: any; institution_navn?: any; by?: any }): string {
+export function createProgramSlug(prog: Record<string, unknown>): string {
   const kot = String(prog.kot_nr || "");
   const title = String(prog.udbud_titel || "");
   const inst = String(prog.institution || prog.institution_navn || "");

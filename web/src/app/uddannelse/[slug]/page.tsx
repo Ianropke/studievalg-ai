@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import dynamicImport from "next/dynamic";
 import { getAllPrograms, getProgramBySlug, createProgramSlug } from "@/lib/slugs";
 
 // Pure server SVG triangle radar component
@@ -208,6 +207,21 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             </div>
           </div>
 
+          {/* Kort Svar-boks (AI Summary highlight box for SEO & AI agents) */}
+          <div className="bg-[#EFF6FF] border border-[#2563EB]/20 p-5 rounded-xl space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#1D4ED8]">
+              <span className="w-2 h-2 rounded-full bg-[#2563EB]"></span>
+              <span>KORT FORTALT</span>
+            </div>
+            <p className="text-sm font-semibold text-[#12172B] leading-relaxed">
+              {robustScore >= 78 
+                ? `Denne uddannelse vurderes at stå særligt stærkt i en AI-præget fremtid (AI-robusthed ${robustScore}/100), fordi arbejdet primært bygger på tværfaglig analyse, kompleks problemløsning og menneskelig vurdering.`
+                : robustScore >= 65
+                ? `Uddannelsen har en moderat AI-robusthedsscore (${robustScore}/100). Kunstig intelligens forventes i stigende grad at assistere dokumentation og rutineopgaver, mens den faglige helhedsvurdering fortsat kræver menneskelige fagpersoner.`
+                : `Uddannelsen berøres i højere grad af AI-automatisering (${robustScore}/100), idet en række kerneopgaver kan effektiviseres af sprogmodeller. Det anbefales at supplere studiet med strategiske eller teknologiske kompetencer.`}
+            </p>
+          </div>
+
           {/* Visual Score Section: Compact Radar + 3 Bars */}
           <div className="flex flex-col sm:flex-row items-center gap-6 bg-[#F7F8FA] p-6 rounded-xl border border-[#E7E9EF]">
             <div className="bg-[#FFFFFF] p-4 rounded-xl border border-[#E7E9EF] flex flex-col items-center justify-center shrink-0 w-40 card-shadow">
@@ -256,6 +270,29 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             </div>
           </div>
 
+          {/* Dataoverblik Faktaboks (Mono-tal & Seneste Optagelsesdato) */}
+          <div className="bg-[#F7F8FA] p-5 rounded-xl border border-[#E7E9EF] space-y-3">
+            <h3 className="text-xs font-bold text-[#12172B] uppercase tracking-wider">Dataoverblik & Nøgletal</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+              <div>
+                <span className="text-[#8891A3] block text-[11px]">KOT-nummer</span>
+                <span className="font-mono-data font-bold text-[#12172B]">{kot}</span>
+              </div>
+              <div>
+                <span className="text-[#8891A3] block text-[11px]">Adgangskvotient</span>
+                <span className="font-mono-data font-bold text-[#12172B]">{kv}</span>
+              </div>
+              <div>
+                <span className="text-[#8891A3] block text-[11px]">Institution</span>
+                <span className="font-semibold text-[#12172B] truncate block">{inst}</span>
+              </div>
+              <div>
+                <span className="text-[#8891A3] block text-[11px]">Dataopdatering</span>
+                <span className="font-mono-data text-[#0B7A57] font-semibold">Juli 2026</span>
+              </div>
+            </div>
+          </div>
+
           {/* RAG Evidence & Method Explanation */}
           <div className="space-y-4 pt-4 border-t border-[#E7E9EF]">
             <h3 className="text-base font-bold text-[#12172B]">Evidensforklaring & Modelanalyse</h3>
@@ -270,9 +307,9 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
                 {prog.skills_hierarchy.skills && prog.skills_hierarchy.skills.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {prog.skills_hierarchy.skills.map((skill, i) => (
-                      <span key={i} className="bg-[#FFFFFF] border border-[#D8DBE4] px-2 py-0.5 rounded text-[11px] font-medium text-[#12172B]">
-                        {skill}
-                      </span>
+                      <Link key={i} href={`/?q=${encodeURIComponent(skill)}`} className="bg-[#FFFFFF] hover:border-[#12172B] border border-[#D8DBE4] px-2 py-0.5 rounded text-[11px] font-medium text-[#12172B] transition">
+                        {skill} →
+                      </Link>
                     ))}
                   </div>
                 )}
@@ -280,8 +317,47 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             )}
           </div>
 
+          {/* Lignende Uddannelser (Beregnet ud fra Geometrisk Trekant-Afstand) */}
+          <div className="pt-6 border-t border-[#E7E9EF] space-y-4">
+            <div>
+              <h3 className="text-base font-bold text-[#12172B]">Lignende uddannelser</h3>
+              <p className="text-xs text-[#545D71]">Beregnet ud fra geometrisk afstand mellem uddannelsernes tre score-profiler (AI, Job, Løn):</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {getAllPrograms()
+                .filter((p) => createProgramSlug(p) !== slug && p.udbud_titel)
+                .map((p) => {
+                  const pRob = 100 - (p.scores?.automation_risk || 0);
+                  const pJob = p.scores?.labour_demand || 50;
+                  const pSal = p.scores?.salary_growth || 50;
+                  const dist = Math.hypot(pRob - robustScore, pJob - jobScore, pSal - salScore);
+                  return { program: p, slug: createProgramSlug(p), dist, pRob, pJob, pSal };
+                })
+                .sort((a, b) => a.dist - b.dist)
+                .slice(0, 4)
+                .map(({ program: simProg, slug: simSlug, pRob }) => (
+                  <Link
+                    key={simSlug}
+                    href={`/uddannelse/${simSlug}`}
+                    className="p-3.5 bg-[#F7F8FA] hover:bg-[#FFFFFF] border border-[#E7E9EF] hover:border-[#12172B] rounded-xl transition card-shadow space-y-1 block group"
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <h4 className="font-bold text-xs text-[#12172B] group-hover:text-[#2563EB] transition truncate">
+                        {simProg.udbud_titel}
+                      </h4>
+                      <span className="text-[10px] font-mono-data font-semibold text-[#0B7A57] bg-[#E6F4ED] px-2 py-0.5 rounded-full shrink-0">
+                        AI {pRob}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#545D71] truncate">{simProg.institution || simProg.institution_navn}</p>
+                  </Link>
+                ))}
+            </div>
+          </div>
+
           {/* Call to Action Button */}
-          <div className="pt-4 border-t border-[#E7E9EF] text-center">
+          <div className="pt-6 border-t border-[#E7E9EF] text-center">
             <Link
               href={`/?q=${encodeURIComponent(title)}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow"
