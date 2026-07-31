@@ -54,4 +54,23 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 - **Eget Domæne Opsætning:** Domænet `uddannelsesindsigt.dk` er opsat som det primære produktionsdomæne på Vercel med `A-record` (`76.76.21.21`) og `CNAME-record` (`cname.vercel-dns.com.`) administreret via Simply.com.
 - **Domæne-Konsistens på Tværs af Systemet:** Alle kanoniske URLs, `sitemap.xml`, `robots.txt` og `llms.txt` opdateres automatisk til at anvende domænet `https://uddannelsesindsigt.dk` for optimal SEO og AI-agent discoverability.
 
+## 9. Virality & Social Sharing ("Del dit match")
+- **URL Permalink Hydrering:** Direkte delingslinks anvender URL query parametre (`?gpa=9.5&wAi=80&wJob=70&wSal=60&q=...`). Hydrering af state ved sideindlæsning foretages via `requestAnimationFrame` for at undgå React 19 / Next.js 16 `react-hooks/set-state-in-effect` fnidder og unødige cascading re-renders.
+- **Web Share API Integration:** Mobil-enheder (iOS/Android) åbner telefonens native delingsmenu via `navigator.share()` med direkte adgang til Instagram Stories, WhatsApp, iMessage og Messenger.
+- **Visual Social Card Preview:** Delings-modalen præsenterer et mørkt, højkontrast "Social Card" preview med #1 matchtitel, score-badge, institution og nøjagtige slider-værdier.
+
+## 10. AI-Agent Discoverability & Bot-Politik (robots.txt & llms.txt)
+- **Skelnen Mellem AI-Bots:** Trænings-bots (`GPTBot`, `Google-Extended`, `CCBot`, `Bytespider`) blokeres i `robots.txt`, mens live søge- og citerings-bots (`OAI-SearchBot`, `ChatGPT-User`, `Claude-SearchBot`, `PerplexityBot`) eksplicit tillades.
+- **Ren Tekststruktur (`/llms.txt`):** En uformel, men udbredt standard placeret i domæneroden (`/llms.txt`), der giver LLM'er et uforstyrret, støjfrit overblik over platformens formål, vigtigste sider og PEFF-metode uden JS- eller DOM-støj.
+
+## 11. Route-Specifik Metadata Arkitektur (`layout.tsx` i undersider)
+- **Undgå Delt Statisk Metadata:** En fælles metadata-konstant i `layout.tsx` medfører, at `/`, `/analyse` og `/evidens` deler samme canonical og OpenGraph-titler.
+- **Dedikerede Layout-filer per Subroute:** Opret eksplicitte `layout.tsx` filer i `/analyse/` og `/evidens/` med unikke `title`, `canonical`, `og:title` og `og:url` tags for at sikre 100% præcis sociale kort og SEO-indeksering.
+
+## 12. Pre-rendering af Statisk Initial Tilstand (Nul "Henter..." Skeletons)
+- **Statisk Import af Katalog-data:** I stedet for kun at hente `all_programs_catalog.json` via client-side `fetch()` i `useEffect`, importeres kataloget direkte som statisk initial state i `page.tsx`. Dette sikrer, at Next.js SSG pre-rendereren udskriver al data i den første rå HTML-respons uden tomme loading-skeletter for søgerobotter.
+
+## 13. CI/CD Pipeline & TypeScript Test Runner
+- **npx tsx i GitHub Actions:** Da standard Node.js ikke kan fortolke `.ts`-filer direkte via `node -e`, skal GitHub CI-workflowet (`.github/workflows/ci.yml`) afvikle unit-test suiterne via `npx tsx src/__tests__/algorithm.test.ts` for 100% konsistent og grøn CI/CD validering.
+
 
