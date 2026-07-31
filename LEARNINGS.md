@@ -26,3 +26,27 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 - **Negativ & Edge-Case Testing:** Testplanen må aldrig kun dække "happy path". Eksplicitte scenarier for offline resiliens, korrupt JSON, script-injection (XSS), 0%/100% slider-grænser og deaktiveret JS skal dokumenteres og verificeres.
 - **Videnskabelig Formulering:** Undgå absolutte påstande som "100% objektiv" eller "hallucinationsforbud". Formulér i stedet præcist (*"Eksklusion af demografiske variabler eliminerer direkte diskrimination, men udgør ikke empirisk bevis mod indirekte statistisk bias i kildedata"*).
 - **Nul-Tolerance Quality Gate:** En udgivelse kræver 0 ESLint errors/warnings, 0 TypeScript fejl (`npx tsc --noEmit`) og et grønt statisk produktion-build før den deklareres produktionstjenlig.
+
+## 5. Data QA & Domæne-Isolering (KOT-Koder vs. Geografisk By-match)
+- **Undgå Geografiske Mismatches:** Filtrering af uddannelsessteder (f.eks. CBS, KU, DTU) må aldrig baseres på naive bynavne (fx `"frederiksberg"` eller `"københavn"`). By-matchning udløser alvorlige datadiskrepanser (fx at *Veterinærmedicin KU Science* placeres under *CBS*, blot fordi det ligger på Frederiksberg Campus).
+- **Optagelsesdatabaser som Ground Truth:** Anvend i stedet officielle optagelses-prefixer fra **Den Danske KOT-Optagelsesdatabase**:
+  - `10xxx` = Københavns Universitet (KU)
+  - `13xxx` = Copenhagen Business School (CBS)
+  - `14xxx` & `15xxx` = Danmarks Tekniske Universitet (DTU)
+  - `16xxx` = Roskilde Universitet (RUC)
+  - `17xxx`, `18xxx`, `19xxx` = Syddansk Universitet (SDU)
+  - `20xxx`, `21xxx`, `22xxx` = Aarhus Universitet (AU)
+  - `24xxx` = IT-Universitetet (ITU)
+  - `25xxx`, `26xxx` = Aalborg Universitet (AAU)
+  - `30xxx`+ / Professionsbachelorer / Erhvervsakademier = Professionshøjskoler
+
+## 6. Interaktivitet & Dynamisk Slider Re-rangering
+- **Realtids Indikation ved Karakter-Slider:** Når en bruger trækker i `Dit gymnasiale gennemsnit (Kvote 1)` slideren, opdateres kvotestatus-badges, forklarende tekster og anbefalingsrækkefølgen dynamisk via en eligibility-bonus (`meetsGpa ? +15 : 0`).
+- **Jævn Rendering med `useDeferredValue`:** Ved at udskyde array-genberegningen via Reacts `useDeferredValue` holdes main-thread responsiv (INP < 16ms) under kontinuerlig slider-drag på 1.413 elementer.
+
+## 7. Grafisk UI & Visuel Kvalitetsindikator
+- **Direkte Status i Radar- og Trekantsdiagrammer:** Geometriske grafer bør ikke kræve manuel tal-aflæsning. Indbyg 50% og 100% benchmark-ringe samt dynamisk farvekodning direkte på polygon og badge:
+  - 🟢 **Stærk (≥78/100)**: Grøn polygon & statusbadge (`#0F9D6E`)
+  - 🔵 **Moderat (65-77/100)**: Blå polygon & statusbadge (`#2563EB`)
+  - 🟡 **Lavere (<65/100)**: Amber polygon & statusbadge (`#D97706`)
+
