@@ -44,4 +44,4 @@ Disallow: /
 User-agent: *
 Disallow: /api/
 
-Sitemap: https://uddannelsesindsigt.com/sitemap.xml
+Sitemap: https://uddannelsesindsigt.dk/sitemap.xml

@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${title} — Adgangskvotient, AI-robusthed & Jobudsigter | Uddannelsesindsigt`,
     description: `${title} ved ${inst}: Seneste Kvote 1 adgangskvotient ${kv}. AI-robusthedsscore ${robust}/100, jobmuligheder ${prog.scores?.labour_demand || 50}/100. Se fuld analyse og sammenlign med dine egne prioriteter.`,
     alternates: {
-      canonical: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
+      canonical: `https://uddannelsesindsigt.dk/uddannelse/${slug}`,
     },
   };
 }

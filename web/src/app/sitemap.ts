@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { getAllPrograms, createProgramSlug } from "@/lib/slugs";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://uddannelsesindsigt.com";
+  const baseUrl = "https://uddannelsesindsigt.dk";
   const allPrograms = getAllPrograms();
 
   const programUrls = allPrograms.map((prog) => ({
