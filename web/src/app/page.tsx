@@ -276,10 +276,6 @@ export default function Dashboard() {
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const deferredSelectedUniversity = useDeferredValue(selectedUniversity);
-  const deferredGpa = useDeferredValue(gpa);
-  const deferredAiWeight = useDeferredValue(aiRobustnessWeight);
-  const deferredJobWeight = useDeferredValue(jobOpportunitiesWeight);
-  const deferredSalWeight = useDeferredValue(salaryWeight);
 
   const matchedPrograms = useMemo(() => {
     if (allPrograms.length === 0) return [];
@@ -295,21 +291,21 @@ export default function Dashboard() {
     });
 
     const exactMajors = EXACT_MAJOR_MAP[rawQuery] || EXACT_MAJOR_MAP[normalizedQuery] || [];
-    const totalWeight = Math.max(1, deferredAiWeight + deferredJobWeight + deferredSalWeight);
+    const totalWeight = Math.max(1, aiRobustnessWeight + jobOpportunitiesWeight + salaryWeight);
 
     let list = allPrograms.map((prog) => {
       const latestKv = prog.latest_kvotient;
       const kvNum = typeof latestKv === "number" ? latestKv : null;
-      const meetsGpa = kvNum !== null ? deferredGpa >= kvNum : true;
+      const meetsGpa = kvNum !== null ? gpa >= kvNum : true;
       
       const robustScore = 100 - (prog.scores?.automation_risk || 0);
       const jobScore = prog.scores?.labour_demand || 50;
       const salScore = prog.scores?.salary_growth || 50;
 
       const weightedComposite = (
-        (robustScore * deferredAiWeight) +
-        (jobScore * deferredJobWeight) +
-        (salScore * deferredSalWeight)
+        (robustScore * aiRobustnessWeight) +
+        (jobScore * jobOpportunitiesWeight) +
+        (salScore * salaryWeight)
       ) / totalWeight;
 
       let score = Math.round(weightedComposite);
@@ -364,9 +360,9 @@ export default function Dashboard() {
 
       if (kvNum !== null) {
         if (meetsGpa) {
-          whyText = `Med et gennemsnit på ${deferredGpa.toFixed(1)} opfylder du sikkert Kvote 1-kravet på ${kvNum}. AI-robustheden er ${robustScore}/100 med ${qual}.`;
+          whyText = `Med et gennemsnit på ${gpa.toFixed(1)} opfylder du sikkert Kvote 1-kravet på ${kvNum}. AI-robustheden er ${robustScore}/100 med ${qual}.`;
         } else {
-          whyText = `Kvote 1-kvotienten var senest ${kvNum}. Med et snit på ${deferredGpa.toFixed(1)} anbefales ansøgning via Kvote 2. AI-robusthed er høj (${robustScore}/100).`;
+          whyText = `Kvote 1-kvotienten var senest ${kvNum}. Med et snit på ${gpa.toFixed(1)} anbefales ansøgning via Kvote 2. AI-robusthed er høj (${robustScore}/100).`;
         }
       } else {
         whyText = `Alle ansøgere blev optaget i 2026. Uddannelsen har en AI-robusthedsscore på ${robustScore}/100 og ${qual}.`;
@@ -446,7 +442,7 @@ export default function Dashboard() {
     });
 
     return list.sort((a, b) => b.totalSortScore - a.totalSortScore);
-  }, [deferredSearchQuery, deferredSelectedUniversity, deferredGpa, deferredAiWeight, deferredJobWeight, deferredSalWeight, allPrograms]);
+  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, aiRobustnessWeight, jobOpportunitiesWeight, salaryWeight, allPrograms]);
 
   const topMatches = matchedPrograms.slice(0, visibleCount);
 
