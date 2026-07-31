@@ -50,3 +50,8 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
   - 🔵 **Moderat (65-77/100)**: Blå polygon & statusbadge (`#2563EB`)
   - 🟡 **Lavere (<65/100)**: Amber polygon & statusbadge (`#D97706`)
 
+## 8. Custom Domæne & Produktopsetning (uddannelsesindsigt.dk)
+- **Eget Domæne Opsætning:** Domænet `uddannelsesindsigt.dk` er opsat som det primære produktionsdomæne på Vercel med `A-record` (`76.76.21.21`) og `CNAME-record` (`cname.vercel-dns.com.`) administreret via Simply.com.
+- **Domæne-Konsistens på Tværs af Systemet:** Alle kanoniske URLs, `sitemap.xml`, `robots.txt` og `llms.txt` opdateres automatisk til at anvende domænet `https://uddannelsesindsigt.dk` for optimal SEO og AI-agent discoverability.
+
+
