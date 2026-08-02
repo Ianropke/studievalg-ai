@@ -148,6 +148,64 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   },
 };
 
+/**
+ * Normalizes an uddannelse title to a canonical program name for deduplication.
+ *
+ * Danish KOT data format: "<Uddannelse>[, <Specialisering>][, <By>][, Studiestart: ...]"
+ *
+ * Rules:
+ * 1. Strip "Studiestart: ...", "E-læring", start-type qualifiers.
+ * 2. Split by comma.
+ * 3. The canonical key is:
+ *    - 1 token if token[0] is a standalone programme (no specialization follows).
+ *      We detect this by checking if token[1] looks like a city (short, proper-cased, no "bach" etc.)
+ *    - 2 tokens if token[1] is a specialization (e.g. "sygeplejerske", "tandplejer", "cybersikkerhed")
+ *
+ * City heuristic: a token is a city if it is ≤ 2 words, does NOT contain "bach", "kand", "cand",
+ * "ing", "mester", "plejer", "moder", "læge", "psyk", "økon", "videnskab".
+ */
+function normalizeProgramName(title: string): string {
+  let s = title;
+  // Strip "Studiestart: ..." and everything after
+  s = s.replace(/,?\s*[Ss]tudiestart:.*$/i, "").trim();
+  // Strip "Study start: ..." (English variant)
+  s = s.replace(/,?\s*[Ss]tudy start:.*$/i, "").trim();
+  // Strip "E-læring"
+  s = s.replace(/,?\s*[Ee]-læring/i, "").trim();
+  // Strip standalone start-type tokens
+  s = s.replace(/,?\s*(sommer- og vinterstart|vinterstart|sommerstart)/gi, "").trim();
+
+  const parts = s.split(",").map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 0) return title.toLowerCase().slice(0, 40);
+
+  const token0 = parts[0];
+  const token1 = parts[1];
+
+  // If only one token, use it
+  if (!token1) return token0.toLowerCase();
+
+  // Check if token1 looks like a city (not a specialization)
+  const specializationKeywords = [
+    "bach", "kand", "cand", "ing.", "ing ", "mester", "plejer", "moder",
+    "læge", "psyk", "økon", "videnskab", "teknik", "studie", "science",
+    "business", "design", "kunst", "pæd", "social", "fysiote", "biomed",
+    "kemi", "biolog", "matematik", "inform", "logi", "grafi", "terapi",
+    "audiolo", "tand", "cyber", "robot", "data", "maskin", "maskinme",
+  ];
+  const token1Lower = token1.toLowerCase();
+  const isSpecialization = specializationKeywords.some((kw) => token1Lower.includes(kw));
+  const isCityLike = !isSpecialization && token1.split(" ").length <= 3;
+
+  if (isCityLike) {
+    // token1 is a city — use only token0
+    return token0.toLowerCase();
+  }
+
+  // token1 is a specialization — use both
+  return `${token0}, ${token1}`.toLowerCase();
+}
+
+
 export function getListData(slug: string): { config: ListConfig; items: Array<{ program: ProgramItem; rank: number; valueDisplay: string; numeric: number }> } | null {
   const config = LIST_CONFIGS[slug];
   if (!config) return null;
@@ -163,16 +221,47 @@ export function getListData(slug: string): { config: ListConfig; items: Array<{ 
     };
   });
 
+  // Sort all programs by the list metric
   if (config.sortOrder === "desc") {
     scored.sort((a, b) => b.numeric - a.numeric);
   } else {
     scored.sort((a, b) => a.numeric - b.numeric);
   }
 
-  const items = scored.slice(0, config.limit).map((item, index) => ({
+  // Deduplicate: keep only the best representative per normalized program name.
+  // "Best" = first encountered after sorting (highest/lowest metric score).
+  // Within a tie, prefer the entry with the highest kvotient (most selective = most recognized).
+  const seen = new Map<string, typeof scored[0]>();
+  for (const item of scored) {
+    const key = normalizeProgramName(item.program.udbud_titel);
+    if (!seen.has(key)) {
+      seen.set(key, item);
+    } else {
+      // Tie-break: prefer higher kvotient (more selective = canonical program)
+      const existing = seen.get(key)!;
+      const existingKv = parseFloat(String(existing.program.latest_kvotient || "0").replace(",", ".")) || 0;
+      const currentKv = parseFloat(String(item.program.latest_kvotient || "0").replace(",", ".")) || 0;
+      if (currentKv > existingKv) {
+        seen.set(key, item);
+      }
+    }
+  }
+
+  const deduplicated = Array.from(seen.values());
+
+  // Re-sort after deduplication (Map iteration preserves insertion order which is already sorted,
+  // but explicit sort ensures correctness after any tie-break swaps)
+  if (config.sortOrder === "desc") {
+    deduplicated.sort((a, b) => b.numeric - a.numeric);
+  } else {
+    deduplicated.sort((a, b) => a.numeric - b.numeric);
+  }
+
+  const items = deduplicated.slice(0, config.limit).map((item, index) => ({
     ...item,
     rank: index + 1,
   }));
 
   return { config, items };
 }
+
