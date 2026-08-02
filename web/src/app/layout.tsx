@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -90,6 +91,7 @@ export default function RootLayout({
       </head>
       <body className="bg-[#F7F8FA] text-[#12172B] antialiased font-sans">
         {children}
+        <Footer />
         <Analytics />
         <SpeedInsights />
       </body>

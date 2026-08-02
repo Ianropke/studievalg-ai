@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
@@ -32,7 +32,7 @@ function MultiTriangleRadar({ programs }: { programs: ProgramItem[] }) {
 
   return (
     <div className="flex flex-col items-center gap-3 py-2">
-      <svg viewBox="0 0 100 100" className="w-48 h-48 overflow-visible">
+      <svg viewBox="0 0 100 100" className="w-48 h-48 overflow-visible" role="img" aria-label="Overlappende radar-diagram der sammenligner uddannelsernes AI-robusthed, jobmuligheder og lønpotentiale">
         {/* Reference Grid Rings */}
         <polygon points={`${refRob100.x},${refRob100.y} ${refJob100.x},${refJob100.y} ${refSal100.x},${refSal100.y}`} fill="none" stroke="#D8DBE4" strokeWidth="1" strokeDasharray="2 2" />
         <polygon points={`${refRob50.x},${refRob50.y} ${refJob50.x},${refJob50.y} ${refSal50.x},${refSal50.y}`} fill="none" stroke="#E7E9EF" strokeWidth="1" strokeDasharray="2 2" />
@@ -87,29 +87,22 @@ function ComparisonContent() {
   const searchParams = useSearchParams();
   const allPrograms = initialProgramsCatalog as unknown as ProgramItem[];
 
-  const [selectedSlugs, setSelectedSlugs] = useState<string[]>(["10120-odontologi", "13030-ha-almen"]);
-  const [userGpa, setUserGpa] = useState<number>(9.5);
-  const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [copied, setCopied] = useState<boolean>(false);
-
-  useEffect(() => {
+  const getInitialSlugs = () => {
     const paramA = searchParams.get("a");
     const paramB = searchParams.get("b");
     const paramC = searchParams.get("c");
-
     const slugs: string[] = [];
     if (paramA) slugs.push(paramA);
     if (paramB) slugs.push(paramB);
     if (paramC) slugs.push(paramC);
+    return slugs.length > 0 ? slugs : ["10120-odontologi", "13030-ha-almen"];
+  };
 
-    if (slugs.length > 0) {
-      // Hydrate via requestAnimationFrame to avoid setState in effect warning
-      requestAnimationFrame(() => {
-        setSelectedSlugs(slugs);
-      });
-    }
-  }, [searchParams]);
+  const [selectedSlugs, setSelectedSlugs] = useState<string[]>(getInitialSlugs);
+  const [userGpa, setUserGpa] = useState<number>(9.5);
+  const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [copied, setCopied] = useState<boolean>(false);
 
   const selectedPrograms = useMemo(() => {
     const list = selectedSlugs
@@ -224,6 +217,10 @@ function ComparisonContent() {
               step="0.1"
               value={userGpa}
               onChange={(e) => setUserGpa(parseFloat(e.target.value))}
+              aria-label={`Gymnasialt gennemsnit: ${userGpa.toFixed(1)}`}
+              aria-valuemin={2}
+              aria-valuemax={12}
+              aria-valuenow={userGpa}
               className="w-48 accent-[#2563EB] cursor-pointer"
             />
             <span className="text-lg font-bold font-mono-data text-[#2563EB] w-12 text-right">{userGpa.toFixed(1)}</span>
@@ -411,8 +408,8 @@ function ComparisonContent() {
 
       {/* Search Modal for Adding Program */}
       {showSearchModal && (
-        <div className="fixed inset-0 bg-[#12172B]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-2xl max-w-lg w-full p-6 space-y-4 card-shadow">
+        <div className="fixed inset-0 bg-[#12172B]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowSearchModal(false)} onKeyDown={(e) => { if (e.key === "Escape") setShowSearchModal(false); }}>
+          <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-2xl max-w-lg w-full p-6 space-y-4 card-shadow" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Vælg uddannelse til sammenligning">
             <div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3">
               <h3 className="font-bold text-base text-[#12172B]">Vælg uddannelse til sammenligning</h3>
               <button onClick={() => setShowSearchModal(false)} className="text-[#8891A3] hover:text-[#12172B] text-lg font-bold">

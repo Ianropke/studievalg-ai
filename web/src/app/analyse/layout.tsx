@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "AI Insights | Uddannelsesindsigt — Dataanalyser af AI på Arbejdsmarkedet",
-  description: "Udforsk økonometriske tidsmaskiner, kontrafaktiske fremskrivninger og AI-støjanalyser for 1.413 danske videregående uddannelser.",
+  title: "AI Insights & Uddannelsesanalyse | Uddannelsesindsigt",
+  description:
+    "Dyb AI-drevet analyse af to uddannelser side-om-side. Sammenlign radar-profiler, kompetenceskillsets og arbejdsmarkedsfremskrivninger.",
   alternates: {
     canonical: "https://uddannelsesindsigt.dk/analyse",
   },
   openGraph: {
     title: "AI Insights | Uddannelsesindsigt",
-    description: "Dataanalyser og økonometriske fremskrivninger af kunstig intelligens på det danske uddannelses- og arbejdsmarked.",
+    description: "Dyb AI-analyse af to uddannelser med radar-visualisering, kompetenceprofiler og arbejdsmarkedsfremskrivninger.",
     url: "https://uddannelsesindsigt.dk/analyse",
-    siteName: "Uddannelsesindsigt",
-    locale: "da_DK",
-    type: "website",
   },
 };
 
