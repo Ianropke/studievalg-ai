@@ -42,7 +42,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
     badge: "100% Modellerede O*NET-data",
     description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore baseret på opgavetaksonomi og økonometriske fremskrivninger.",
-    introHedge: "Ifølge vores økonometriske datamodel er disse ti uddannelser vurderet mest AI-robuste pr. juli 2026. Scorerne bygger på opgavetaksonomi fra O*NET samt analyser af studieordninger — se Evidens for fuld metode.",
+    introHedge: "Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. juli 2026. Tallene bygger på opgavedata fra O*NET og analyser af studieordninger — se 'Bag om dine scorer' for fuld metode.",
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
@@ -57,7 +57,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Bedst Lønnede Uddannelser",
     badge: "DST & UFM Registerdata",
     description: "De 10 videregående uddannelser med det højeste beregnede lønpotentiale og stærkeste historiske lønudvikling for nyligt uddannede dimittender.",
-    introHedge: "Baseret på registerdata fra Danmarks Statistik og UFM viser denne liste de 10 uddannelser med højeste vurderede lønpotentiale. Vurderingerne udgør statistiske modelestimater og garanterer ikke individuel startløn.",
+    introHedge: "Baseret på data fra Danmarks Statistik og UFM viser denne liste de 10 uddannelser med det højeste vurderede lønpotentiale. Tallene er vores bedste bud ud fra statistik og modeller — ikke en garanti for individuel startløn.",
     metricLabel: "Lønpotentiale",
     limit: 10,
     getValue: (p) => {
@@ -72,7 +72,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Uddannelser med Laveste Ledighed",
     badge: "Offentlig Dimittend-registerdata",
     description: "De 10 uddannelser med den højeste efterspørgsel på arbejdsmarkedet og laveste observerede dimittendledighed 1-2 år efter fuldførelse.",
-    introHedge: "Registerbaseret oversigt over de 10 uddannelser med stærkest observeret jobefterspørgsel. Tallene afspejler historiske registerdata for dimittendbeskæftigelse.",
+    introHedge: "Registerbaseret oversigt over de 10 uddannelser med stærkest observeret jobefterspørgsel. Tallene afspejler historiske data for dimittendbeskæftigelse.",
     metricLabel: "Jobmuligheder",
     limit: 10,
     getValue: (p) => {
@@ -87,7 +87,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 20 Bedste Samlede Match i Danmark",
     badge: "Kombineret PEFF Trekant-Score",
     description: "De 20 uddannelser der opnår den højeste vægtede kombination af AI-robusthed, jobmuligheder og lønpotentiale.",
-    introHedge: "Denne rangering bygger på det samlede gennemsnit af vores tre kernemetrics (AI-robusthed, jobmuligheder og lønpotentiale). Listen giver et afbalanceret overblik over uddannelser der klarer sig stærkt over hele linjen.",
+    introHedge: "Denne rangering bygger på det samlede gennemsnit af vores tre kernemål (AI-robusthed, jobmuligheder og lønpotentiale). Listen giver et afbalanceret overblik over uddannelser der klarer sig stærkt over hele linjen.",
     metricLabel: "Samlet Trekant-score",
     limit: 20,
     getValue: (p) => {
@@ -105,7 +105,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Uddannelser i Størst AI-omstilling",
     badge: "Strukturel AI-analyse",
     description: "De 10 uddannelser hvor flest kerneopgaver forventes suppleret eller effektiviseret af kunstig intelligens og sprogmodeller.",
-    introHedge: "Gennemskuelighed og balance er afgørende. Denne liste fremhæver de 10 uddannelser med lavest beregnede AI-robusthedsscore — det betyder ikke at faget forsvinder, men at opgaverne står overfor markant AI-støttet omstilling.",
+    introHedge: "Gennemskuelighed og balance er afgørende. Denne liste fremhæver de 10 uddannelser med lavest beregnede AI-robusthedsscore — det betyder ikke at faget forsvinder, men at opgaverne forventes at ændre sig markant i takt med AI.",
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {

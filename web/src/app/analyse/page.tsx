@@ -625,15 +625,18 @@ export default function AIInsightsPage() {
           {/* Section 1: Om Uddannelsesindsigt & Legal Disclaimer */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-3 md:col-span-2">
-              <h4 className="text-sm font-bold text-[#12172B]">Om Uddannelsesindsigt</h4>
+                          <h4 className="text-sm font-bold text-[#12172B]">Om Uddannelsesindsigt</h4>
               <p className="leading-relaxed">
-                Uddannelsesindsigt er en uafhængig, ikke-kommerciel informationsplatform, der tilbyder pædagogisk beslutningsstøtte til uddannelsessøgende. Formålet er at belyse, hvordan kunstig intelligens forventes at påvirke arbejdsmarkedet og specifikke uddannelser.
+                Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Vi viser dig, hvordan kunstig intelligens forventes at påvirke forskellige fag og job i fremtiden, så du kan tage det med i dit valg.
               </p>
               <p className="leading-relaxed">
                 Denne platform vurderer ikke mennesker eller deres fremtidige jobmuligheder. Den analyserer udelukkende statistiske mønstre på uddannelses- og arbejdsmarkedsniveau baseret på offentlig forskning og tilgængelige data. Alle beregninger udføres deterministisk ud fra dokumenterede modeller og datakilder.
               </p>
               <p className="leading-relaxed text-[#545D71]">
-                De viste AI-scorer, kvotienter og analyser er statistiske modelestimater og udgør ikke forudsigelser eller garantier for den enkelte uddannelse, optagelse eller karriere. Officiel ansøgning og optagelse sker altid via Optagelse.dk, og det anbefales at supplere med information fra uddannelsesinstitutionernes egne beskrivelser samt officiel studievejledning.
+                Tallene her er vores bedste bud, baseret på statistik og modeller — ikke en garanti for, hvad der kommer til at ske for dig, dit optag eller din karriere. Officiel ansøgning og optagelse sker altid via Optagelse.dk.
+              </p>
+              <p className="leading-relaxed text-[#545D71]">
+                Vi anbefaler desuden at tale med en studievejleder om dit konkrete valg — denne platform er ét godt input blandt flere, ikke en erstatning for personlig vejledning.
               </p>
             </div>
 
