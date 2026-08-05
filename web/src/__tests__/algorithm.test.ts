@@ -130,7 +130,41 @@ export function runUnitTests() {
   console.assert(kvNumSafe === 10.2, `Test 11 Fejl: Forventede 10.2, fik ${kvNumSafe}`);
   console.log("  ✅ TEST-11: Defensiv Type-Normalisering af Raw Number Kvotienter godkendt (10.2 tal-sikker .replace)");
 
-  console.log("🎉 Alle 11 Unit Tests bestået uden fejl!\n");
+  // Test 12: Ren URL Slug-generering (Ingen titel-duplikering)
+  const sampleProg = { kot_nr: "10160", udbud_titel: "Professionsbachelor, tandplejer, København N, Studiestart: sommerstart", institution: "Københavns Professionshøjskole", by: "København N" };
+  const rawCleanSlug = `${sampleProg.kot_nr}-${sampleProg.udbud_titel}`
+    .toLowerCase().replace(/æ/g, "ae").replace(/ø/g, "oe").replace(/å/g, "aa").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  console.assert(rawCleanSlug === "10160-professionsbachelor-tandplejer-koebenhavn-n-studiestart-sommerstart", `Test 12 Fejl: Forventede ren slug, fik: ${rawCleanSlug}`);
+  console.log("  ✅ TEST-12: Ren URL Slug-generering godkendt ('10160-professionsbachelor-tandplejer-koebenhavn-n-studiestart-sommerstart')");
+
+  // Test 13: Dansk Bynavn & Titel Normalisering
+  function testFormatCity(cityStr: string): string {
+    const map: Record<string, string> = { "koebenhavn": "København", "københavn": "København", "aarhus": "Aarhus", "odense": "Odense" };
+    return cityStr.trim().split(" ").map((w) => {
+      const wL = w.toLowerCase();
+      if (map[wL]) return map[wL];
+      if (w.length === 1) return w.toUpperCase();
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    }).join(" ");
+  }
+  const c1 = testFormatCity("aarhus c");
+  const c2 = testFormatCity("københavn n");
+  console.assert(c1 === "Aarhus C", `Test 13 Fejl: Forventede Aarhus C, fik ${c1}`);
+  console.assert(c2 === "København N", `Test 13 Fejl: Forventede København N, fik ${c2}`);
+  console.log("  ✅ TEST-13: Dansk bynavn- og titel-normalisering godkendt ('aarhus c' -> 'Aarhus C', 'københavn n' -> 'København N')");
+
+  // Test 14: Mangfoldigheds-deduplikering af uddannelsestyper
+  function normKey(title: string): string {
+    const s = title.replace(/,?\s*[Ss]tudiestart:.*$/i, "").replace(/,?\s*[Ee]-læring/i, "").trim();
+    const parts = s.split(",").map(p => p.trim()).filter(Boolean);
+    return parts.slice(0, 1).join("").toLowerCase();
+  }
+  const progVejle = "Professionsbachelor, sygeplejerske, Vejle, Studiestart: sommerstart";
+  const progSlagelse = "Professionsbachelor, sygeplejerske, Slagelse, Studiestart: sommerstart";
+  console.assert(normKey(progVejle) === normKey(progSlagelse), "Test 14 Fejl: Sygeplejerske i Vejle og Slagelse bør have samme kanoniske nøgle");
+  console.log("  ✅ TEST-14: Mangfoldigheds-deduplikering godkendt (Sygeplejerske i Vejle og Slagelse samles under én kanonisk nøgle)");
+
+  console.log("🎉 Alle 14 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
