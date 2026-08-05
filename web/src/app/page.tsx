@@ -372,17 +372,23 @@ export default function Dashboard() {
 
       let whyText = "";
       let qual = "stabil arbejdsmarkeds-efterspørgsel";
-      if (jobScore > 80) qual = "stærk efterspørgsel";
-      else if (jobScore < 40) qual = "svagere efterspørgsel";
+      if (jobScore >= 85) qual = "meget stærk efterspørgsel";
+      else if (jobScore >= 70) qual = "stærk efterspørgsel";
+      else if (jobScore < 40) qual = "lavere efterspørgsel";
+
+      let robustQual = "moderat";
+      if (robustScore >= 88) robustQual = "meget høj";
+      else if (robustScore >= 75) robustQual = "høj";
+      else if (robustScore < 50) robustQual = "lavere";
 
       if (kvNum !== null) {
         if (meetsGpa) {
-          whyText = `Med et gennemsnit på ${gpa.toFixed(1)} opfylder du sikkert Kvote 1-kravet på ${kvNum}. AI-robustheden er ${robustScore}/100 med ${qual}.`;
+          whyText = `Med et snit på ${gpa.toFixed(1)} opfylder du Kvote 1-kravet på ${kvNum}. AI-robustheden er ${robustQual} (${robustScore}/100), og feltet har ${qual}.`;
         } else {
-          whyText = `Kvote 1-kvotienten var senest ${kvNum}. Med et snit på ${gpa.toFixed(1)} anbefales ansøgning via Kvote 2. AI-robusthed er høj (${robustScore}/100).`;
+          whyText = `Kvote 1-kvotienten var senest ${kvNum} — med et snit på ${gpa.toFixed(1)} anbefales ansøgning via Kvote 2. AI-robustheden er ${robustQual} (${robustScore}/100).`;
         }
       } else {
-        whyText = `Alle ansøgere blev optaget i 2026. Uddannelsen har en AI-robusthedsscore på ${robustScore}/100 og ${qual}.`;
+        whyText = `Alle opfyldende ansøgere blev optaget i 2026. Uddannelsen har ${robustQual} AI-robusthed (${robustScore}/100) og ${qual}.`;
       }
 
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
@@ -461,10 +467,26 @@ export default function Dashboard() {
     return list.sort((a, b) => b.totalSortScore - a.totalSortScore);
   }, [deferredSearchQuery, deferredSelectedUniversity, gpa, aiRobustnessWeight, jobOpportunitiesWeight, salaryWeight, allPrograms]);
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Uddannelsesindsigt",
+    "url": "https://uddannelsesindsigt.dk",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://uddannelsesindsigt.dk/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   const topMatches = matchedPrograms.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <Header />
 
       <main className="max-w-5xl mx-auto px-6 py-10 space-y-10">

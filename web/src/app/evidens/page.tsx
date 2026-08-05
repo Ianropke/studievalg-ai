@@ -23,8 +23,35 @@ export default function EvidensPage() {
       .catch((err) => console.error(err));
   }, []);
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Hvordan beregnes AI-robusthedsscorerne?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Beregningerne vægter officiel registerdata fra UFM/DST, økonometriske fremskrivningsmodeller samt AI-analyse af studieordninger."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Hvad er datakilderne bag Uddannelsesindsigt?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Platformen samler over 42 datakilder fra Uddannelses- og Forskningsministeriet (KOT), Danmarks Statistik, OECD, ESCO og O*NET."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <Header />
 
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">

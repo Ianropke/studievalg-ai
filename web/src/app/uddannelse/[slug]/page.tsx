@@ -101,11 +101,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = prog.udbud_titel || "Uddannelse";
   const inst = prog.institution || prog.institution_navn || "";
   const kv = prog.latest_kvotient || "Alle optaget";
-  const robust = 100 - (prog.scores?.automation_risk || 0);
+  const enriched = getEnrichedScores(title, prog.scores);
+  const robust = 100 - (enriched.automation_risk || 0);
+  const job = enriched.labour_demand || 50;
 
   return {
-    title: `${title} — Adgangskvotient, AI-robusthed & Jobudsigter | Uddannelsesindsigt`,
-    description: `${title} ved ${inst}: Seneste Kvote 1 adgangskvotient ${kv}. AI-robusthedsscore ${robust}/100, jobmuligheder ${prog.scores?.labour_demand || 50}/100. Se fuld analyse og sammenlign med dine egne prioriteter.`,
+    title: `${title} — Adgangskvotient 2026, AI-robusthed & Jobudsigter | Uddannelsesindsigt`,
+    description: `${title} ved ${inst}: Seneste Kvote 1 adgangskvotient ${kv} (2026). AI-robusthedsscore ${robust}/100, jobmuligheder ${job}/100. Se fuld analyse og sammenlign med dine egne prioriteter.`,
     alternates: {
       canonical: `https://uddannelsesindsigt.dk/uddannelse/${slug}`,
     },
@@ -143,8 +145,8 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
       "address": city,
     },
     "identifier": kot,
-    "description": `Adgangskvotient ${kv}. AI-robusthedsscore ${robustScore}/100.`,
-    "url": `https://studievalg-ai.vercel.app/uddannelse/${slug}`,
+    "description": `Adgangskvotient ${kv}. AI-robusthedsscore ${robustScore}/100. Jobmuligheder ${jobScore}/100.`,
+    "url": `https://uddannelsesindsigt.dk/uddannelse/${slug}`,
   };
 
   return (

@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { createProgramSlug } from "@/lib/slugs";
 
 interface ProgramItem {
   kot_nr?: string;
@@ -584,9 +586,17 @@ export default function AIInsightsPage() {
               <table className="w-full text-xs text-left text-[#12172B]">
                 <thead className="bg-[#FFFFFF] text-[#545D71] uppercase text-[10px] font-bold border-b border-[#E7E9EF]">
                   <tr>
-                    <th className="py-2.5 px-3">Parameter</th>
-                    <th className="py-2.5 px-3 text-[#1D4ED8]">{programA.udbud_titel}</th>
-                    <th className="py-2.5 px-3 text-[#6D28D9]">{programB.udbud_titel}</th>
+                    <th className="py-2.5 px-3 font-semibold text-[#545D71]">Parameter</th>
+                    <th className="py-2.5 px-3 text-[#1D4ED8]">
+                      <Link href={`/uddannelse/${createProgramSlug(programA)}`} className="hover:underline flex items-center gap-1">
+                        {programA.udbud_titel} <span className="text-[10px]">→</span>
+                      </Link>
+                    </th>
+                    <th className="py-2.5 px-3 text-[#6D28D9]">
+                      <Link href={`/uddannelse/${createProgramSlug(programB)}`} className="hover:underline flex items-center gap-1">
+                        {programB.udbud_titel} <span className="text-[10px]">→</span>
+                      </Link>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E7E9EF]">
