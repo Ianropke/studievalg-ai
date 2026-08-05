@@ -354,41 +354,6 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           </div>
         </article>
       </main>
-
-      {/* Legal Footer */}
-      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-12 px-6 lg:px-16 text-[#545D71] text-xs mt-16">
-        <div className="max-w-6xl mx-auto space-y-8 text-left">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-3 md:col-span-2">
-              <h4 className="text-sm font-bold text-[#12172B]">Om Uddannelsesindsigt</h4>
-              <p className="leading-relaxed">
-                Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Vi viser dig, hvordan kunstig intelligens forventes at påvirke forskellige fag og job i fremtiden, så du kan tage det med i dit valg.
-              </p>
-              <p className="leading-relaxed text-[#8891A3]">
-                Tallene her er vores bedste bud, baseret på statistik og modeller — ikke en garanti for, hvad der kommer til at ske for dig, dit optag eller din karriere. Officiel ansøgning sker via Optagelse.dk.
-              </p>
-              <p className="leading-relaxed text-[#8891A3]">
-                Vi anbefaler desuden at tale med en studievejleder om dit konkrete valg — denne platform er ét godt input blandt flere, ikke en erstatning for personlig vejledning.
-              </p>
-            </div>
-
-            <div className="space-y-3 bg-[#F7F8FA] p-5 rounded-xl border border-[#E7E9EF]">
-              <h4 className="text-sm font-bold text-[#12172B]">Transparens</h4>
-              <ul className="space-y-2 font-medium text-[#12172B]">
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Offentlige datakilder</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Dokumenteret metode</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen behandling af personoplysninger</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Nul sporing eller cookies</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-[#E7E9EF] flex flex-col sm:flex-row justify-between items-center text-[11px] text-[#8891A3] gap-2">
-            <p>© 2026 Uddannelsesindsigt • Uafhængig pædagogisk beslutningsstøtte</p>
-            <p className="font-mono-data font-semibold">Data senest opdateret: Juli 2026</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

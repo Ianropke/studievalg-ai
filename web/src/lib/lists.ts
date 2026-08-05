@@ -164,7 +164,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
  * City heuristic: a token is a city if it is ≤ 2 words, does NOT contain "bach", "kand", "cand",
  * "ing", "mester", "plejer", "moder", "læge", "psyk", "økon", "videnskab".
  */
-function normalizeProgramName(title: string): string {
+export function normalizeProgramName(title: string): string {
   let s = title;
   // Strip "Studiestart: ..." and everything after
   s = s.replace(/,?\s*[Ss]tudiestart:.*$/i, "").trim();

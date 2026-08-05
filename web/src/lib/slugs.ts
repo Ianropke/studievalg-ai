@@ -45,11 +45,8 @@ export function slugify(text: string): string {
 export function createProgramSlug(prog: Record<string, unknown>): string {
   const kot = String(prog.kot_nr || "");
   const title = String(prog.udbud_titel || "");
-  const inst = String(prog.institution || prog.institution_navn || "");
-  const city = String(prog.by || "");
 
-  // Combine KOT, title, institution/city for a clear, unique, readable URL
-  const raw = `${kot}-${title}-${inst}-${city}`;
+  const raw = kot ? `${kot}-${title}` : title;
   return slugify(raw);
 }
 

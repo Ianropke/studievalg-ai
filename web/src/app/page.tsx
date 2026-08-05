@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { normalizeProgramName } from "@/lib/lists";
+import { formatProgramTitle } from "@/lib/textUtils";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -359,16 +361,7 @@ export default function Dashboard() {
       const gpaEligibilityBonus = (kvNum !== null && meetsGpa) ? 15 : 0;
       const totalSortScore = weightedComposite + relevanceBoost + gpaEligibilityBonus;
 
-      const normalizeTitle = (t: string) => {
-        if (!t) return t;
-        return t.split(' ').map((word, i) => {
-          if (word === word.toUpperCase() && word.length > 1) return word;
-          if (i === 0) return word;
-          return word.toLowerCase();
-        }).join(' ');
-      };
-      const normalizedTitle = normalizeTitle(prog.udbud_titel || "Uddannelsen");
-      prog.udbud_titel = normalizedTitle;
+      prog.udbud_titel = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
 
       let whyText = "";
       let qual = "stabil arbejdsmarkeds-efterspørgsel";
@@ -464,7 +457,21 @@ export default function Dashboard() {
       return true;
     });
 
-    return list.sort((a, b) => b.totalSortScore - a.totalSortScore);
+    const sorted = list.sort((a, b) => b.totalSortScore - a.totalSortScore);
+
+    // If no search query is active, deduplicate program types so top recommendations show diverse degrees
+    if (!deferredSearchQuery.trim()) {
+      const seen = new Map<string, typeof sorted[0]>();
+      for (const item of sorted) {
+        const key = normalizeProgramName(item.udbud_titel || "");
+        if (!seen.has(key)) {
+          seen.set(key, item);
+        }
+      }
+      return Array.from(seen.values());
+    }
+
+    return sorted;
   }, [deferredSearchQuery, deferredSelectedUniversity, gpa, aiRobustnessWeight, jobOpportunitiesWeight, salaryWeight, allPrograms]);
 
   const websiteJsonLd = {
@@ -698,9 +705,12 @@ export default function Dashboard() {
                               setShowShareModal(true);
                             }}
                             title="Del dette match"
-                            className="p-1 text-[#8891A3] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition"
+                            className="p-1.5 text-[#8891A3] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition flex items-center gap-1"
                           >
-                            🔗 <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.999 3 3 0 000 5.999zm0 11.998a3 3 0 100-5.999 3 3 0 000 5.999" />
+                            </svg>
+                            <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
                           </button>
                         </div>
                         <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition">
@@ -849,66 +859,6 @@ export default function Dashboard() {
           )}
         </div>
       </main>
-
-      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-12 px-6 lg:px-16 text-[#545D71] text-xs mt-16">
-        <div className="max-w-6xl mx-auto space-y-8 text-left">
-          {/* Section 1: Om Uddannelsesindsigt & Legal Disclaimer */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-3 md:col-span-2">
-              <h4 className="text-sm font-bold text-[#12172B]">Om Uddannelsesindsigt</h4>
-              <p className="leading-relaxed">
-                Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Vi viser dig, hvordan kunstig intelligens forventes at påvirke forskellige fag og job i fremtiden, så du kan tage det med i dit valg.
-              </p>
-              <p className="leading-relaxed">
-                Denne platform vurderer ikke mennesker eller deres fremtidige jobmuligheder. Den analyserer udelukkende statistiske mønstre på uddannelses- og arbejdsmarkedsniveau baseret på offentlig forskning og tilgængelige data. Alle beregninger udføres deterministisk ud fra dokumenterede modeller og datakilder.
-              </p>
-              <p className="leading-relaxed text-[#545D71]">
-                Tallene her er vores bedste bud, baseret på statistik og modeller — ikke en garanti for, hvad der kommer til at ske for dig, dit optag eller din karriere. Officiel ansøgning og optagelse sker altid via Optagelse.dk.
-              </p>
-              <p className="leading-relaxed text-[#545D71]">
-                Vi anbefaler desuden at tale med en studievejleder om dit konkrete valg — denne platform er ét godt input blandt flere, ikke en erstatning for personlig vejledning.
-              </p>
-            </div>
-
-            {/* Section 2: Transparens Badges */}
-            <div className="space-y-3 bg-[#F7F8FA] p-5 rounded-xl border border-[#E7E9EF]">
-              <h4 className="text-sm font-bold text-[#12172B]">Transparens</h4>
-              <ul className="space-y-2 font-medium text-[#12172B]">
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Offentlige datakilder</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Dokumenteret metode (Open methodology)</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen behandling af personoplysninger</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen brugertracking eller cookies</li>
-                <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen reklamer eller kommercielle interesser</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Section 3: Datakilder List */}
-          <div className="pt-6 border-t border-[#E7E9EF] space-y-3">
-            <h4 className="text-xs font-bold text-[#12172B] uppercase tracking-wider">Datakilder</h4>
-            <p className="leading-relaxed text-[#545D71]">
-              Platformen bygger på aggregerede data fra følgende institutioner og forskningspublikationer:
-            </p>
-            <div className="flex flex-wrap gap-2 text-[11px] font-medium text-[#545D71]">
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Uddannelses- og Forskningsministeriet (KOT)</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Danmarks Statistik</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">OECD & ILO</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">ESCO & O*NET</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">OpenAI / Eloundou et al.</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Felten et al.</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">Kraka & Deloitte</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">PwC AI Jobs Barometer</span>
-              <span className="bg-[#F7F8FA] border border-[#D8DBE4] px-2.5 py-1 rounded-md">McKinsey Global Institute</span>
-            </div>
-          </div>
-
-          {/* Bottom Copyright & Datostempel */}
-          <div className="pt-4 border-t border-[#E7E9EF] flex flex-col sm:flex-row justify-between items-center text-[11px] text-[#8891A3] gap-2">
-            <p>© 2026 Uddannelsesindsigt • Uafhængig pædagogisk beslutningsstøtte</p>
-            <p className="font-mono-data font-semibold">Data senest opdateret: Juli 2026</p>
-          </div>
-        </div>
-      </footer>
 
       {/* Share Match Modal */}
       {showShareModal && (
