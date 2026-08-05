@@ -68,7 +68,7 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 - **Dedikerede Layout-filer per Subroute:** Opret eksplicitte `layout.tsx` filer i `/analyse/` og `/evidens/` med unikke `title`, `canonical`, `og:title` og `og:url` tags for at sikre 100% præcis sociale kort og SEO-indeksering.
 
 ## 12. Pre-rendering af Statisk Initial Tilstand (Nul "Henter..." Skeletons)
-- **Statisk Import af Katalog-data:** I stedet for kun at hente `all_programs_catalog.json` via client-side `fetch()` i `useEffect`, importeres kataloget direkte som statisk initial state i `page.tsx`. Dette sikrer, at Next.js SSG pre-rendereren udskriver al data i den første rå HTML-respons uden tomme loading-skeletter for søgerobotter.
+- **Statisk Import af Katalog-data:** I stedet for kun at hente `all_programs_catalog.json` via client-side `fetch()` i `useEffect`, importeres kataloget direkte som statisk initial state i `page.tsx` og `evidens/page.tsx`. Dette sikrer, at Next.js SSG pre-rendereren udskriver al data i den første rå HTML-respons uden tomme loading-skeletter for søgerobotter.
 
 ## 13. CI/CD Pipeline & TypeScript Test Runner
 - **npx tsx i GitHub Actions:** Da standard Node.js ikke kan fortolke `.ts`-filer direkte via `node -e`, skal GitHub CI-workflowet (`.github/workflows/ci.yml`) afvikle unit-test suiterne via `npx tsx src/__tests__/algorithm.test.ts` for 100% konsistent og grøn CI/CD validering.
@@ -76,10 +76,31 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 ## 14. v2.6 Virale Lister & Sammenligningsarkitektur
 - **ItemList Schema.org for AI-Svarmaskiner:** De 7 statistiske top 10/20 listersider (`/lister/[slug]`) injecter `ItemList` og `ListItem` JSON-LD direkte i HTML-hovedet. Det gør listerne lynhurtige at hente for ChatGPT, Claude og Perplexity samt forbedrer muligheden for Google Rich Snippets.
 - **Sikker String-Normalisering af Kvotienter:** Ved sortering af `latest_kvotient` (som i JSON-kataloget kan være et tal som `10.2` eller en tekst som `"Alle optaget"`), skal feltet altid eksplicit konverteres via `String(p.latest_kvotient || "")` før strengoperationer (som `.toLowerCase()` eller `.includes()`) udføres.
+
 ## 15. Systematisk Fejlanalyse & Forebyggelsesprotokol
 - **Sikker Type-støbning af JSON-felter (Defensiv Kodning):** Eksterne og udtrudte JSON-felter kan have hybride typer (fx `latest_kvotient` kan være både `number` som `10.2` og `string` som `"Alle optaget"`). Udfør ALTDIG eksplicit `String(val || "")` før der kaldes strengmetoder som `.toLowerCase()`.
 - **Minimal Vercel Schema v3:** Undgå forældede Vercel JSON-nøgler (`name`, `rootDirectory`) inde i `vercel.json`. Brug altid den minimalistiske v3-standard `{"framework": "nextjs"}` i repositoriets rod for at undgå CLI-skemavalideringsfejl.
 - **Python / Node Hybrid Repositories:** Når et git-repo indeholder både Python-scripting (`requirements.txt`, `engine/`) og et Next.js webapp-projekt (`web/`), SKAL der ligge en `vercel.json` i repo-roden fra dag 1. Ellers gætter Vercels GitHub-integration at projektet er Python og fejler ved automatiske git push triggers.
 - **Lokal Build-validering før Push:** Afvikl altid `npm run build` og `npx tsc --noEmit` lokalt i `web/` mappen før der laves git commit/push, for at fange SSG-prerender fejl med det samme.
 
+## 16. Kanonisk Deduplicering af Top 10 Lister & Anbefalinger
+- **Geografisk Mangfoldighed i Anbefalinger:** KOT-data indeholder samme uddannelse fra flere byer (fx Sygeplejerske i Vejle, Slagelse, Roskilde, København). Uden deduplicering blev lister fyldt med 5-7 geografiske varianter af samme fag.
+- **Kanonisk Nøgle-normalisering (`normalizeProgramName`):** Ved at strippe geografiske og studiestart-tokens samles campus-varianter af samme uddannelse under én repræsentant, udvalgt defensivt med højeste adgangskvotient som tie-breaker.
 
+## 17. URL Slug Arkitektur uden Titel-Duplikering
+- **Undgå Dobbelte Programnavne i URLs:** Sammensætning af `${kot}-${title}-${inst}-${city}` medfører dobbelte titler i URL'en, hvis `title` i kildedata i forvejen indeholder by/institution (fx `10160-professionsbachelor-tandplejer-...-professionsbachelor-tandplejer`).
+- **Ren Slug Formel:** `createProgramSlug(prog)` sammensætter udelukkende `${kot}-${title}`, hvilket giver krystalklare, SEO-venlige URLs (fx `/uddannelse/10160-professionsbachelor-tandplejer-koebenhavn-n-studiestart-sommerstart`).
+
+## 18. Centraliseret Tekst- & Bynavn Normalisering (`textUtils.ts`)
+- **Ingen Ad-hoc Formattering:** Formattering af bynavne (*København N*, *Aarhus C*, *Odense M*, *Aalborg Øst*) og jobtitler (*Sundhedsadministrativ koordinator*, *Erhvervssprog og tekstredigering*) skal samles centralt i `textUtils.ts` med regelsæt og city maps — ikke ad-hoc i visningskomponenter.
+- **UI Label Beskyttelse:** Danske UI-labels (*Studiestart: sommerstart*) beskyttes mod utilsigtet engelsk oversættelse på engelsksprogede linjer.
+
+## 19. Én Samlet, Professionel Global Footer (`Footer.tsx`)
+- **Slå Duplikerede Footere Sammen:** Undgå at renderere inline `<footer>` elementer inde i undersider. Konsolidér i stedet Om-os, Transparens, Datakilder, Værktøjer og Legal disclaimers i én fælles global `<Footer />` i root `layout.tsx`.
+
+## 20. Advanced SEO Rich Results & Schema.org Integration (`FAQPage` + `WebSite`)
+- **Udvidede Google Snippets**: Injecting af `@type: FAQPage` på metodesider (`/evidens`) og `@type: WebSite` med `SearchAction` på forsiden åbner for Google Rich Results og Sitelinks Search Box.
+- **Enriched Scores i Metadata**: `generateMetadata` anvender `getEnrichedScores` fremfor rå tal til meta descriptions.
+
+## 21. Baggrundstask Management & Stream Cleanup
+- **Stuck CLI Task Resolution**: Kommandoer som `npx vercel deploy` kan holde stdout-streamen åben efter at Vercel deployment er fuldført. Overvåg og afslut hængende processer defensivt med `manage_task` for at holde agentens workflow rent og støjfrit.
