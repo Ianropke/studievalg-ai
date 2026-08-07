@@ -2,8 +2,10 @@
   "name": "studievalg-root",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "web"
+  ],
   "scripts": {
-    "build": "cd web && npm run build",
-    "lint": "cd web && npm run lint"
+    "build": "npm run build --workspace=web"
   }
 }
