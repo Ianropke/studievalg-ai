@@ -104,3 +104,16 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 
 ## 21. Baggrundstask Management & Stream Cleanup
 - **Stuck CLI Task Resolution**: Kommandoer som `npx vercel deploy` kan holde stdout-streamen åben efter at Vercel deployment er fuldført. Overvåg og afslut hængende processer defensivt med `manage_task` for at holde agentens workflow rent og støjfrit.
+
+## 22. Flerords-bynavne & Ordbogs-Lookup (`formatCityName`)
+- **Direkte Ordbogsopslag på Hele Strengen**: Naiv ordopdeling (`split(" ")`) kapitaliserede ikke andet ord i flerords-byer (fx `"Kgs. lyngby"` med lille `"l"`). `formatCityName` tjekker nu mod en fuld-streng ordbog før ord-opdeling. Det sikrer at bynavne og forkortelser som *"Kgs. Lyngby"*, *"Kongens Lyngby"*, *"Kbh. S"*, *"Kbh. N"*, *"Kbh. Ø"* og *"Kbh. NV"* altid kapitaliseres 100% korrekt.
+
+## 23. Automatisk Adskillelse af Sammensatte Fagtitler
+- **Konsistent Sætningsstruktur**: Når kildedata klistrer to titelfragmenter sammen (fx `Teknisk videnskab (civilingeniør)` og `Teknisk biomedicin`), indsætter en central sætningsregel i `formatProgramTitle` automatisk en tankestreg (` — `) mellem fragmenterne, så titlen fremstår som ét naturligt, sammenhængende fagnavn (*"Teknisk videnskab (civilingeniør) — Teknisk biomedicin"*).
+
+## 24. Pædagogisk Campus-lokations Badging (`locationsCount`)
+- **Gennemskuelig Gruppering**: Ved deduplikering af uddannelsestyper beriges det repræsentative element med `locationsCount` og `locationsList`. Recommendation Cards præsenterer herefter et pædagogisk badge (`Findes 4 steder (Aalborg, Odense, Esbjerg, +1)`), der informerer om geografiske udbud uden at fylde top 10 listen med duplikeret indhold.
+
+## 25. Vercel Monorepo Workspace Configuration (`package.json` Workspaces)
+- **NPM Workspace Root**: Ved monorepo-opsætning i Git, hvor Next.js appen ligger i en undermappe (`web/`), SKAL repositoriets rod `package.json` definere `"workspaces": ["web"]` og `"scripts": { "build": "npm run build --workspace=web" }`.
+- **Lokale Lockfiles**: Der må kun eksistere én `package-lock.json` i repositoriets rod for at forhindre SWC/dep resolution-fejl i Vercel CI.
