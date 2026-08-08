@@ -22,6 +22,8 @@ const CITY_NAME_MAP: Record<string, string> = {
   "ballerup": "Ballerup",
   "tjele": "Tjele",
   "kgs. lyngby": "Kgs. Lyngby",
+  "kongens lyngby": "Kongens Lyngby",
+  "lyngby": "Lyngby",
   "kolding": "Kolding",
   "sønderborg": "Sønderborg",
   "soenderborg": "Sønderborg",
@@ -30,31 +32,50 @@ const CITY_NAME_MAP: Record<string, string> = {
   "holstebro": "Holstebro",
   "horsens": "Horsens",
   "silkeborg": "Silkeborg",
+  "kbh. s": "Kbh. S",
+  "kbh. n": "Kbh. N",
+  "kbh. v": "Kbh. V",
+  "kbh. k": "Kbh. K",
+  "kbh. ø": "Kbh. Ø",
+  "kbh. nv": "Kbh. NV",
+  "kbh. sv": "Kbh. SV",
 };
 
 /**
- * Capitalizes a city string like "aarhus c" -> "Aarhus C", "aalborg øst" -> "Aalborg Øst"
+ * Capitalizes a city string like "aarhus c" -> "Aarhus C", "kgs. lyngby" -> "Kgs. Lyngby"
  */
 export function formatCityName(cityStr: string): string {
   if (!cityStr) return "";
   const trimmed = cityStr.trim();
-  
-  return trimmed.split(" ").map((word, index) => {
+  const lowerFull = trimmed.toLowerCase();
+
+  // 1. Direct full string match in city dictionary
+  if (CITY_NAME_MAP[lowerFull]) {
+    return CITY_NAME_MAP[lowerFull];
+  }
+
+  // 2. Word-by-word formatting
+  return trimmed.split(/\s+/).map((word, index) => {
     const wLower = word.toLowerCase();
     if (CITY_NAME_MAP[wLower]) return CITY_NAME_MAP[wLower];
-    
-    // Single letter directional codes: C, N, S, Ø, M, J, V
-    if (word.length === 1) return word.toUpperCase();
-    
+
+    // Directional or campus suffixes: C, N, S, Ø, M, J, V, NV, SV
+    if (word.length <= 2 && /^[a-zæøå]+$/i.test(word)) {
+      return word.toUpperCase();
+    }
+
     // Directional words: Øst, Vest, Nord, Syd
     if (["øst", "oest", "vest", "nord", "syd"].includes(wLower)) {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     }
 
-    if (index === 0) {
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    // Small prepositions remain lowercase unless first word
+    if (index > 0 && ["og", "ved", "i", "af", "på"].includes(wLower)) {
+      return wLower;
     }
-    return word.toLowerCase();
+
+    // Default: Capitalize first letter of word
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   }).join(" ");
 }
 
@@ -78,6 +99,9 @@ export function formatProgramTitle(title: string): string {
   s = s.replace(/studiestart:\s*Sommerstart/g, "Studiestart: sommerstart");
   s = s.replace(/studiestart:\s*Vinterstart/g, "Studiestart: vinterstart");
 
+  // Separate double title case fragments: "Teknisk videnskab (civilingeniør) Teknisk biomedicin" -> "Teknisk videnskab (civilingeniør) — Teknisk biomedicin"
+  s = s.replace(/(\([\w\sæøå]+\))\s+([A-ZÆØÅ][a-zæøå]+)/g, "$1 — $2");
+
   // Format cities embedded in comma-separated title string: "Titel, by, Studiestart..."
   const parts = s.split(",").map(p => p.trim());
   if (parts.length >= 2) {
@@ -86,7 +110,7 @@ export function formatProgramTitle(title: string): string {
       if (lower.startsWith("studiestart:")) {
         return "Studiestart: " + lower.replace("studiestart:", "").trim();
       }
-      if (CITY_NAME_MAP[lower] || /^[a-zæøå\s]+\s[c|n|s|ø|m|j|v|øst|vest|nord|syd]$/i.test(part)) {
+      if (CITY_NAME_MAP[lower] || /^[a-zæøå\s\.]+\s[c|n|s|ø|m|j|v|øst|vest|nord|syd]$/i.test(part)) {
         return formatCityName(part);
       }
       return part;

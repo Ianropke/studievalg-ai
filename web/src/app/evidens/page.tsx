@@ -56,8 +56,8 @@ export default function EvidensPage() {
 
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-6">
           <div className="border-b border-[#E7E9EF] pb-4">
-            <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">ARKITEKTUR</span>
-            <h2 className="text-xl font-bold text-[#12172B] font-display">Hierarkisk Evidens-arkitektur</h2>
+            <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">SÅDAN BYGGER VI SCOREN</span>
+            <h2 className="text-xl font-bold text-[#12172B] font-display">Sådan er dataene bygget op</h2>
           </div>
           
           <div className="space-y-4">
@@ -107,7 +107,7 @@ export default function EvidensPage() {
 
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-6">
           <div className="border-b border-[#E7E9EF] pb-4">
-            <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">DATAKILDER & METRICS</span>
+            <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">DATAKILDER OG TAL</span>
             <h2 className="text-xl font-bold text-[#12172B] font-display">Hvad måler vi på?</h2>
           </div>
 
@@ -131,9 +131,9 @@ export default function EvidensPage() {
 
           <div className="pt-6 border-t border-[#E7E9EF] space-y-4">
              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-               <h3 className="font-bold text-[#12172B] text-sm font-mono-data">Eksempler på udtrukne citater via RAG</h3>
+               <h3 className="font-bold text-[#12172B] text-sm font-mono-data">Eksempler på citater udtrukket fra studieordninger</h3>
                <span className="bg-[#EFF6FF] text-[#2563EB] text-[10px] px-2.5 py-0.5 rounded-full font-bold border border-[#2563EB]/20">
-                 Illustrativt eksempel på RAG-udtræk fra studieordning
+                 Eksempel på udtræk fra studieordning
                </span>
              </div>
              

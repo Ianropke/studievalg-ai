@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/lists";
-import { formatProgramTitle } from "@/lib/textUtils";
+import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -386,7 +386,8 @@ export default function Dashboard() {
 
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
       const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
-      return { ...prog, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore };
+      const cityName = (prog.by || "") as string;
+      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
@@ -459,16 +460,29 @@ export default function Dashboard() {
 
     const sorted = list.sort((a, b) => b.totalSortScore - a.totalSortScore);
 
-    // If no search query is active, deduplicate program types so top recommendations show diverse degrees
+    // If no search query is active, group program types by canonical key so top recommendations show diverse degrees
     if (!deferredSearchQuery.trim()) {
-      const seen = new Map<string, typeof sorted[0]>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const groups = new Map<string, any[]>();
       for (const item of sorted) {
-        const key = normalizeProgramName(item.udbud_titel || "");
-        if (!seen.has(key)) {
-          seen.set(key, item);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const key = normalizeProgramName((item as any).udbud_titel || "");
+        if (!groups.has(key)) {
+          groups.set(key, []);
         }
+        groups.get(key)!.push(item);
       }
-      return Array.from(seen.values());
+
+      const deduplicated = [];
+      for (const groupItems of groups.values()) {
+        const rep = { ...groupItems[0] };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const cities = Array.from(new Set(groupItems.map((p: any) => formatCityName(p.by || "")))).filter(Boolean);
+        rep.locationsCount = cities.length;
+        rep.locationsList = cities;
+        deduplicated.push(rep);
+      }
+      return deduplicated;
     }
 
     return sorted;
@@ -718,6 +732,13 @@ export default function Dashboard() {
                             {prog.udbud_titel}
                           </Link>
                         </h3>
+                        {prog.locationsCount && prog.locationsCount > 1 ? (
+                          <div className="pt-1">
+                            <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/20">
+                              Findes {prog.locationsCount} steder ({prog.locationsList.slice(0, 3).join(", ")}{prog.locationsList.length > 3 ? `, +${prog.locationsList.length - 3}` : ""})
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
 
                       <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
