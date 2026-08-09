@@ -33,7 +33,7 @@ REQUIRED_EDUCATION = {"kot_nr", "education_code", "education_title", "mapping_me
 REQUIRED_LABOUR = {"education_code", "period", "employment_rate", "unemployment_rate", "source", "dataset", "source_url"}
 REQUIRED_SALARY = {"education_code", "period", "salary_median", "source", "dataset", "source_url"}
 REQUIRED_DISCO = {"kot_nr", "disco08_code", "mapping_method", "mapping_source", "mapping_period", "mapping_confidence"}
-REQUIRED_AI = {"disco08_code", "automation_risk", "augmentation_potential", "source", "dataset", "period", "source_url"}
+REQUIRED_AI = {"disco08_code", "automation_risk", "augmentation_potential", "source", "dataset", "period", "source_url", "mapping_confidence"}
 
 
 def _require_columns(df: pd.DataFrame, required: set[str], name: str) -> None:
@@ -139,14 +139,18 @@ def build_profiles() -> dict:
         merged = merged.merge(disco, on="kot_nr", how="left", validate="one_to_one")
         merged = merged.merge(ai, on="disco08_code", how="left", validate="many_to_one")
 
-        required = ["education_code", "employment_rate", "unemployment_rate", "salary_5y_growth", "disco08_code", "automation_risk", "augmentation_potential"]
+        required = ["education_code", "employment_rate", "unemployment_rate", "salary_5y_growth", "disco08_code", "automation_risk", "augmentation_potential", "mapping_confidence", "disco_mapping_confidence", "ai_mapping_confidence"]
         missing_rows = merged[required].isna().any(axis=1)
         if missing_rows.any():
             examples = merged.loc[missing_rows, ["kot_nr", "udbud_titel", "education_code"]].head(10).to_dict("records")
             raise ValueError(f"Incomplete source coverage for {int(missing_rows.sum())} programmes. Examples: {examples}")
 
-        merged["labour_demand"] = (0.7 * _percentile(merged["employment_rate"]) + 0.3 * _percentile(merged["unemployment_rate"], False)).clip(0, 1)
-        merged["salary_growth"] = _percentile(merged["salary_5y_growth"]).clip(0, 1)
+        # Compute labour and salary percentiles once per official education group.
+        group_scores = merged[["education_code", "employment_rate", "unemployment_rate", "salary_5y_growth"]].drop_duplicates("education_code").copy()
+        group_scores["labour_demand"] = (0.7 * _percentile(group_scores["employment_rate"]) + 0.3 * _percentile(group_scores["unemployment_rate"], False)).clip(0, 1)
+        group_scores["salary_growth"] = _percentile(group_scores["salary_5y_growth"]).clip(0, 1)
+        merged = merged.drop(columns=[c for c in ["labour_demand", "salary_growth"] if c in merged.columns], errors="ignore")
+        merged = merged.merge(group_scores[["education_code", "labour_demand", "salary_growth"]], on="education_code", how="left", validate="many_to_one")
 
         conn.execute("DROP TABLE IF EXISTS education_profile_scores")
         conn.execute("""CREATE TABLE education_profile_scores (
@@ -154,36 +158,38 @@ def build_profiles() -> dict:
             education_code VARCHAR NOT NULL, education_title VARCHAR NOT NULL,
             disco08_code VARCHAR NOT NULL,
             automation_risk DOUBLE NOT NULL, augmentation_potential DOUBLE NOT NULL,
-            labour_demand DOUBLE NOT NULL, salary_growth DOUBLE NOT NULL, salary_median DOUBLE NOT NULL,
+            labour_demand DOUBLE NOT NULL, salary_growth DOUBLE NOT NULL,
+            employment_rate DOUBLE NOT NULL, unemployment_rate DOUBLE NOT NULL,
+            salary_median DOUBLE NOT NULL, salary_5y_growth DOUBLE NOT NULL,
             mapping_method VARCHAR NOT NULL, mapping_source VARCHAR NOT NULL, mapping_period VARCHAR NOT NULL, mapping_confidence VARCHAR NOT NULL,
             disco_mapping_method VARCHAR NOT NULL, disco_mapping_source VARCHAR NOT NULL, disco_mapping_period VARCHAR NOT NULL, disco_mapping_confidence VARCHAR NOT NULL,
             labour_source VARCHAR NOT NULL, labour_dataset VARCHAR NOT NULL, labour_period VARCHAR NOT NULL, labour_source_url VARCHAR NOT NULL,
             salary_source VARCHAR NOT NULL, salary_dataset VARCHAR NOT NULL, salary_period VARCHAR NOT NULL, salary_source_url VARCHAR NOT NULL,
-            ai_source VARCHAR NOT NULL, ai_dataset VARCHAR NOT NULL, ai_period VARCHAR NOT NULL, ai_source_url VARCHAR NOT NULL
+            ai_source VARCHAR NOT NULL, ai_dataset VARCHAR NOT NULL, ai_period VARCHAR NOT NULL, ai_source_url VARCHAR NOT NULL, ai_mapping_confidence VARCHAR NOT NULL
         )""")
 
-        columns = list(merged.columns)
         rows = []
         for _, r in merged.iterrows():
             rows.append([
                 str(r.kot_nr), str(r.udbud_titel), str(r.education_code), str(r.education_title), str(r.disco08_code),
-                float(r.automation_risk), float(r.augmentation_potential), float(r.labour_demand), float(r.salary_growth), float(r.salary_median),
+                float(r.automation_risk), float(r.augmentation_potential), float(r.labour_demand), float(r.salary_growth),
+                float(r.employment_rate), float(r.unemployment_rate), float(r.salary_median), float(r.salary_5y_growth),
                 str(r.mapping_method), str(r.mapping_source), str(r.mapping_period), str(r.mapping_confidence),
                 str(r.disco_mapping_method), str(r.disco_mapping_source), str(r.disco_mapping_period), str(r.disco_mapping_confidence),
                 str(r.labour_source), str(r.labour_dataset), str(r.labour_period), str(r.labour_source_url),
                 str(r.salary_source), str(r.salary_dataset), str(r.salary_period), str(r.salary_source_url),
-                str(r.ai_source), str(r.ai_dataset), str(r.ai_period), str(r.ai_source_url),
+                str(r.ai_source), str(r.ai_dataset), str(r.ai_period), str(r.ai_source_url), str(r.ai_mapping_confidence),
             ])
-        conn.executemany("INSERT INTO education_profile_scores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+        conn.executemany("INSERT INTO education_profile_scores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     finally:
         conn.close()
 
     result = {
-        "schema_version": "3.0",
+        "schema_version": "3.1",
         "programme_count": int(len(merged)),
         "education_group_count": int(merged["education_code"].nunique()),
         "sources": {"programme_education_mapping": str(EDUCATION_MAP.relative_to(BASE_DIR)), "labour_market": str(LABOUR_PATH.relative_to(BASE_DIR)), "salary": str(SALARY_PATH.relative_to(BASE_DIR)), "programme_disco_mapping": str(DISCO_MAP.relative_to(BASE_DIR)), "ai_occupation": str(AI_PATH.relative_to(BASE_DIR))},
-        "methodology": {"labour_demand": "0.7 * employment percentile + 0.3 * inverse unemployment percentile across KOT programmes", "salary_growth": "cross-sectional percentile of observed five-year salary growth calculated only from comparable salary observations"},
+        "methodology": {"labour_demand": "0.7 * employment percentile + 0.3 * inverse unemployment percentile across unique official education groups", "salary_growth": "cross-sectional percentile of observed five-year salary growth across unique official education groups"},
         "epistemic_status": {"employment_rate": "OBSERVED", "unemployment_rate": "OBSERVED", "salary_median": "OBSERVED", "salary_5y_growth": "DERIVED_FROM_OBSERVED_SERIES", "labour_demand": "DERIVED", "salary_growth": "DERIVED", "automation_risk": "CROSSWALK_OR_MODEL", "augmentation_potential": "CROSSWALK_OR_MODEL"},
     }
     with open(DATA_DIR / "education_profile_build_manifest.json", "w", encoding="utf-8") as f:
