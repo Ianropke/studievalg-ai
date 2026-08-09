@@ -1,8 +1,8 @@
 """
-Evidence-Based Recommendation Engine & Analytics Pipeline (v2026.2 Production Hardened).
+Evidence-Based Recommendation Engine & Analytics Pipeline (v2026.3 Production Final).
 Processes user queries, performs staged candidate retrieval, candidate-aware evidence filtering,
-multi-factor preference matching, deterministic claim-to-evidence validation, comprehensive data validation,
-and dynamic scenario modeling.
+canonical location matching via catalog schema, deterministic claim-to-evidence validation,
+data validation, and dynamic scenario modeling.
 """
 
 import sys
@@ -18,6 +18,19 @@ from engine.scenario_simulator import run_scenario_simulation
 
 DATA_DIR = BASE_DIR / "data"
 DUCKDB_PATH = DATA_DIR / "kot_data.duckdb"
+CATALOG_PATH = DATA_DIR / "all_programs_catalog.json"
+
+# Load structured catalog metadata for canonical location lookup ('by', 'institution')
+CATALOG_BY_KOT = {}
+if CATALOG_PATH.exists():
+    try:
+        with open(CATALOG_PATH, "r", encoding="utf-8") as f:
+            cat_list = json.load(f)
+            for item in cat_list:
+                if "kot_nr" in item:
+                    CATALOG_BY_KOT[str(item["kot_nr"])] = item
+    except Exception as e:
+        sys.stderr.write(f"Warning loading catalog: {e}\n")
 
 # Synonym dictionary for query intent expansion
 SYNONYMS = {
@@ -32,7 +45,7 @@ SYNONYMS = {
     "humaniora": ["humaniora", "filosofi", "historie", "litteratur", "sprog", "kultur"]
 }
 
-# Major Danish study cities
+# Major Danish study cities and regional aliases
 CITIES = ["københavn", "aarhus", "odense", "aalborg", "esbjerg", "frederiksberg", "roskilde", "lyngby"]
 
 # Authoritative Danish data sources classification
@@ -85,7 +98,7 @@ class MultiAgentEngine:
         query_clean = user_query.strip().lower()
         stop_words = {"i", "på", "til", "og", "eller", "en", "et", "som", "med", "af", "for"}
         raw_tokens = [t for t in query_clean.split() if t not in stop_words and len(t) > 1]
-        
+
         search_terms = raw_tokens.copy()
 
         detected_location = None
@@ -114,7 +127,6 @@ class MultiAgentEngine:
         conn = duckdb.connect(self.duckdb_path)
         search_terms = plan["search_terms"]
 
-        # Stage 1 & 2: Keyword and synonym matching against titles and DISCO titles
         like_conditions = []
         params = []
         for term in search_terms:
@@ -136,7 +148,6 @@ class MultiAgentEngine:
         except Exception:
             profiles = []
 
-        # Stage 3: Broader token matching if no exact matches found
         if not profiles and search_terms:
             first_term = search_terms[0].split()[0]
             if len(first_term) > 3:
@@ -152,8 +163,6 @@ class MultiAgentEngine:
                 except Exception:
                     profiles = []
 
-        # Stage 4: If STILL no relevant candidates match, return EMPTY list.
-        # DO NOT fall back to unrelated high-salary / high-demand programmes!
         admissions = conn.execute("""
             SELECT kot_nr, udbud_titel, aar, graensekvotient
             FROM kot_graensekvotienter
@@ -196,7 +205,7 @@ class MultiAgentEngine:
             "admissions_summary": retrieved_data["admissions"][:5]
         }
 
-    # 4. Reasoning Agent (Canonical Multi-Factor Matching & Structured Location)
+    # 4. Reasoning Agent (Canonical Structured Location Matching & Clamped Metrics)
     def _reasoning_agent(self, plan, retrieved_data, evidence):
         scored_programs = []
         user_prefs = plan["user_preferences"]
@@ -205,8 +214,8 @@ class MultiAgentEngine:
         preferred_loc = (user_prefs.get("location") or "").lower().strip()
 
         # Normalized weights summing to 1.0
-        w_ai = 0.35 * (1.0 - (0.2 * risk_tol))  # Low risk tolerance increases resilience weight
-        w_sal = 0.25 * (0.5 + (0.5 * salary_prio))  # Monotonic salary priority influence
+        w_ai = 0.35 * (1.0 - (0.2 * risk_tol))
+        w_sal = 0.25 * (0.5 + (0.5 * salary_prio))
         w_job = 0.25
         w_loc = 0.15 if preferred_loc else 0.0
 
@@ -217,26 +226,35 @@ class MultiAgentEngine:
         w_loc_norm = w_loc / weight_sum
 
         for p in retrieved_data["profiles"]:
-            auto_risk = float(p.get("automation_risk", 0.3))
-            aug_pot = float(p.get("augmentation_potential", 0.7))
-            lab_dem = float(p.get("labour_demand", 0.7))
-            sal_gro = float(p.get("salary_growth", 0.7))
+            kot = str(p["kot_nr"])
+            auto_risk = max(0.0, min(1.0, float(p.get("automation_risk", 0.3))))
+            aug_pot = max(0.0, min(1.0, float(p.get("augmentation_potential", 0.7))))
+            lab_dem = max(0.0, min(1.0, float(p.get("labour_demand", 0.7))))
+            sal_gro = max(0.0, min(1.0, float(p.get("salary_growth", 0.7))))
+
+            # FIX #3: Strictly clamped automation exposure [0.0, 1.0]
+            auto_exp = round(max(0.0, min(1.0, auto_risk * 1.1)), 3)
 
             # Authoritative single AI resilience index
             ai_resilience = compute_canonical_ai_resilience(auto_risk, aug_pot)
 
-            # Structured location matching using database 'by' / 'institution' fields
-            prog_city = (p.get("by") or "").lower()
-            prog_inst = (p.get("institution") or "").lower()
-            prog_title = p["udbud_titel"].lower()
+            # FIX #1: Canonical structured location matching using catalog 'by' and 'institution'
+            cat_entry = CATALOG_BY_KOT.get(kot, {})
+            cat_city = (cat_entry.get("by") or "").lower().strip()
+            cat_inst = (cat_entry.get("institution") or "").lower().strip()
+            title_lower = p["udbud_titel"].lower().strip()
 
+            location_status = "KNOWN"
             if preferred_loc:
-                if preferred_loc in prog_city or preferred_loc in prog_inst or preferred_loc in prog_title:
+                if not cat_city and not cat_inst and not any(c in title_lower for c in CITIES):
+                    location_status = "UNKNOWN"
+                    loc_fit = 0.5
+                elif preferred_loc in cat_city or preferred_loc in cat_inst or preferred_loc in title_lower or (preferred_loc == "københavn" and "frederiksberg" in cat_city):
                     loc_fit = 1.0
                 else:
                     loc_fit = 0.3
             else:
-                loc_fit = 1.0  # Neutral match when no location preferred
+                loc_fit = 1.0
 
             # Composite match score
             composite = (
@@ -263,23 +281,26 @@ class MultiAgentEngine:
             if lab_dem < 0.60:
                 main_risks.append("Lavere historisk dimittend-beskæftigelse")
 
+            # FIX #2: REMOVED FALSE HEURISTIC ("evidence_quality": "HIGH" if disco08_code else "MEDIUM").
+            # Evidence quality is now determined strictly by citation source authority!
+
             scored_programs.append({
-                "kot_nr": str(p["kot_nr"]),
+                "kot_nr": kot,
                 "udbud_titel": p["udbud_titel"],
                 "match_score": round(composite, 2),
-                "automation_exposure": round(auto_risk * 1.1, 2),
+                "automation_exposure": auto_exp,
                 "automation_risk": round(auto_risk, 3),
                 "augmentation_potential": round(aug_pot, 3),
                 "labour_demand": round(lab_dem, 3),
                 "salary_growth": round(sal_gro, 3),
                 "ai_resilience": round(ai_resilience, 3),
+                "location_status": location_status,
                 "score_components": {
                     "ai_resilience": round(ai_resilience * 100),
                     "salary_growth": round(sal_gro * 100),
                     "labour_demand": round(lab_dem * 100),
                     "location_fit": round(loc_fit * 100)
                 },
-                "evidence_quality": "HIGH" if p.get("disco08_code") else "MEDIUM",
                 "top_positive_factors": top_factors if top_factors else ["Stabil samlet profil"],
                 "main_risks": main_risks if main_risks else ["Ingen væsentlige risikofaktorer identificeret"],
                 "automation_risk_pct": f"{round(auto_risk*100)}%",
@@ -290,19 +311,19 @@ class MultiAgentEngine:
         scored_programs.sort(key=lambda x: x["match_score"], reverse=True)
         return scored_programs
 
-    # 5. Counterargument Agent (Data-Backed Downside Risk Analysis)
+    # 5. Counterargument Agent (FIX #4: Renamed to Modelbaseret Forbehold)
     def _counterargument_agent(self, top_program):
         if not top_program:
             return "Ingen kandidatuddannelse at analysere for risikofaktorer."
         title = top_program.get("udbud_titel", "uddannelsen")
         risk_pct = top_program.get("automation_risk_pct", "25%")
         return (
-            f"Statistisk forbehold for {title}: "
+            f"Modelbaseret forbehold for {title}: "
             f"Baseret på opgavetaksonomien vurderes den direkte automatiseringseksponering til {risk_pct}. "
             f"Et muligt downside-scenarie er, at acceleration i AI-værktøjer omstrukturerer rutineopgaver for nyuddannede."
         )
 
-    # 6. Data Validator Agent (Comprehensive Model Validation & Explicit Rejection Payload)
+    # 6. Data Validator Agent (Comprehensive Model Validation & Explicit Payload)
     def _data_validator_agent(self, scored_programs):
         conn = duckdb.connect(self.duckdb_path)
         valid_programs = []
@@ -312,20 +333,22 @@ class MultiAgentEngine:
         for p in scored_programs:
             kot = p.get("kot_nr", "")
             score = p.get("match_score", 0)
+            auto_exp = p.get("automation_exposure", 0)
             auto_risk = p.get("automation_risk", 0)
             aug_pot = p.get("augmentation_potential", 0)
             lab_dem = p.get("labour_demand", 0)
             sal_gro = p.get("salary_growth", 0)
             ai_res = p.get("ai_resilience", 0)
 
-            # 1. Bounds check
-            if not (0.0 <= score <= 1.0 and 0.0 <= auto_risk <= 1.0 and 0.0 <= aug_pot <= 1.0 and
-                    0.0 <= lab_dem <= 1.0 and 0.0 <= sal_gro <= 1.0 and 0.0 <= ai_res <= 1.0):
+            # Bounds check for all 6 core dimensions [0.0, 1.0]
+            if not (0.0 <= score <= 1.0 and 0.0 <= auto_exp <= 1.0 and 0.0 <= auto_risk <= 1.0 and
+                    0.0 <= aug_pot <= 1.0 and 0.0 <= lab_dem <= 1.0 and 0.0 <= sal_gro <= 1.0 and
+                    0.0 <= ai_res <= 1.0):
                 rejected_programs.append(p)
-                rejection_reasons[kot] = "Numerical metric out of bounds [0.0, 1.0]"
+                rejection_reasons[kot] = f"Numerical metric out of bounds [0.0, 1.0]: auto_exp={auto_exp}"
                 continue
 
-            # 2. Database existence check in canonical education_profile_scores table
+            # Database existence check
             db_row = conn.execute("SELECT kot_nr FROM education_profile_scores WHERE kot_nr = ?", [kot]).fetchone()
             if db_row:
                 valid_programs.append(p)
@@ -335,7 +358,6 @@ class MultiAgentEngine:
 
         conn.close()
 
-        # Determine explicit validation status
         if not scored_programs:
             status = "NO_VALID_CANDIDATES"
         elif len(valid_programs) == len(scored_programs):
@@ -374,15 +396,11 @@ class MultiAgentEngine:
             source_title = c.get("report_title") or ""
             source_url = c.get("source_url") or ""
 
-            # Evaluate claim relevance score
             matching_tokens = sum(1 for token in title_tokens if token in quote_text or token in source_title.lower())
             relevance_score = 0.30 + (0.25 * matching_tokens)
             relevance_score = min(0.95, round(relevance_score, 2))
 
-            # Classify source authority deterministically
             authority = classify_source_authority(source_title, source_url)
-
-            # Set supports_claim = True ONLY IF source authority != UNKNOWN AND relevance >= 0.70
             supports = (authority != "UNKNOWN") and (relevance_score >= 0.70)
 
             if supports:
@@ -427,6 +445,11 @@ class MultiAgentEngine:
         top_kot = valid_programs[0]["kot_nr"]
         scenario_proj = run_scenario_simulation(top_kot, target_year=2030)
 
+        # Attach overall evidence authority level from citations
+        primary_auth = citations[0]["source_authority"] if citations else "UNKNOWN"
+        for p in valid_programs:
+            p["evidence_quality"] = primary_auth
+
         return {
             "status": "success",
             "query": user_query,
@@ -451,11 +474,11 @@ class MultiAgentEngine:
         retrieved = self._retriever_agent(plan)
         evidence = self._evidence_agent(retrieved, plan)
         reasoning = self._reasoning_agent(plan, retrieved, evidence)
-        
+
         validation_payload = self._data_validator_agent(reasoning)
         valid_progs = validation_payload["valid_programs"]
         top_prog = valid_progs[0] if valid_progs else {}
-        
+
         counterargument = self._counterargument_agent(top_prog)
         citations = self._citation_agent(evidence, top_prog)
 
@@ -478,7 +501,5 @@ if __name__ == "__main__":
         "location": args.location
     })
 
-    print("\n==========================================")
-    print("ANALYTICS ENGINE RESPONSE (JSON PAYLOAD)")
-    print("==========================================")
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    # FIX #5: Python writes clean JSON output to stdout. Diagnostics go to stderr.
+    sys.stdout.write(json.dumps(result, ensure_ascii=False))

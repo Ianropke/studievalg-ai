@@ -15,6 +15,28 @@ const PipelineInputSchema = z.object({
   location: z.string().max(100).optional().default("")
 });
 
+// Strict Zod response contract schema for Python backend output
+const PipelineResponseSchema = z.object({
+  status: z.string(),
+  query: z.string(),
+  validation_status: z.string().optional(),
+  recommended_programs: z.array(z.object({
+    kot_nr: z.string(),
+    udbud_titel: z.string(),
+    match_score: z.number(),
+    automation_exposure: z.number(),
+    automation_risk: z.number(),
+    augmentation_potential: z.number(),
+    labour_demand: z.number(),
+    salary_growth: z.number(),
+    ai_resilience: z.number(),
+    score_components: z.record(z.string(), z.number()),
+    top_positive_factors: z.array(z.string()),
+    main_risks: z.array(z.string())
+  })).optional().default([]),
+  evidence_citations: z.array(z.any()).optional().default([])
+});
+
 export async function POST(request: Request) {
   try {
     const rawBody = await request.json().catch(() => null);
@@ -23,7 +45,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ugyldig JSON-request i body" }, { status: 400 });
     }
 
-    // Validate payload against Zod schema
+    // Validate payload against Zod input schema
     const parseResult = PipelineInputSchema.safeParse(rawBody);
     if (!parseResult.success) {
       return NextResponse.json({
@@ -51,11 +73,31 @@ export async function POST(request: Request) {
         timeout: 10000 // 10 second safety execution limit
       });
 
-      const jsonMatch = stdout.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const payload = JSON.parse(jsonMatch[0]);
-        return NextResponse.json(payload);
+      // FIX #5: Parse complete stdout directly without regex matching
+      let parsedPayload: unknown;
+      try {
+        parsedPayload = JSON.parse(stdout.trim());
+      } catch (parseErr) {
+        console.error("[API Route Error] Python stdout was not valid JSON:", parseErr);
+        return NextResponse.json({
+          status: "unavailable",
+          error_code: "ANALYTICS_ENGINE_INVALID_RESPONSE",
+          message: "Studievalgsanalysen returnerede et ugyldigt svarformat."
+        }, { status: 503 });
       }
+
+      // Validate Python backend response object against Zod response schema
+      const responseValidation = PipelineResponseSchema.safeParse(parsedPayload);
+      if (!responseValidation.success) {
+        console.error("[API Route Error] Python response failed Zod schema validation:", responseValidation.error.format());
+        return NextResponse.json({
+          status: "unavailable",
+          error_code: "ANALYTICS_ENGINE_INVALID_RESPONSE",
+          message: "Studievalgsanalysen returnerede et ugyldigt svar-schema."
+        }, { status: 503 });
+      }
+
+      return NextResponse.json(parsedPayload);
     }
 
     // If Python engine is unavailable or unconfigured, return HTTP 503 safe failure response
@@ -66,8 +108,8 @@ export async function POST(request: Request) {
     }, { status: 503 });
 
   } catch (err: unknown) {
-    // Log exception details server-side safely without exposing internal paths or stack traces to client
-    console.error("[API Route Error] MultiAgentEngine execution failed:", err);
+    // Log exception details server-side safely without exposing internal paths to client
+    console.error("[API Route Exception]", err);
     return NextResponse.json({
       status: "unavailable",
       error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
