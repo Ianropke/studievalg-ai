@@ -38,9 +38,8 @@ export async function POST(request: Request) {
     const pythonScript = path.join(projectRoot, "agents", "multi_agent_engine.py");
     const venvPython = path.join(projectRoot, "venv", "bin", "python");
 
-    // Check if Python venv binary exists (Local vs Vercel Serverless environment)
+    // Check if Python venv binary exists
     if (fs.existsSync(venvPython) && fs.existsSync(pythonScript)) {
-      // Execute Python analytics pipeline safely with execFile and 10s timeout
       const { stdout } = await execFilePromise(venvPython, [
         pythonScript,
         "--query", query,
@@ -59,47 +58,20 @@ export async function POST(request: Request) {
       }
     }
 
-    // Fallback for Vercel Serverless environment: Returns structured deterministic analytics response
+    // If Python engine is unavailable or unconfigured, return HTTP 503 safe failure response
     return NextResponse.json({
-      status: "success",
-      query,
-      environment: "serverless_fallback",
-      recommended_programs: [
-        {
-          kot_nr: "17020",
-          udbud_titel: "Datalogi, Odense M, Studiestart: sommerstart",
-          match_score: 0.85,
-          score_components: { ai_resilience: 88, salary_growth: 90, labour_demand: 94, location_fit: 100 },
-          evidence_quality: "HIGH",
-          top_positive_factors: ["Stærk dimittend-beskæftigelse", "Højt historisk lønpotentiale"],
-          main_risks: ["Moderatmængde af opgaveomstilling ved AI-værktøjer"]
-        }
-      ],
-      devils_advocate_perspective: `Statistisk forbehold for ${query}: Baseret på opgavetaksonomien vurderes den direkte automatiseringseksponering med forbehold for opgaveomstilling.`,
-      scenario_projections_2030: {
-        kot_nr: "17020",
-        baseline_year: 2025,
-        target_year: 2030,
-        methodology_disclaimer: "Illustrativ scenariomodelsimulering baseret på antagne parameterfordelinger (5.–95. percentilinterval).",
-        projections: {
-          basis: { projected_automation_risk: 0.529, model_uncertainty_interval: "42.2% – 63.1%" }
-        }
-      },
-      evidence_citations: [
-        {
-          claim_id: "claim-17020",
-          source: "Stort potentiale for automatisering af danske jobs (Kraka-Deloitte)",
-          url: "https://kraka.dk/wp-content/uploads/stort_potentiale_for_automatisering_af_danske_jobs.pdf",
-          quote: "Generativ AI har et særligt højt augmentationspotentiale i softwareudvikling (88%).",
-          relevance_score: 0.90,
-          evidence_quality: "HIGH",
-          supports_claim: true
-        }
-      ]
-    });
+      status: "unavailable",
+      error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
+      message: "Studievalgsanalysen er midlertidigt utilgængelig. Venligst benyt den klient-side baserede søge- og filter-motor på forsiden."
+    }, { status: 503 });
 
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : "Der opstod en fejl under beregningen.";
-    return NextResponse.json({ error: "Fejl i analysetjenesten", message: errorMsg }, { status: 500 });
+    return NextResponse.json({
+      status: "unavailable",
+      error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
+      message: "Studievalgsanalysen er midlertidigt utilgængelig.",
+      details: errorMsg
+    }, { status: 503 });
   }
 }

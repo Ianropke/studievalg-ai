@@ -9,7 +9,8 @@ export interface ScoreProvenance {
   source: string;
   dataset_version: string;
   methodology: string;
-  confidence: "HIGH" | "MEDIUM" | "LOW";
+  confidence: "HIGH" | "MEDIUM" | "LOW" | "UNKNOWN";
+  is_baseline_estimate: boolean;
   last_updated: string;
 }
 
@@ -29,6 +30,8 @@ export interface NormalizedScores {
   labour_demand: number;       // 0..100
   salary_growth: number;       // 0..100
   ai_resilience: number;       // 0..100 (100 - automation_risk)
+  data_quality: "HIGH" | "MEDIUM" | "LOW";
+  is_baseline_estimate: boolean;
   provenance: Record<string, ScoreProvenance>;
 }
 
@@ -73,6 +76,8 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
       labour_demand: labDemand,
       salary_growth: salGrowth,
       ai_resilience: 100 - autoRisk,
+      data_quality: "HIGH",
+      is_baseline_estimate: false,
       provenance: {
         automation_risk: {
           metric: "automation_risk",
@@ -80,6 +85,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
           dataset_version: datasetVersion,
           methodology: "Task-weighted econometric model",
           confidence: "MEDIUM",
+          is_baseline_estimate: false,
           last_updated: lastUpdated
         },
         labour_demand: {
@@ -88,6 +94,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
           dataset_version: datasetVersion,
           methodology: "2-year graduate employment rate & vacancy ratio",
           confidence: "HIGH",
+          is_baseline_estimate: false,
           last_updated: lastUpdated
         },
         salary_growth: {
@@ -96,13 +103,14 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
           dataset_version: datasetVersion,
           methodology: "5-year graduate earnings progression trajectory",
           confidence: "HIGH",
+          is_baseline_estimate: false,
           last_updated: lastUpdated
         }
       }
     };
   }
 
-  // 2. Fallback for unmapped records: Default baseline values with explicit LOW confidence marker
+  // 2. Fallback for unmapped records: Default baseline values with explicit LOW confidence and is_baseline_estimate flag
   const defaultAutoRisk = 28;
   const defaultLabDemand = 72;
   const defaultSalGrowth = 70;
@@ -115,6 +123,8 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
     labour_demand: defaultLabDemand,
     salary_growth: defaultSalGrowth,
     ai_resilience: 100 - defaultAutoRisk,
+    data_quality: "LOW",
+    is_baseline_estimate: true,
     provenance: {
       automation_risk: {
         metric: "automation_risk",
@@ -122,6 +132,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
         dataset_version: datasetVersion,
         methodology: "Default domain baseline",
         confidence: "LOW",
+        is_baseline_estimate: true,
         last_updated: lastUpdated
       },
       labour_demand: {
@@ -130,6 +141,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
         dataset_version: datasetVersion,
         methodology: "National average baseline",
         confidence: "LOW",
+        is_baseline_estimate: true,
         last_updated: lastUpdated
       },
       salary_growth: {
@@ -138,6 +150,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
         dataset_version: datasetVersion,
         methodology: "National graduate baseline",
         confidence: "LOW",
+        is_baseline_estimate: true,
         last_updated: lastUpdated
       }
     }

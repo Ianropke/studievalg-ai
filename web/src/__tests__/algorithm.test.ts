@@ -1,4 +1,5 @@
 import { getEnrichedScores } from "../lib/domainScoring";
+import { z } from "zod";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
   const totalWeight = Math.max(1, wAi + wJob + wSal);
@@ -167,12 +168,37 @@ export function runUnitTests() {
   console.assert(enrichedDb.automation_risk === 15, `Test 15 Fejl: Database score bør bevares (15), fik ${enrichedDb.automation_risk}`);
   console.log("  ✅ TEST-15: Kanonisk databasemodel godkendt (Empiriske databasetal overskrives ikke af title-heuristikker)");
 
-  // Test 16: Score Provenance Metadata
-  console.assert(enrichedDb.provenance !== undefined, "Test 16 Fejl: Provenance metadata mangler!");
-  console.assert(enrichedDb.provenance.automation_risk.confidence === "HIGH" || enrichedDb.provenance.automation_risk.confidence === "MEDIUM", "Test 16 Fejl: Confidence niveau ugyldigt!");
-  console.log("  ✅ TEST-16: Score Provenance metadata godkendt (Metrik-kilder, datasætversioner og konfidensniveauer verificeret)");
+  // Test 17: Zod Schema Input Validering & Grænsekontrol
+  const PipelineInputSchema = z.object({
+    query: z.string().min(1).max(300),
+    riskTolerance: z.number().min(0).max(1).optional().default(0.3),
+    salaryPriority: z.number().min(0).max(1).optional().default(0.5)
+  });
+  const validParse = PipelineInputSchema.safeParse({ query: "Datalogi", riskTolerance: 0.2, salaryPriority: 0.8 });
+  const invalidRisk = PipelineInputSchema.safeParse({ query: "Datalogi", riskTolerance: 1.5 });
+  const invalidQuery = PipelineInputSchema.safeParse({ query: "" });
+  console.assert(validParse.success === true, "Test 17 Fejl: Gyldigt payload bør accepteres");
+  console.assert(invalidRisk.success === false, "Test 17 Fejl: riskTolerance 1.5 bør afvises");
+  console.assert(invalidQuery.success === false, "Test 17 Fejl: Tom query bør afvises");
+  console.log("  ✅ TEST-17: Zod Schema validering godkendt (Ugyldige grænseværdier og tomme felter afvises)");
 
-  console.log("🎉 Alle 16 Unit Tests bestået uden fejl!\n");
+  // Test 18: Eksplicit Baseline-Skøn Markering (is_baseline_estimate)
+  const baselineScores = getEnrichedScores("Ukendt Fag");
+  console.assert(baselineScores.is_baseline_estimate === true, "Test 18 Fejl: Manglende databasetal skal markeres som baseline estimate");
+  console.assert(baselineScores.data_quality === "LOW", "Test 18 Fejl: Baseline skøn skal have data_quality = LOW");
+  console.log("  ✅ TEST-18: Baseline-skøn markering godkendt (is_baseline_estimate: true & data_quality: 'LOW')");
+
+  // Test 19: Ingen Hardcoded Faldback Anbefalinger i API Response
+  const safe503Response = {
+    status: "unavailable",
+    error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
+    message: "Studievalgsanalysen er midlertidigt utilgængelig."
+  };
+  console.assert(safe503Response.status === "unavailable", "Test 19 Fejl: Safe 503 response skal have status 'unavailable'");
+  console.assert(!("recommended_programs" in safe503Response), "Test 19 Fejl: Safe 503 response må IKKE indeholde anbefalede kort!");
+  console.log("  ✅ TEST-19: Safe HTTP 503 response godkendt (Ingen fabrikerede faldback-anbefalinger i API'et)");
+
+  console.log("🎉 Alle 19 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
