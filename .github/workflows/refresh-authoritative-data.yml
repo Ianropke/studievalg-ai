@@ -36,11 +36,13 @@ jobs:
         run: python etl/build_education_crosswalk.py
       - name: Run data quality gate
         run: python etl/run_data_quality_gate.py
+      - name: Golden programme provenance audit
+        run: python etl/audit_golden_programmes.py
       - name: Commit refreshed raw data and validation artefacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sources/raw data/sources/raw_source_manifest.json data/sources/kot_udd_crosswalk.csv data/sources/kot_udd_crosswalk_report.json data/sources/data_quality_gate_report.json
+          git add data/sources/raw data/sources/raw_source_manifest.json data/sources/kot_udd_crosswalk.csv data/sources/kot_udd_crosswalk_report.json data/sources/data_quality_gate_report.json data/sources/golden_programme_audit.json
           if git diff --cached --quiet; then
             echo "No source changes."
           else
