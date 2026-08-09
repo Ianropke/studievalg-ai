@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "id": "ufm_graduate_employment",
+      "publisher": "Uddannelses- og Forskningsstyrelsen",
+      "dataset": "Beskæftigelse",
+      "url": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+      "catalog_url": "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/c7f294fe-bf49-4f1d-98c2-61f0573bcb67",
+      "grain": "education_group x completion_year",
+      "definition": "Employment rate in months 12-23 after completion: employment days / (employment days + unemployment days).",
+      "licence": "CC BY 4.0",
+      "update_frequency": "annual",
+      "epistemic_status": "OBSERVED"
+    },
+    {
+      "id": "ufm_cross_education_indicators",
+      "publisher": "Uddannelses- og Forskningsstyrelsen",
+      "dataset": "Nøgletal på tværs",
+      "url": "https://datavarehus.ufm.dk/rapporter/tvaernogletal",
+      "grain": "education_group x year",
+      "definition": "Includes graduate unemployment 4-7 quarters after completion and time to first full-time job, among other indicators.",
+      "licence": "CC BY 4.0",
+      "update_frequency": "twice yearly",
+      "epistemic_status": "OBSERVED"
+    },
+    {
+      "id": "dst_lons11",
+      "publisher": "Danmarks Statistik",
+      "dataset": "LONS11",
+      "url": "https://www.statistikbanken.dk/LONS11",
+      "api_url": "https://api.statbank.dk/v1",
+      "grain": "education x year x configured dimensions",
+      "definition": "Salary statistics by education, sector, pay form, employee group, pay components and sex.",
+      "licence": "CC BY 4.0",
+      "update_frequency": "according to StatBank table",
+      "epistemic_status": "OBSERVED"
+    },
+    {
+      "id": "dst_ddu_audd_2026",
+      "publisher": "Danmarks Statistik",
+      "dataset": "DDU_AUDD_V1_2026",
+      "url": "https://www.dst.dk/da/Statistik/dokumentation/nomenklaturer/ddu-audd",
+      "grain": "education_code",
+      "definition": "Danish classification of completed education; each education has a unique four-digit AUDD code.",
+      "valid_from": "2026-02-01",
+      "epistemic_status": "OFFICIAL_CLASSIFICATION"
+    },
+    {
+      "id": "ufm_kot",
+      "publisher": "Uddannelses- og Forskningsstyrelsen",
+      "dataset": "Søgning og optagelse via KOT",
+      "url": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
+      "grain": "KOT programme x year",
+      "definition": "Summer admission search and admission data for programmes admitted through KOT.",
+      "epistemic_status": "OBSERVED"
+    }
+  ]
+}
