@@ -43,7 +43,7 @@ jobs:
 
       - name: 🛡️ Security Vulnerability Audit
         working-directory: ./web
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
 
       - name: ⚡ Lighthouse CI Performance & Accessibility Guard
         working-directory: ./web

@@ -1,23 +1,26 @@
 import { NextResponse } from "next/server";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import path from "path";
 import util from "util";
 
-const execPromise = util.promisify(exec);
+const execFilePromise = util.promisify(execFile);
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
-    const query = body?.query || "Datalogi og Jura";
-    const riskTolerance = body?.riskTolerance || 0.3;
+    const query = String(body?.query || "Datalogi og Jura").slice(0, 300);
+    const riskTolerance = Number(body?.riskTolerance ?? 0.3);
 
     const projectRoot = path.resolve(process.cwd(), "..");
     const pythonScript = path.join(projectRoot, "agents", "multi_agent_engine.py");
     const venvPython = path.join(projectRoot, "venv", "bin", "python");
 
-    // Execute the Python 8-Agent Pipeline
-    const command = `"${venvPython}" "${pythonScript}" --query "${query}" --risk ${riskTolerance}`;
-    const { stdout } = await execPromise(command, { cwd: projectRoot });
+    // Execute Python script securely using execFile (avoids shell injection vulnerabilities)
+    const { stdout } = await execFilePromise(venvPython, [
+      pythonScript,
+      "--query", query,
+      "--risk", String(riskTolerance)
+    ], { cwd: projectRoot });
 
     // Parse output JSON
     const jsonMatch = stdout.match(/\{[\s\S]*\}/);

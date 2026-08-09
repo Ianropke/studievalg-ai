@@ -3,6 +3,7 @@ ETL Pipeline for Ingesting Official UFM KOT (Den Koordinerede Tilmelding) Admiss
 Source: UFM REST API (Kot_Graensekvotienter_v1)
 """
 
+import os
 import ssl
 import json
 import urllib.request
@@ -10,10 +11,11 @@ from pathlib import Path
 import pandas as pd
 import duckdb
 
+UFM_API_KEY = os.environ.get("UFM_API_KEY", "")
 UFM_API_URL = (
     "https://ufm.exmondm.com/api/table?"
     "name=Kot_Graensekvotienter_v1&id=311&"
-    "apikey=EUivb7w9TDqKGRF671iclK4csnebG62eiCEig5O9uOI_&"
+    f"apikey={UFM_API_KEY}&"
     "filename=data.json"
 )
 
@@ -26,8 +28,6 @@ DUCKDB_PATH = DATA_DIR / "kot_data.duckdb"
 def fetch_ufm_data():
     print(f"--> Fetching KOT data from UFM REST API...")
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
 
     req = urllib.request.Request(UFM_API_URL, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, context=ctx) as resp:
