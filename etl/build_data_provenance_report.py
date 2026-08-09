@@ -1,9 +1,7 @@
 """Build a machine-readable provenance audit for programme-level metrics.
 
-This audit is intentionally conservative. A numeric value is not treated as
-credible merely because it exists or because a source exists in the global
-registry. It detects missing provenance, default occupation mappings and
-suspiciously repeated score vectors.
+The report trusts only explicit programme-level provenance emitted by the
+canonical profile pipeline. A global source registry is never sufficient.
 """
 
 from pathlib import Path
@@ -11,18 +9,9 @@ import json
 from collections import Counter, defaultdict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-CATALOG_CANDIDATES = [
-    BASE_DIR / "data" / "all_programs_catalog.json",
-    BASE_DIR / "web" / "src" / "data" / "all_programs_catalog.json",
-]
+CATALOG_CANDIDATES = [BASE_DIR / "data" / "all_programs_catalog.json", BASE_DIR / "web" / "src" / "data" / "all_programs_catalog.json"]
 OUTPUT_PATH = BASE_DIR / "data" / "DATA_PROVENANCE_REPORT.json"
-
-METRICS = (
-    "automation_risk",
-    "augmentation_potential",
-    "labour_demand",
-    "salary_growth",
-)
+METRICS = ("automation_risk", "augmentation_potential", "labour_demand", "salary_growth")
 
 
 def _catalog_path():
@@ -36,12 +25,14 @@ def _score_signature(scores):
     return tuple(scores.get(metric) for metric in METRICS)
 
 
-def _metric_status(programme, metric, value):
+def _status_from_export(programme, metric, value):
+    provenance = (programme.get("score_provenance") or {}).get(metric) or {}
+    explicit = provenance.get("epistemic_status")
     if value is None:
         return "MISSING"
+    if explicit:
+        return explicit
     if metric in {"automation_risk", "augmentation_potential"}:
-        # Until a programme-specific occupation/task crosswalk is documented,
-        # these remain model/crosswalk estimates.
         return "MODEL_OR_CROSSWALK"
     return "PROVENANCE_REQUIRED"
 
@@ -62,7 +53,8 @@ def build_report():
         signature_groups[signature].append(str(programme.get("kot_nr", "")))
 
         disco = programme.get("disco08")
-        is_default_mapping = disco in (None, "", "DEFAULT")
+        mapping = programme.get("mapping_provenance") or {}
+        is_default_mapping = disco in (None, "", "DEFAULT") or mapping.get("status") in {"DEFAULT_UNVERIFIED", "INVALID_DEFAULT_MAPPING"}
         if is_default_mapping:
             default_mapping_count += 1
 
@@ -72,73 +64,50 @@ def build_report():
             "institution": programme.get("institution"),
             "city": programme.get("by"),
             "disco08": disco,
-            "disco_title": programme.get("disco_titel"),
-            "mapping": {
-                "status": "DEFAULT_UNVERIFIED" if is_default_mapping else "UNVERIFIED",
-                "method": "DEFAULT_FALLBACK" if is_default_mapping else None,
-                "source": None,
-                "confidence": "LOW" if is_default_mapping else "UNKNOWN",
-            },
+            "mapping": mapping,
             "metrics": {},
         }
 
         for metric in METRICS:
             value = scores.get(metric)
-            status = _metric_status(programme, metric, value)
+            exported = (programme.get("score_provenance") or {}).get(metric) or {}
+            status = _status_from_export(programme, metric, value)
             row["metrics"][metric] = {
                 "value": value,
                 "epistemic_status": status,
-                "source": None,
-                "dataset": None,
-                "period": None,
-                "transformation": None,
-                "coverage": None,
-                "confidence": "LOW" if is_default_mapping else "UNKNOWN",
+                "source": exported.get("source"),
+                "dataset": exported.get("dataset"),
+                "period": exported.get("period"),
+                "transformation": exported.get("transformation"),
+                "coverage": exported.get("coverage"),
+                "confidence": exported.get("confidence", "UNKNOWN"),
             }
             status_counter[status] += 1
 
-        # ai_resilience is derived from the model metrics if present, but it is
-        # never treated as independently observed evidence.
-        if "ai_resilience" in scores:
-            row["metrics"]["ai_resilience"] = {
-                "value": scores["ai_resilience"],
-                "epistemic_status": "MODEL_DERIVED",
-                "source": None,
-                "dataset": None,
-                "period": None,
-                "transformation": "Documented model formula; not an observed labour-market outcome.",
-                "coverage": None,
-                "confidence": "LOW",
-            }
-            status_counter["MODEL_DERIVED"] += 1
-
         programme_rows.append(row)
 
-    # Repeated vectors are not automatically wrong, but a very large cluster is
-    # a strong signal that programme-specific metrics are not being populated.
     repeated_groups = [
         {"signature": list(signature), "programme_count": len(kots), "kot_numbers": kots[:100]}
         for signature, kots in signature_groups.items()
         if len(kots) >= 5
     ]
     repeated_groups.sort(key=lambda x: x["programme_count"], reverse=True)
-
     largest_group = repeated_groups[0] if repeated_groups else None
-    repeated_score_warning = bool(largest_group and largest_group["programme_count"] >= max(5, len(catalog) * 0.05))
+    repeated_warning = bool(largest_group and largest_group["programme_count"] >= max(5, len(catalog) * 0.05))
 
     report = {
-        "schema_version": "2.0",
+        "schema_version": "2.1",
         "generated_by": "etl/build_data_provenance_report.py",
         "catalog_path": str(catalog_path.relative_to(BASE_DIR)),
-        "purpose": "Audit programme-level provenance and detect fallback/default scoring.",
+        "purpose": "Audit explicit programme-level provenance and detect fallback/default scoring.",
         "epistemic_statuses": {
             "OBSERVED": "Directly observed from a named source dataset.",
             "DERIVED": "Calculated deterministically from observed source data.",
             "CROSSWALK": "Transferred through an occupation/skills classification mapping.",
             "MODEL": "Produced by a documented modelling assumption or formula.",
+            "CROSSWALK_OR_MODEL": "Crosswalk/model estimate with explicit source metadata.",
             "MODEL_OR_CROSSWALK": "Model/crosswalk estimate pending programme-specific provenance.",
             "PROVENANCE_REQUIRED": "A numeric value exists but its raw source/transformation is not documented.",
-            "MODEL_DERIVED": "Derived from model metrics; not an observed outcome.",
             "MISSING": "No numeric value is available.",
         },
         "summary": {
@@ -152,8 +121,8 @@ def build_report():
             "critical_warnings": [
                 warning for warning in [
                     "DEFAULT occupation mapping is present for a substantial number of programmes." if default_mapping_count else None,
-                    "A large number of programmes share an identical score vector; programme-specific scoring may not be populated." if repeated_score_warning else None,
-                    "labour_demand and salary_growth remain blocked from being called observed until raw provenance is attached.",
+                    "A large number of programmes share an identical score vector; programme-specific scoring may not be populated." if repeated_warning else None,
+                    "labour_demand or salary_growth remain blocked from being called observed unless their exported provenance is DERIVED/OBSERVED.",
                 ] if warning
             ],
         },
