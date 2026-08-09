@@ -1,13 +1,7 @@
 """Fetch authoritative Danish education/labour sources into data/sources/raw.
 
-Sources:
-- UFM Beskæftigelse via the public Datavejviser CKAN API.
-- UFM Søgning og optagelse via KOT via the public Datavejviser CKAN API.
-- Statistics Denmark education register (current CSV distributions).
-- Statistics Denmark LONS11 schema via Statbank API.
-
-No values are embedded in the repository. Every downloaded file gets a SHA-256
-manifest entry with source URL, retrieval time and dataset metadata.
+The ingestion uses public official distributions and stores immutable snapshots
+with SHA-256 provenance. It never fabricates missing observations.
 """
 from __future__ import annotations
 
@@ -26,15 +20,15 @@ RAW = ROOT / "data" / "sources" / "raw"
 MANIFEST = ROOT / "data" / "sources" / "raw_source_manifest.json"
 
 UFM_CKAN_BASE = "https://datavejviser-indtastning.digst.govcloud.dk/api/3/action/package_show?id="
-UFM_EMPLOYMENT_ID = "beskaeftigelse"
-UFM_KOT_ID = "sogning-og-optagelse-via-kot"
+UFM_EMPLOYMENT_ID = "c7f294fe-bf49-4f1d-98c2-61f0573bcb67"
+UFM_KOT_ID = "f13d335a-d4e5-456d-b176-2af0ba1d82c2"
 UFM_KOT_CATALOG = "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/f13d335a-d4e5-456d-b176-2af0ba1d82c2"
 UFM_EMPLOYMENT_CATALOG = "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/c7f294fe-bf49-4f1d-98c2-61f0573bcb67"
 DST_REGISTER_PAGE = "https://www.dst.dk/da/Statistik/dokumentation/metode/uddannelsesregistret"
 
 
 def get(url: str) -> requests.Response:
-    r = requests.get(url, timeout=60, headers={"User-Agent": "studievalg-ai-source-ingestion/1.1"})
+    r = requests.get(url, timeout=60, headers={"User-Agent": "studievalg-ai-source-ingestion/1.2"})
     r.raise_for_status()
     return r
 
@@ -43,7 +37,11 @@ def save_bytes(name: str, data: bytes, metadata: dict) -> None:
     path = RAW / name
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
-    metadata.update({"path": str(path.relative_to(ROOT)), "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)})
+    metadata.update({
+        "path": str(path.relative_to(ROOT)),
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "bytes": len(data),
+    })
 
 
 def fetch_ufm_dataset(dataset_id: str, dataset_name: str, catalog_url: str, filename: str, manifest: list[dict]) -> None:
@@ -114,7 +112,7 @@ def fetch_lons11_schema(manifest: list[dict]) -> None:
         "source_url": tableinfo_url,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "status": "SCHEMA_ONLY",
-        "note": "No salary values are downloaded until the exact population/dimensions are configured and reviewed.",
+        "note": "Salary dimensions are deliberately not guessed. A reviewed query is required before downloading salary observations.",
     }
     save_bytes("dst_lons11_tableinfo.json", data, meta)
     manifest.append(meta)
@@ -127,7 +125,10 @@ def main() -> int:
     fetch_ufm_dataset(UFM_KOT_ID, "Søgning og optagelse via KOT", UFM_KOT_CATALOG, "ufm_kot.csv", manifest)
     fetch_dst_register(manifest)
     fetch_lons11_schema(manifest)
-    MANIFEST.write_text(json.dumps({"retrieved_at": datetime.now(timezone.utc).isoformat(), "sources": manifest}, ensure_ascii=False, indent=2), encoding="utf-8")
+    MANIFEST.write_text(
+        json.dumps({"retrieved_at": datetime.now(timezone.utc).isoformat(), "sources": manifest}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     print(f"Fetched {len(manifest)} authoritative source artefacts.")
     return 0
 
