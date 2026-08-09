@@ -3,79 +3,102 @@
 This contract defines the only inputs accepted by `etl/build_education_profiles.py`.
 The purpose is to prevent plausible-looking but undocumented scores from entering the production catalogue.
 
-## 1. Programme → DISCO mapping
+## 1. KOT → official education-group mapping
+
+File: `data/sources/programme_education_mapping.csv`
+
+Required columns:
+
+- `kot_nr`
+- `education_code`
+- `education_title`
+- `mapping_method`
+- `mapping_source`
+- `mapping_period`
+- `mapping_confidence`
+
+Rules:
+
+- One row per KOT programme.
+- `education_code` must come from an identified official education classification or documented crosswalk.
+- Title similarity/fuzzy matching alone is forbidden.
+- The mapping must say whether it is `OFFICIAL`, `DOCUMENTED_CROSSWALK`, or `EXPERT_REVIEW`.
+- The source and version/year must be recorded.
+
+## 2. KOT → DISCO mapping
 
 File: `data/sources/programme_disco_mapping.csv`
 
 Required columns:
 
-- `kot_nr` — UFM KOT programme identifier.
-- `disco08_code` — DISCO-08 occupation code.
-- `mapping_method` — `OFFICIAL`, `DOCUMENTED_CROSSWALK`, or `EXPERT_REVIEW`.
-- `mapping_source` — named source supporting the mapping.
-- `mapping_period` — version/year of the mapping source.
-- `mapping_confidence` — `HIGH`, `MEDIUM`, or `LOW`.
+- `kot_nr`
+- `disco08_code`
+- `mapping_method`
+- `mapping_source`
+- `mapping_period`
+- `mapping_confidence`
 
 Rules:
 
 - One row per `kot_nr`.
 - `DEFAULT` is forbidden.
-- A mapping without a named source is rejected.
+- Title similarity alone is not acceptable.
 - A mapping is a crosswalk/model input, never an observed labour-market value.
-- Title similarity alone is not an acceptable mapping method.
 
-## 2. Labour-market and salary observations
+## 3. Graduate labour-market observations
 
 File: `data/sources/labour_market_by_programme.csv`
 
 Required columns:
 
 - `kot_nr`
-- `labour_period`
+- `period`
 - `employment_rate` — decimal 0–1.
 - `unemployment_rate` — decimal 0–1.
-- `labour_source`
-- `labour_dataset`
-- `labour_source_url`
-- `salary_median` — observed salary level in the source's stated units.
-- `salary_5y_growth` — observed/derived five-year salary growth, in decimal form.
-- `salary_source`
-- `salary_dataset`
-- `salary_period`
-- `salary_source_url`
+- `source`
+- `dataset`
+- `source_url`
 
-### Approved official source families
+Preferred official source:
 
-The preferred Danish sources are:
+**UFM Datavarehus — Beskæftigelse.** The published measure is the graduate employment rate during months 12–23 after completion, calculated from days in employment versus days unemployed. UFM states that the source is its Datavarehus based on Danish Statistics register data. If the available source grain is education group rather than individual KOT programme, the education mapping must be explicit and the UI must not describe it as a programme-specific observation.
 
-1. **UFM Datavarehus — Beskæftigelse**: graduate employment measured 12–23 months after completion, based on Danish register data. This is the preferred source when the required programme/education grain is available.
-2. **Danmarks Statistik OVGARB10**: education-to-labour-market outcomes. Use when the required education-group grain is appropriate and document that it is an education-group, not necessarily KOT-programme, observation.
-3. **Danmarks Statistik LONS11**: salary by education. Salary observations must be linked through an explicit, documented education-code mapping; never by fuzzy programme-title matching.
+Supporting sources may include other official UFM/DST labour-market datasets where their population and grain are documented.
 
-The repository contains `etl/fetch_official_statbank_sources.py` to retrieve raw OVGARB10 and LONS11 extracts from the public Statbank API. Raw files are stored under `data/sources/raw/` together with a source manifest.
+## 4. Salary observations
+
+File: `data/sources/salary_by_education.csv`
+
+Required columns:
+
+- `education_code`
+- `period`
+- `salary_median`
+- `salary_5y_growth`
+- `source`
+- `dataset`
+- `source_url`
+
+Preferred official source:
+
+**Danmarks Statistik LONS11 — Løn efter uddannelse, sektor, aflønningsform, lønmodtagergruppe, lønkomponenter og køn.** The repository must record the exact dimensions selected and the unit. Salary data must be linked to programmes through `programme_education_mapping.csv`, never fuzzy title matching.
 
 Rules:
 
-- One row per programme for the stated period in the final programme-level input.
-- Employment/unemployment must be observed or deterministically derived from an identified official dataset.
-- Salary growth must be calculated from salary observations from the identified salary dataset. It may not be generated from `labour_demand`, KOT scores, or another model score.
-- If an official source is only available at education-group level, the final row must carry the exact education-group code and documented crosswalk used to connect it to the programme. Do not imply that the observation is programme-specific.
-- The pipeline derives `labour_demand` as:
+- `salary_median` must be an observed value from the identified salary source.
+- `salary_5y_growth` must be calculated from a comparable salary series or supplied as a documented source-derived measure.
+- It may never be generated from `labour_demand`, KOT scores, or another model score.
+- If comparable five-year data cannot be established, the pipeline must leave the growth metric unavailable rather than invent it.
 
-  `0.7 × employment percentile + 0.3 × inverse unemployment percentile`
-
-- The pipeline derives `salary_growth` as the cross-sectional percentile of the observed five-year salary-growth measure.
-- Resulting scores are `DERIVED`, not `OBSERVED`.
-
-## 3. AI occupation exposure
+## 5. AI occupation exposure
 
 File: `data/sources/ai_occupation_exposure.csv`
 
-Columns:
+Required columns:
 
 - `disco08_code`
-- `automation_risk` — decimal 0–1.
-- `augmentation_potential` — decimal 0–1.
+- `automation_risk`
+- `augmentation_potential`
 - `source`
 - `dataset`
 - `period`
@@ -84,23 +107,36 @@ Columns:
 Rules:
 
 - One row per DISCO-08 code.
-- Values must be traceable to a named source/model.
-- If the source is O*NET or another foreign occupation taxonomy, the DISCO mapping must be documented separately.
+- Foreign occupation sources such as O*NET require a documented DISCO crosswalk.
 - These values are `CROSSWALK_OR_MODEL`, never observed Danish labour-market measurements.
 
-## 4. KOT data is admissions data, not labour demand
+## 6. Derived scores
 
-KOT observations are used for admission-related product features such as historical threshold values and demand/interest indicators. They must never be used as a proxy for employment, unemployment or salary.
+The canonical pipeline derives:
 
-## 5. No synthetic fallback
+`labour_demand = 0.7 × employment percentile + 0.3 × inverse unemployment percentile`
 
-The following are explicitly forbidden in production:
+and:
+
+`salary_growth = cross-sectional percentile of observed five-year salary growth`
+
+Both are `DERIVED`, not observed.
+
+The weights are model choices and must be exposed in methodology documentation.
+
+## 7. KOT is admissions data, not labour demand
+
+KOT observations are used for admissions-related features such as historical threshold values and demand/interest indicators. They must never be used as a proxy for employment, unemployment or salary.
+
+## 8. No synthetic fallback
+
+Forbidden in production:
 
 - constant fallback scores such as 70/70/70;
-- `DEFAULT` DISCO mappings;
-- generated values based on programme title alone;
-- using KOT threshold values as a proxy for labour demand;
-- constructing a regression outcome from the platform's own scores;
+- `DEFAULT` mappings;
+- programme values generated from programme titles alone;
+- KOT thresholds used as labour-demand proxies;
+- synthetic regression outcomes based on the platform's own scores;
 - assigning a source merely because it exists in the global evidence registry.
 
 If required source coverage is incomplete, the build must fail rather than fill the gap.
