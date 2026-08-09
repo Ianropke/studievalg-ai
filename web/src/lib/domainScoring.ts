@@ -67,11 +67,10 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
     const labDemand = normalizeMetricValue(rawScores.labour_demand, 72);
     const salGrowth = normalizeMetricValue(rawScores.salary_growth, 70);
     const augPot = normalizeMetricValue(rawScores.augmentation_potential, 80);
-    const autoExp = normalizeMetricValue(rawScores.automation_exposure, autoRisk);
 
     return {
       automation_risk: autoRisk,
-      automation_exposure: autoExp,
+      automation_exposure: autoRisk,
       augmentation_potential: augPot,
       labour_demand: labDemand,
       salary_growth: salGrowth,

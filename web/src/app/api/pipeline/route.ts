@@ -24,7 +24,6 @@ const PipelineResponseSchema = z.object({
     kot_nr: z.string(),
     udbud_titel: z.string(),
     match_score: z.number(),
-    automation_exposure: z.number(),
     automation_risk: z.number(),
     augmentation_potential: z.number(),
     labour_demand: z.number(),

@@ -1,8 +1,8 @@
 """
-Evidence-Based Recommendation Engine & Analytics Pipeline (v2026.3 Production Final).
+Evidence-Based Recommendation Engine & Analytics Pipeline (v2026.4 Targeted Correctness Pass).
 Processes user queries, performs staged candidate retrieval, candidate-aware evidence filtering,
-canonical location matching via catalog schema, deterministic claim-to-evidence validation,
-data validation, and dynamic scenario modeling.
+interest alignment matching, canonical location matching with source transparency,
+deterministic claim-to-evidence validation, data validation, and dynamic scenario modeling.
 """
 
 import sys
@@ -42,7 +42,7 @@ SYNONYMS = {
     "lærer": ["pædagog", "læreruddannelse", "undervisning"],
     "matematik": ["datalogi", "ingeniør", "fysik", "økonomi"],
     "kunsthistorie": ["kunst", "visuel", "kultur", "design"],
-    "humaniora": ["humaniora", "filosofi", "historie", "litteratur", "sprog", "kultur"]
+    "humaniora": ["humaniora", "filosofi", "historie", "litteratur", "sprog", "kultur", "politik"]
 }
 
 # Major Danish study cities and regional aliases
@@ -96,7 +96,7 @@ class MultiAgentEngine:
     # 1. Planner Agent (Structured Query Intent Extraction)
     def _planner_agent(self, user_query, user_profile):
         query_clean = user_query.strip().lower()
-        stop_words = {"i", "på", "til", "og", "eller", "en", "et", "som", "med", "af", "for"}
+        stop_words = {"i", "på", "til", "og", "eller", "en", "et", "som", "med", "af", "for", "love", "like", "elsker"}
         raw_tokens = [t for t in query_clean.split() if t not in stop_words and len(t) > 1]
 
         search_terms = raw_tokens.copy()
@@ -117,6 +117,7 @@ class MultiAgentEngine:
 
         return {
             "query": user_query,
+            "raw_tokens": raw_tokens,
             "search_terms": list(set(search_terms)),
             "detected_location": detected_location,
             "user_preferences": profile
@@ -205,24 +206,30 @@ class MultiAgentEngine:
             "admissions_summary": retrieved_data["admissions"][:5]
         }
 
-    # 4. Reasoning Agent (Canonical Structured Location Matching & Clamped Metrics)
+    # 4. Reasoning Agent (User Interest Alignment & Structured Location Sources)
     def _reasoning_agent(self, plan, retrieved_data, evidence):
         scored_programs = []
         user_prefs = plan["user_preferences"]
+        raw_tokens = plan.get("raw_tokens", [])
+        query_terms = [t.lower() for t in raw_tokens if len(t) > 2]
+        
         risk_tol = float(user_prefs.get("risk_tolerance", 0.3))
         salary_prio = float(user_prefs.get("salary_priority", 0.5))
         preferred_loc = (user_prefs.get("location") or "").lower().strip()
 
-        # Normalized weights summing to 1.0
-        w_ai = 0.35 * (1.0 - (0.2 * risk_tol))
-        w_sal = 0.25 * (0.5 + (0.5 * salary_prio))
-        w_job = 0.25
-        w_loc = 0.15 if preferred_loc else 0.0
+        # Transparent score component weights summing to 1.0:
+        # interest_fit: 30%, ai_resilience: 25%, labour_demand: 20%, salary_growth: 15%, location_fit: 10%
+        w_int = 0.30
+        w_ai = 0.25 * (1.0 - (0.2 * risk_tol))
+        w_job = 0.20
+        w_sal = 0.15 * (0.5 + (0.5 * salary_prio))
+        w_loc = 0.10 if preferred_loc else 0.0
 
-        weight_sum = w_ai + w_sal + w_job + w_loc
+        weight_sum = w_int + w_ai + w_sal + w_job + w_loc
+        w_int_norm = w_int / weight_sum
         w_ai_norm = w_ai / weight_sum
-        w_sal_norm = w_sal / weight_sum
         w_job_norm = w_job / weight_sum
+        w_sal_norm = w_sal / weight_sum
         w_loc_norm = w_loc / weight_sum
 
         for p in retrieved_data["profiles"]:
@@ -232,32 +239,54 @@ class MultiAgentEngine:
             lab_dem = max(0.0, min(1.0, float(p.get("labour_demand", 0.7))))
             sal_gro = max(0.0, min(1.0, float(p.get("salary_growth", 0.7))))
 
-            # FIX #3: Strictly clamped automation exposure [0.0, 1.0]
-            auto_exp = round(max(0.0, min(1.0, auto_risk * 1.1)), 3)
-
             # Authoritative single AI resilience index
             ai_resilience = compute_canonical_ai_resilience(auto_risk, aug_pot)
 
-            # FIX #1: Canonical structured location matching using catalog 'by' and 'institution'
+            # REQ #4: User Interest Alignment (interest_fit)
+            title_lower = p["udbud_titel"].lower().strip()
+            disco_lower = (p.get("disco_titel") or "").lower().strip()
+
+            # Filter out city names from interest alignment query terms
+            interest_query_terms = [t for t in query_terms if t not in CITIES]
+
+            if interest_query_terms:
+                direct_matches = sum(1 for tok in interest_query_terms if tok in title_lower)
+                disco_matches = sum(1 for tok in interest_query_terms if tok in disco_lower)
+                
+                if direct_matches > 0:
+                    interest_fit = min(1.0, 0.85 + (0.10 * (direct_matches - 1)))
+                elif disco_matches > 0:
+                    interest_fit = 0.70
+                else:
+                    interest_fit = 0.30
+            else:
+                interest_fit = 0.70
+
+            # REQ #2: Canonical Location Data with Transparent Source
             cat_entry = CATALOG_BY_KOT.get(kot, {})
             cat_city = (cat_entry.get("by") or "").lower().strip()
             cat_inst = (cat_entry.get("institution") or "").lower().strip()
-            title_lower = p["udbud_titel"].lower().strip()
 
-            location_status = "KNOWN"
             if preferred_loc:
-                if not cat_city and not cat_inst and not any(c in title_lower for c in CITIES):
-                    location_status = "UNKNOWN"
-                    loc_fit = 0.5
-                elif preferred_loc in cat_city or preferred_loc in cat_inst or preferred_loc in title_lower or (preferred_loc == "københavn" and "frederiksberg" in cat_city):
+                if preferred_loc in cat_city or preferred_loc in cat_inst or (preferred_loc == "københavn" and "frederiksberg" in cat_city):
                     loc_fit = 1.0
-                else:
+                    loc_source = "STRUCTURED"
+                elif preferred_loc in title_lower:
+                    loc_fit = 0.8  # Title fallback gets lower confidence score than structured
+                    loc_source = "TITLE_FALLBACK"
+                elif cat_city or cat_inst:
                     loc_fit = 0.3
+                    loc_source = "STRUCTURED"
+                else:
+                    loc_fit = 0.5
+                    loc_source = "UNKNOWN"
             else:
                 loc_fit = 1.0
+                loc_source = "STRUCTURED" if (cat_city or cat_inst) else "UNKNOWN"
 
-            # Composite match score
+            # Composite match score with user interest alignment
             composite = (
+                (w_int_norm * interest_fit) +
                 (w_ai_norm * ai_resilience) +
                 (w_sal_norm * sal_gro) +
                 (w_job_norm * lab_dem) +
@@ -267,6 +296,8 @@ class MultiAgentEngine:
             top_factors = []
             main_risks = []
 
+            if interest_fit >= 0.80:
+                top_factors.append("Stærk faglig interesse-sammenfald for ansøgeren")
             if ai_resilience >= 0.75:
                 top_factors.append("Høj AI-robusthed og stærkt augmentationspotentiale")
             if lab_dem >= 0.80:
@@ -277,29 +308,35 @@ class MultiAgentEngine:
                 top_factors.append(f"Match på ønsket studieby ({preferred_loc.capitalize()})")
 
             if auto_risk >= 0.35:
-                main_risks.append(f"Forventet opgaveomstilling ved øget AI-adoption ({round(auto_risk*100)}% automatiseringseksponering)")
+                main_risks.append(f"Forventet opgaveomstilling ved øget AI-adoption ({round(auto_risk*100)}% opgaveeksponering)")
             if lab_dem < 0.60:
                 main_risks.append("Lavere historisk dimittend-beskæftigelse")
-
-            # FIX #2: REMOVED FALSE HEURISTIC ("evidence_quality": "HIGH" if disco08_code else "MEDIUM").
-            # Evidence quality is now determined strictly by citation source authority!
 
             scored_programs.append({
                 "kot_nr": kot,
                 "udbud_titel": p["udbud_titel"],
                 "match_score": round(composite, 2),
-                "automation_exposure": auto_exp,
                 "automation_risk": round(auto_risk, 3),
                 "augmentation_potential": round(aug_pot, 3),
                 "labour_demand": round(lab_dem, 3),
                 "salary_growth": round(sal_gro, 3),
                 "ai_resilience": round(ai_resilience, 3),
-                "location_status": location_status,
+                "interest_fit": round(interest_fit, 3),
+                "location_fit": round(loc_fit, 2),
+                "location_source": loc_source,
                 "score_components": {
+                    "interest_fit": round(interest_fit * 100),
                     "ai_resilience": round(ai_resilience * 100),
                     "salary_growth": round(sal_gro * 100),
                     "labour_demand": round(lab_dem * 100),
                     "location_fit": round(loc_fit * 100)
+                },
+                "score_weights": {
+                    "interest_weight": round(w_int_norm, 2),
+                    "ai_weight": round(w_ai_norm, 2),
+                    "job_weight": round(w_job_norm, 2),
+                    "salary_weight": round(w_sal_norm, 2),
+                    "location_weight": round(w_loc_norm, 2)
                 },
                 "top_positive_factors": top_factors if top_factors else ["Stabil samlet profil"],
                 "main_risks": main_risks if main_risks else ["Ingen væsentlige risikofaktorer identificeret"],
@@ -311,7 +348,7 @@ class MultiAgentEngine:
         scored_programs.sort(key=lambda x: x["match_score"], reverse=True)
         return scored_programs
 
-    # 5. Counterargument Agent (FIX #4: Renamed to Modelbaseret Forbehold)
+    # 5. Counterargument Agent (Modelbaseret Forbehold)
     def _counterargument_agent(self, top_program):
         if not top_program:
             return "Ingen kandidatuddannelse at analysere for risikofaktorer."
@@ -333,19 +370,19 @@ class MultiAgentEngine:
         for p in scored_programs:
             kot = p.get("kot_nr", "")
             score = p.get("match_score", 0)
-            auto_exp = p.get("automation_exposure", 0)
             auto_risk = p.get("automation_risk", 0)
             aug_pot = p.get("augmentation_potential", 0)
             lab_dem = p.get("labour_demand", 0)
             sal_gro = p.get("salary_growth", 0)
             ai_res = p.get("ai_resilience", 0)
+            int_fit = p.get("interest_fit", 0)
 
-            # Bounds check for all 6 core dimensions [0.0, 1.0]
-            if not (0.0 <= score <= 1.0 and 0.0 <= auto_exp <= 1.0 and 0.0 <= auto_risk <= 1.0 and
-                    0.0 <= aug_pot <= 1.0 and 0.0 <= lab_dem <= 1.0 and 0.0 <= sal_gro <= 1.0 and
-                    0.0 <= ai_res <= 1.0):
+            # Bounds check for all core dimensions [0.0, 1.0]
+            if not (0.0 <= score <= 1.0 and 0.0 <= auto_risk <= 1.0 and 0.0 <= aug_pot <= 1.0 and
+                    0.0 <= lab_dem <= 1.0 and 0.0 <= sal_gro <= 1.0 and 0.0 <= ai_res <= 1.0 and
+                    0.0 <= int_fit <= 1.0):
                 rejected_programs.append(p)
-                rejection_reasons[kot] = f"Numerical metric out of bounds [0.0, 1.0]: auto_exp={auto_exp}"
+                rejection_reasons[kot] = "Numerical metric out of bounds [0.0, 1.0]"
                 continue
 
             # Database existence check
@@ -374,9 +411,9 @@ class MultiAgentEngine:
             "validation_status": status
         }
 
-    # 7. Citation Agent (Separates source_authority, claim_relevance, and supports_claim)
-    def _citation_agent(self, evidence, top_program):
-        if not top_program:
+    # 7. Citation Agent (REQ #1: Programme & Claim-Specific Evidence Evaluation)
+    def _citation_agent(self, evidence, candidate_program):
+        if not candidate_program:
             return [{
                 "claim_id": "claim-none",
                 "source": "Ingen kilde",
@@ -388,7 +425,7 @@ class MultiAgentEngine:
             }]
 
         citations = []
-        program_title = (top_program.get("udbud_titel") or "").lower()
+        program_title = (candidate_program.get("udbud_titel") or "").lower()
         title_tokens = [w for w in program_title.split() if len(w) > 3][:3]
 
         for c in evidence["evidence_chunks"]:
@@ -405,7 +442,7 @@ class MultiAgentEngine:
 
             if supports:
                 citations.append({
-                    "claim_id": f"claim-{top_program.get('kot_nr', '17020')}",
+                    "claim_id": f"claim-{candidate_program.get('kot_nr', '17020')}",
                     "source": source_title,
                     "url": source_url,
                     "quote": c["chunk_text"],
@@ -416,8 +453,8 @@ class MultiAgentEngine:
 
         if not citations:
             return [{
-                "claim_id": f"claim-{top_program.get('kot_nr', '17020')}",
-                "source": "Ingen specifik kilde matchet",
+                "claim_id": f"claim-{candidate_program.get('kot_nr', '17020')}",
+                "source": "Ingen specifik kilde matchet for denne uddannelse",
                 "url": "",
                 "quote": "Ingen direkte verificeret evidenskilde fundet for dette specifikke fagområde.",
                 "source_authority": "UNKNOWN",
@@ -427,8 +464,8 @@ class MultiAgentEngine:
 
         return citations[:5]
 
-    # 8. UI Formatter Agent
-    def _ui_formatter_agent(self, validation_payload, counterargument, citations, user_query):
+    # 8. UI Formatter Agent (REQ #1: Programme-Specific Evidence Quality Attachment)
+    def _ui_formatter_agent(self, validation_payload, counterargument, evidence, user_query):
         valid_programs = validation_payload["valid_programs"]
         val_status = validation_payload["validation_status"]
 
@@ -442,13 +479,20 @@ class MultiAgentEngine:
                 "evidence_citations": []
             }
 
+        # REQ #1: Calculate program-specific evidence citations and quality for EACH recommended program
+        all_program_citations = {}
+        for prog in valid_programs:
+            prog_citations = self._citation_agent(evidence, prog)
+            all_program_citations[prog["kot_nr"]] = prog_citations
+            
+            # Attach programme-specific overall evidence quality
+            top_cite = prog_citations[0] if prog_citations else {}
+            prog["evidence_quality"] = top_cite.get("source_authority", "UNKNOWN")
+            prog["citations"] = prog_citations
+
         top_kot = valid_programs[0]["kot_nr"]
         scenario_proj = run_scenario_simulation(top_kot, target_year=2030)
-
-        # Attach overall evidence authority level from citations
-        primary_auth = citations[0]["source_authority"] if citations else "UNKNOWN"
-        for p in valid_programs:
-            p["evidence_quality"] = primary_auth
+        top_citations = all_program_citations.get(top_kot, [])
 
         return {
             "status": "success",
@@ -457,9 +501,9 @@ class MultiAgentEngine:
             "recommended_programs": valid_programs,
             "devils_advocate_perspective": counterargument,
             "scenario_projections_2030": scenario_proj,
-            "evidence_citations": citations,
+            "evidence_citations": top_citations,
             "explainability": {
-                "user_model_matching": "Deterministisk flerfaktor-vægtet algoritme (w_ai, w_salary, w_demand, w_location)",
+                "user_model_matching": "Deterministisk 5-faktor vægtet algoritme (w_interest, w_ai, w_salary, w_demand, w_location)",
                 "knowledge_graph_chain": "Education -> Course -> Task -> DISCO-08 -> Industry",
                 "register_data_verification": "UFM REST API & Danmarks Statistik (KOT 2009-2026)"
             }
@@ -480,9 +524,8 @@ class MultiAgentEngine:
         top_prog = valid_progs[0] if valid_progs else {}
 
         counterargument = self._counterargument_agent(top_prog)
-        citations = self._citation_agent(evidence, top_prog)
 
-        final_payload = self._ui_formatter_agent(validation_payload, counterargument, citations, user_query)
+        final_payload = self._ui_formatter_agent(validation_payload, counterargument, evidence, user_query)
         return final_payload
 
 
@@ -501,5 +544,5 @@ if __name__ == "__main__":
         "location": args.location
     })
 
-    # FIX #5: Python writes clean JSON output to stdout. Diagnostics go to stderr.
+    # Clean stdout JSON output
     sys.stdout.write(json.dumps(result, ensure_ascii=False))
