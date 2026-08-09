@@ -117,3 +117,15 @@ Dette dokument opsummerer de vigtigste læringer fra udviklingen af platformen, 
 ## 25. Vercel Monorepo Workspace Configuration (`package.json` Workspaces)
 - **NPM Workspace Root**: Ved monorepo-opsætning i Git, hvor Next.js appen ligger i en undermappe (`web/`), SKAL repositoriets rod `package.json` definere `"workspaces": ["web"]` og `"scripts": { "build": "npm run build --workspace=web" }`.
 - **Lokale Lockfiles**: Der må kun eksistere én `package-lock.json` i repositoriets rod for at forhindre SWC/dep resolution-fejl i Vercel CI.
+
+## 26. Query-Aware Candidate Retrieval & Analytics Pipeline (`multi_agent_engine.py`)
+- **Dynamisk Kandidat-søgning**: Erstatter statisk `LIMIT 15` med dynamiske, parametrerede SQL-forespørgsler mod DuckDB baseret på brugerens søgetermer (fx *"journalist"* → Journalistik, Medier, Kommunikation).
+- **Flerfaktor Vægtning**: Inddrager samtlige brugerpræferencer (`salary_priority`, `location`, `gpa`, `risk_tolerance`) i flerfaktor-vægtningen i stedet for udelukkende at se på risikotolerance.
+
+## 27. API Route Shell Injection Prevention (`route.ts`)
+- **Sikker Subprocess Afvikling**: Undgå `exec(command)` med streng-interpolering af brugerinput. Anvend altid `execFile(pythonPath, [scriptPath, "--query", query, ...])` med et eksplicit argument-array for at eliminere risici for command injection.
+
+## 28. Streng CI Security Gate & Secrets Hygiene
+- **Fjern Hardkodede Keys**: API-nøgler må aldrig ligge i kildekoden. De hentes via `os.environ.get("UFM_API_KEY")` med standard TLS-certifikatvalidering (`ssl.create_default_context()`).
+- **Aktive CI Quality Gates**: I `.github/workflows/ci.yml` fjernes `|| true` fra `npm audit --audit-level=high` så CI-pipelinen håndhæver et ægte sikkerheds-gateway mod sårbarheder.
+
