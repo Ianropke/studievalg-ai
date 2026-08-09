@@ -1,12 +1,14 @@
-"""Build education profile scores from explicitly sourced input datasets.
+"""Build canonical education profile scores from sourced observations.
 
-Canonical producer of education_profile_scores.
+No programme score is fabricated. The pipeline requires:
+1. an explicit KOT -> DISCO mapping;
+2. programme-level labour/salary observations with independent provenance;
+3. AI occupation exposure with its own source provenance.
 
-The pipeline refuses to invent labour-market, salary, occupation, or AI values.
-It requires three source exports with mandatory provenance fields. See
-DATA_SOURCE_CONTRACT.md.
+The score layer only transforms supplied observations. It does not infer a
+programme mapping from title similarity and it never uses KOT admission data as
+labour-market demand.
 """
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -26,9 +28,20 @@ MAPPING_PATH = SOURCES_DIR / "programme_disco_mapping.csv"
 LABOUR_PATH = SOURCES_DIR / "labour_market_by_programme.csv"
 AI_PATH = SOURCES_DIR / "ai_occupation_exposure.csv"
 
-REQUIRED_MAPPING = {"kot_nr", "disco08_code", "mapping_method", "mapping_source", "mapping_period", "mapping_confidence"}
-REQUIRED_LABOUR = {"kot_nr", "period", "employment_rate", "unemployment_rate", "salary_median", "salary_5y_growth", "source", "dataset", "source_url"}
-REQUIRED_AI = {"disco08_code", "automation_risk", "augmentation_potential", "source", "dataset", "period", "source_url"}
+REQUIRED_MAPPING = {
+    "kot_nr", "disco08_code", "mapping_method", "mapping_source",
+    "mapping_period", "mapping_confidence"
+}
+REQUIRED_LABOUR = {
+    "kot_nr", "period", "employment_rate", "unemployment_rate",
+    "salary_median", "salary_5y_growth", "labour_source", "labour_dataset",
+    "labour_source_url", "salary_source", "salary_dataset",
+    "salary_source_url"
+}
+REQUIRED_AI = {
+    "disco08_code", "automation_risk", "augmentation_potential", "source",
+    "dataset", "period", "source_url"
+}
 
 
 def _require_columns(df: pd.DataFrame, required: set[str], name: str) -> None:
@@ -70,7 +83,11 @@ def build_profiles() -> dict:
     labour = _read_csv(LABOUR_PATH, REQUIRED_LABOUR, "labour_market_by_programme")
     ai = _read_csv(AI_PATH, REQUIRED_AI, "ai_occupation_exposure")
 
-    labour = _numeric(labour, ["employment_rate", "unemployment_rate", "salary_median", "salary_5y_growth"], "labour_market_by_programme")
+    labour = _numeric(
+        labour,
+        ["employment_rate", "unemployment_rate", "salary_median", "salary_5y_growth"],
+        "labour_market_by_programme",
+    )
     ai = _numeric(ai, ["automation_risk", "augmentation_potential"], "ai_occupation_exposure")
 
     if mapping["kot_nr"].duplicated().any():
@@ -80,16 +97,16 @@ def build_profiles() -> dict:
     if ai["disco08_code"].duplicated().any():
         raise ValueError("ai_occupation_exposure: disco08_code must be unique")
 
+    if mapping["disco08_code"].astype(str).str.upper().eq("DEFAULT").any():
+        raise ValueError("programme_disco_mapping: DEFAULT mapping is forbidden")
     if not labour["employment_rate"].between(0, 1).all() or not labour["unemployment_rate"].between(0, 1).all():
         raise ValueError("Labour rates must be expressed as decimals in [0,1]")
     if not ai["automation_risk"].between(0, 1).all() or not ai["augmentation_potential"].between(0, 1).all():
         raise ValueError("AI scores must be expressed as decimals in [0,1]")
 
-    labour = labour.rename(columns={
-        "source": "labour_source", "dataset": "labour_dataset", "period": "labour_period", "source_url": "labour_source_url"
-    })
     ai = ai.rename(columns={
-        "source": "ai_source", "dataset": "ai_dataset", "period": "ai_period", "source_url": "ai_source_url"
+        "source": "ai_source", "dataset": "ai_dataset", "period": "ai_period",
+        "source_url": "ai_source_url"
     })
 
     conn = duckdb.connect(str(DUCKDB_PATH))
@@ -104,11 +121,16 @@ def build_profiles() -> dict:
         merged = merged.merge(labour, on="kot_nr", how="left", validate="one_to_one")
         merged = merged.merge(ai, on="disco08_code", how="left", validate="many_to_one")
 
-        required_join = ["disco08_code", "employment_rate", "unemployment_rate", "salary_5y_growth", "automation_risk", "augmentation_potential"]
+        required_join = [
+            "disco08_code", "employment_rate", "unemployment_rate", "salary_5y_growth",
+            "automation_risk", "augmentation_potential", "salary_source", "salary_dataset"
+        ]
         missing_rows = merged[required_join].isna().any(axis=1)
         if missing_rows.any():
             examples = merged.loc[missing_rows, ["kot_nr", "udbud_titel"]].head(10).to_dict("records")
-            raise ValueError(f"Incomplete source coverage for {int(missing_rows.sum())} programmes. Examples: {examples}")
+            raise ValueError(
+                f"Incomplete source coverage for {int(missing_rows.sum())} programmes. Examples: {examples}"
+            )
 
         merged["labour_demand"] = (
             0.7 * _percentile(merged["employment_rate"], True)
@@ -150,25 +172,33 @@ def build_profiles() -> dict:
             """
         )
 
-        disco_title_map = {str(code): title for code, title in conn.execute("SELECT code, title FROM disco08_occupations").fetchall()}
+        disco_title_map = {
+            str(code): title
+            for code, title in conn.execute("SELECT code, title FROM disco08_occupations").fetchall()
+        }
         rows = []
         for _, r in merged.iterrows():
             rows.append([
-                str(r.kot_nr), str(r.udbud_titel), str(r.disco08_code), disco_title_map.get(str(r.disco08_code)),
-                float(r.automation_risk), float(r.augmentation_potential), float(r.labour_demand), float(r.salary_growth),
-                None, None,
-                str(r.mapping_method), str(r.mapping_source), str(r.mapping_period), str(r.mapping_confidence),
-                str(r.labour_source), str(r.labour_dataset), str(r.labour_period), str(r.labour_source_url),
-                str(r.labour_source), str(r.labour_dataset), str(r.labour_period), str(r.labour_source_url),
+                str(r.kot_nr), str(r.udbud_titel), str(r.disco08_code),
+                disco_title_map.get(str(r.disco08_code)), float(r.automation_risk),
+                float(r.augmentation_potential), float(r.labour_demand),
+                float(r.salary_growth), None, None,
+                str(r.mapping_method), str(r.mapping_source), str(r.mapping_period),
+                str(r.mapping_confidence), str(r.labour_source), str(r.labour_dataset),
+                str(r.labour_period), str(r.labour_source_url), str(r.salary_source),
+                str(r.salary_dataset), str(r.labour_period), str(r.salary_source_url),
                 str(r.ai_source), str(r.ai_dataset), str(r.ai_period), str(r.ai_source_url),
             ])
 
-        conn.executemany("INSERT INTO education_profile_scores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+        conn.executemany(
+            "INSERT INTO education_profile_scores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            rows,
+        )
     finally:
         conn.close()
 
     result = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "programme_count": int(len(merged)),
         "sources": {
             "mapping": str(MAPPING_PATH.relative_to(BASE_DIR)),
@@ -177,7 +207,7 @@ def build_profiles() -> dict:
         },
         "methodology": {
             "labour_demand": "0.7 * employment percentile + 0.3 * inverse unemployment percentile",
-            "salary_growth": "cross-sectional percentile of observed 5-year salary growth",
+            "salary_growth": "cross-sectional percentile of observed five-year salary growth",
         },
         "epistemic_status": {
             "labour_demand": "DERIVED",
