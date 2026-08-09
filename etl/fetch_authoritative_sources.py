@@ -2,6 +2,10 @@
 
 The ingestion uses public official distributions and stores immutable snapshots
 with SHA-256 provenance. It never fabricates missing observations.
+
+Important: the UFM KOT file is an admissions source, not itself a labour-market
+identifier. The DST education register is used to discover UDD/AUDD mappings;
+we do not infer a mapping from programme names.
 """
 from __future__ import annotations
 
@@ -18,6 +22,7 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "sources" / "raw"
 MANIFEST = ROOT / "data" / "sources" / "raw_source_manifest.json"
+CROSSWALK_SPEC = ROOT / "data" / "sources" / "education_crosswalk_spec.json"
 
 UFM_CKAN_BASE = "https://datavejviser-indtastning.digst.govcloud.dk/api/3/action/package_show?id="
 UFM_EMPLOYMENT_ID = "c7f294fe-bf49-4f1d-98c2-61f0573bcb67"
@@ -28,7 +33,7 @@ DST_REGISTER_PAGE = "https://www.dst.dk/da/Statistik/dokumentation/metode/uddann
 
 
 def get(url: str) -> requests.Response:
-    r = requests.get(url, timeout=60, headers={"User-Agent": "studievalg-ai-source-ingestion/1.2"})
+    r = requests.get(url, timeout=60, headers={"User-Agent": "studievalg-ai-source-ingestion/1.3"})
     r.raise_for_status()
     return r
 
@@ -60,6 +65,7 @@ def fetch_ufm_dataset(dataset_id: str, dataset_name: str, catalog_url: str, file
         "distribution": "CSV",
         "catalog_url": catalog_url,
         "source_url": resource["url"],
+        "resource_name": resource.get("name"),
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "license": "CC BY 4.0",
     }
@@ -92,7 +98,7 @@ def fetch_dst_register(manifest: list[dict]) -> None:
             "source_url": url,
             "catalog_url": DST_REGISTER_PAGE,
             "retrieved_at": datetime.now(timezone.utc).isoformat(),
-            "classification_note": "UDD/AUDD are the authoritative programme/qualification identifiers used to link education data.",
+            "classification_note": "UDD/AUDD are authoritative Danish education identifiers; programme-to-observation mapping must be explicit.",
         }
         save_bytes(f"dst_education_register/{name}", r.content, meta)
         manifest.append(meta)
@@ -102,8 +108,10 @@ def fetch_lons11_schema(manifest: list[dict]) -> None:
     tableinfo_url = "https://api.statbank.dk/v1/tableinfo/LONS11?lang=da"
     info = get(tableinfo_url).json()
     variables = {v["id"]: v for v in info["variables"]}
-    if "UDD" not in variables:
-        raise RuntimeError("LONS11 schema changed; missing UDD variable")
+    # Do not assume that a variable named UDD exists forever. Fail clearly if
+    # the table's education dimension changes and require a reviewed query.
+    if not any(v.get("id", "").upper() == "UDD" for v in info["variables"]):
+        raise RuntimeError("LONS11 schema changed; no UDD education variable found")
     data = json.dumps(info, ensure_ascii=False, indent=2).encode("utf-8")
     meta = {
         "source": "Danmarks Statistik",
@@ -118,6 +126,28 @@ def fetch_lons11_schema(manifest: list[dict]) -> None:
     manifest.append(meta)
 
 
+def write_crosswalk_spec() -> None:
+    spec = {
+        "version": "1.0",
+        "status": "REQUIRES_SOURCE_MAPPING",
+        "grain": "KOT programme -> official Danish education identifier",
+        "canonical_identifier": "UDD",
+        "secondary_identifier": "AUDD",
+        "rules": [
+            "Do not map by fuzzy programme-title similarity.",
+            "Do not infer an education code from DISCO-08.",
+            "Do not use KOT number as a labour-market code unless the source explicitly defines that relationship.",
+            "Each production mapping must contain kot_code, udd_code, mapping_method, mapping_source, mapping_period, and mapping_confidence.",
+            "Unmapped programmes remain UNMAPPED and cannot receive labour/salary scores."
+        ],
+        "allowed_mapping_methods": ["OFFICIAL_SOURCE", "VERIFIED_CROSSWALK"],
+        "required_provenance": ["source_url", "dataset", "period"],
+        "note": "The ingestion pipeline creates the contract and raw source snapshots; it does not manufacture the KOT-to-UDD relationship."
+    }
+    CROSSWALK_SPEC.parent.mkdir(parents=True, exist_ok=True)
+    CROSSWALK_SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     RAW.mkdir(parents=True, exist_ok=True)
     manifest: list[dict] = []
@@ -125,11 +155,13 @@ def main() -> int:
     fetch_ufm_dataset(UFM_KOT_ID, "Søgning og optagelse via KOT", UFM_KOT_CATALOG, "ufm_kot.csv", manifest)
     fetch_dst_register(manifest)
     fetch_lons11_schema(manifest)
+    write_crosswalk_spec()
     MANIFEST.write_text(
-        json.dumps({"retrieved_at": datetime.now(timezone.utc).isoformat(), "sources": manifest}, ensure_ascii=False, indent=2),
+        json.dumps({"retrieved_at": datetime.now(timezone.utc).isoformat(), "sources": manifest}, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     print(f"Fetched {len(manifest)} authoritative source artefacts.")
+    print(f"Crosswalk contract written to {CROSSWALK_SPEC.relative_to(ROOT)}")
     return 0
 
 
