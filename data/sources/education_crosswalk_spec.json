@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "status": "REQUIRES_SOURCE_MAPPING",
+  "grain": "KOT programme -> official Danish education identifier",
+  "canonical_identifier": "UDD",
+  "secondary_identifier": "AUDD",
+  "rules": [
+    "Do not map by fuzzy programme-title similarity.",
+    "Do not infer an education code from DISCO-08.",
+    "Do not use KOT number as a labour-market code unless the source explicitly defines that relationship.",
+    "Each production mapping must contain kot_code, udd_code, mapping_method, mapping_source, mapping_period, and mapping_confidence.",
+    "Unmapped programmes remain UNMAPPED and cannot receive labour/salary scores."
+  ],
+  "allowed_mapping_methods": ["OFFICIAL_SOURCE", "VERIFIED_CROSSWALK"],
+  "required_provenance": ["source_url", "dataset", "period"],
+  "note": "The ingestion pipeline creates the contract and raw source snapshots; it does not manufacture the KOT-to-UDD relationship."
+}
