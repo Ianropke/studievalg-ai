@@ -2,6 +2,6 @@
   "framework": "nextjs",
   "rootDirectory": "web",
   "buildCommand": "npm run build",
-  "installCommand": "npm install --include=optional",
+  "installCommand": "npm install --include=optional --no-package-lock",
   "outputDirectory": ".next"
 }
