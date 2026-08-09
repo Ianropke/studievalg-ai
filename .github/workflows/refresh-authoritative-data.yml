@@ -21,7 +21,8 @@ jobs:
       - name: Fetch authoritative sources
         run: python etl/fetch_authoritative_sources.py
       - name: Verify manifest
-        run: python - <<'PY'
+        run: |
+          python - <<'PY'
           import json
           from pathlib import Path
           p = Path('data/sources/raw_source_manifest.json')
@@ -31,11 +32,15 @@ jobs:
               assert item.get('sha256') and item.get('source_url') and item.get('retrieved_at')
           print(f"Verified {len(data['sources'])} raw source artefacts")
           PY
-      - name: Commit refreshed raw data
+      - name: Build KOT to UDD crosswalk
+        run: python etl/build_education_crosswalk.py
+      - name: Run data quality gate
+        run: python etl/run_data_quality_gate.py
+      - name: Commit refreshed raw data and validation artefacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/sources/raw data/sources/raw_source_manifest.json
+          git add data/sources/raw data/sources/raw_source_manifest.json data/sources/kot_udd_crosswalk.csv data/sources/kot_udd_crosswalk_report.json data/sources/data_quality_gate_report.json
           if git diff --cached --quiet; then
             echo "No source changes."
           else
