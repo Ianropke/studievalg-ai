@@ -92,11 +92,12 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     limit: 20,
     getValue: (p) => {
       const enriched = getEnrichedScores(p.udbud_titel, p.scores);
-      const rob = 100 - (enriched.automation_risk || 0);
-      const job = enriched.labour_demand || 50;
-      const sal = enriched.salary_growth || 50;
-      const avg = Math.round((rob + job + sal) / 3);
-      return { display: `${avg}/100`, numeric: avg, raw: avg };
+      const rob = enriched.ai_resilience;
+      const job = enriched.labour_demand;
+      const sal = enriched.salary_growth;
+      // Explicit weighted composite model (w_ai = 0.40, w_job = 0.35, w_sal = 0.25, sum = 1.0)
+      const score = Math.round(0.40 * rob + 0.35 * job + 0.25 * sal);
+      return { display: `${score}/100`, numeric: score, raw: score };
     },
     sortOrder: "desc",
   },

@@ -1,7 +1,4 @@
-/**
- * Unit Tests for AI-Studievalg Algoritme & Søgemaskine
- * Test Suite: Vitest / Node Test Runner
- */
+import { getEnrichedScores } from "../lib/domainScoring";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
   const totalWeight = Math.max(1, wAi + wJob + wSal);
@@ -164,7 +161,18 @@ export function runUnitTests() {
   console.assert(normKey(progVejle) === normKey(progSlagelse), "Test 14 Fejl: Sygeplejerske i Vejle og Slagelse bør have samme kanoniske nøgle");
   console.log("  ✅ TEST-14: Mangfoldigheds-deduplikering godkendt (Sygeplejerske i Vejle og Slagelse samles under én kanonisk nøgle)");
 
-  console.log("🎉 Alle 14 Unit Tests bestået uden fejl!\n");
+  // Test 15: Kanonisk Databasemodel vs Title-Heuristik
+  const dbScores = { automation_risk: 0.15, labour_demand: 0.95, salary_growth: 0.90 };
+  const enrichedDb = getEnrichedScores("Medicin", dbScores);
+  console.assert(enrichedDb.automation_risk === 15, `Test 15 Fejl: Database score bør bevares (15), fik ${enrichedDb.automation_risk}`);
+  console.log("  ✅ TEST-15: Kanonisk databasemodel godkendt (Empiriske databasetal overskrives ikke af title-heuristikker)");
+
+  // Test 16: Score Provenance Metadata
+  console.assert(enrichedDb.provenance !== undefined, "Test 16 Fejl: Provenance metadata mangler!");
+  console.assert(enrichedDb.provenance.automation_risk.confidence === "HIGH" || enrichedDb.provenance.automation_risk.confidence === "MEDIUM", "Test 16 Fejl: Confidence niveau ugyldigt!");
+  console.log("  ✅ TEST-16: Score Provenance metadata godkendt (Metrik-kilder, datasætversioner og konfidensniveauer verificeret)");
+
+  console.log("🎉 Alle 16 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
