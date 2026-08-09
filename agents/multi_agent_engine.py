@@ -1,7 +1,8 @@
 """
-Evidence-Based Recommendation Engine & Analytics Pipeline.
-Processes user queries, performs query-aware candidate retrieval, candidate-aware evidence filtering,
-multi-factor preference matching, deterministic claim-to-evidence validation, data validation, and dynamic scenario modeling.
+Evidence-Based Recommendation Engine & Analytics Pipeline (v2026.2 Production Hardened).
+Processes user queries, performs staged candidate retrieval, candidate-aware evidence filtering,
+multi-factor preference matching, deterministic claim-to-evidence validation, comprehensive data validation,
+and dynamic scenario modeling.
 """
 
 import sys
@@ -26,7 +27,9 @@ SYNONYMS = {
     "bygge": ["bygningsingeniør", "arkitektur", "konstruktør"],
     "økonom": ["erhvervsøkonomi", "ha", "oecon", "finans"],
     "lærer": ["pædagog", "læreruddannelse", "undervisning"],
-    "matematik": ["datalogi", "ingeniør", "fysik", "økonomi"]
+    "matematik": ["datalogi", "ingeniør", "fysik", "økonomi"],
+    "kunsthistorie": ["kunst", "visuel", "kultur", "design"],
+    "humaniora": ["humaniora", "filosofi", "historie", "litteratur", "sprog", "kultur"]
 }
 
 # Major Danish study cities
@@ -51,14 +54,25 @@ MEDIUM_QUALITY_SOURCES = [
 ]
 
 
-def classify_source_quality(source_title: str, url: str) -> str:
-    """Classifies source quality deterministically based on publisher authority."""
+def classify_source_authority(source_title: str, url: str) -> str:
+    """Classifies source authority deterministically based on publisher and official status."""
     combined = f"{source_title} {url}".lower()
     if any(hq in combined for hq in HIGH_QUALITY_SOURCES):
         return "HIGH"
     if any(mq in combined for mq in MEDIUM_QUALITY_SOURCES):
         return "MEDIUM"
     return "LOW" if url.startswith("http") else "UNKNOWN"
+
+
+def compute_canonical_ai_resilience(auto_risk: float, aug_pot: float) -> float:
+    """
+    Canonical authoritative formula for derived AI Resilience Index.
+    Formula: max(0.1, min(1.0, 1.0 - automation_risk + (0.2 * augmentation_potential)))
+    """
+    risk = max(0.0, min(1.0, float(auto_risk)))
+    aug = max(0.0, min(1.0, float(aug_pot)))
+    resilience = 1.0 - risk + (0.2 * aug)
+    return round(max(0.1, min(1.0, resilience)), 3)
 
 
 class MultiAgentEngine:
@@ -69,7 +83,10 @@ class MultiAgentEngine:
     # 1. Planner Agent (Structured Query Intent Extraction)
     def _planner_agent(self, user_query, user_profile):
         query_clean = user_query.strip().lower()
-        search_terms = [query_clean]
+        stop_words = {"i", "på", "til", "og", "eller", "en", "et", "som", "med", "af", "for"}
+        raw_tokens = [t for t in query_clean.split() if t not in stop_words and len(t) > 1]
+        
+        search_terms = raw_tokens.copy()
 
         detected_location = None
         for city in CITIES:
@@ -78,7 +95,7 @@ class MultiAgentEngine:
                 search_terms.append(city)
 
         for key, syns in SYNONYMS.items():
-            if key in query_clean:
+            if any(key in token for token in raw_tokens):
                 search_terms.extend(syns)
 
         profile = user_profile or {}
@@ -92,11 +109,12 @@ class MultiAgentEngine:
             "user_preferences": profile
         }
 
-    # 2. Retriever Agent (Query-Aware Candidate Retrieval)
+    # 2. Retriever Agent (Staged Retrieval without High-Salary Fallback Bias)
     def _retriever_agent(self, plan):
         conn = duckdb.connect(self.duckdb_path)
         search_terms = plan["search_terms"]
 
+        # Stage 1 & 2: Keyword and synonym matching against titles and DISCO titles
         like_conditions = []
         params = []
         for term in search_terms:
@@ -106,7 +124,8 @@ class MultiAgentEngine:
         where_clause = " OR ".join(like_conditions) if like_conditions else "1=1"
 
         query_sql = f"""
-            SELECT kot_nr, udbud_titel, disco08_code, disco_titel, automation_risk, augmentation_potential, labour_demand, salary_growth
+            SELECT kot_nr, udbud_titel, disco08_code, disco_titel,
+                   automation_risk, augmentation_potential, labour_demand, salary_growth
             FROM education_profile_scores
             WHERE {where_clause}
             LIMIT 25
@@ -117,14 +136,24 @@ class MultiAgentEngine:
         except Exception:
             profiles = []
 
-        if not profiles:
-            profiles = conn.execute("""
-                SELECT kot_nr, udbud_titel, disco08_code, disco_titel, automation_risk, augmentation_potential, labour_demand, salary_growth
-                FROM education_profile_scores
-                ORDER BY labour_demand DESC, salary_growth DESC
-                LIMIT 15
-            """).df().to_dict(orient="records")
+        # Stage 3: Broader token matching if no exact matches found
+        if not profiles and search_terms:
+            first_term = search_terms[0].split()[0]
+            if len(first_term) > 3:
+                broad_sql = """
+                    SELECT kot_nr, udbud_titel, disco08_code, disco_titel,
+                           automation_risk, augmentation_potential, labour_demand, salary_growth
+                    FROM education_profile_scores
+                    WHERE LOWER(udbud_titel) LIKE ?
+                    LIMIT 15
+                """
+                try:
+                    profiles = conn.execute(broad_sql, [f"%{first_term}%"]).df().to_dict(orient="records")
+                except Exception:
+                    profiles = []
 
+        # Stage 4: If STILL no relevant candidates match, return EMPTY list.
+        # DO NOT fall back to unrelated high-salary / high-demand programmes!
         admissions = conn.execute("""
             SELECT kot_nr, udbud_titel, aar, graensekvotient
             FROM kot_graensekvotienter
@@ -136,11 +165,9 @@ class MultiAgentEngine:
         conn.close()
         return {"profiles": profiles, "admissions": admissions}
 
-    # 3. Evidence Agent (Candidate-Aware Evidence Retrieval)
+    # 3. Evidence Agent (Candidate-Aware Evidence Filtering)
     def _evidence_agent(self, retrieved_data, plan):
         conn = duckdb.connect(self.duckdb_path)
-
-        # Candidate-aware retrieval: filter evidence matching search keywords or candidate titles
         search_terms = plan["search_terms"]
         like_conds = []
         params = []
@@ -162,13 +189,6 @@ class MultiAgentEngine:
         except Exception:
             chunks = []
 
-        if not chunks:
-            chunks = conn.execute("""
-                SELECT chunk_id, report_title, source_url, category, chunk_text
-                FROM report_evidence_chunks
-                LIMIT 10
-            """).df().to_dict(orient="records")
-
         conn.close()
 
         return {
@@ -176,17 +196,17 @@ class MultiAgentEngine:
             "admissions_summary": retrieved_data["admissions"][:5]
         }
 
-    # 4. Reasoning Agent (Explicit Weighted Multi-Factor Matching)
+    # 4. Reasoning Agent (Canonical Multi-Factor Matching & Structured Location)
     def _reasoning_agent(self, plan, retrieved_data, evidence):
         scored_programs = []
         user_prefs = plan["user_preferences"]
         risk_tol = float(user_prefs.get("risk_tolerance", 0.3))
         salary_prio = float(user_prefs.get("salary_priority", 0.5))
-        preferred_loc = (user_prefs.get("location") or "").lower()
+        preferred_loc = (user_prefs.get("location") or "").lower().strip()
 
-        # Normalized model weights: w_ai + w_sal + w_job + w_loc = 1.0
-        w_ai = 0.35
-        w_sal = 0.25 * salary_prio * 2.0
+        # Normalized weights summing to 1.0
+        w_ai = 0.35 * (1.0 - (0.2 * risk_tol))  # Low risk tolerance increases resilience weight
+        w_sal = 0.25 * (0.5 + (0.5 * salary_prio))  # Monotonic salary priority influence
         w_job = 0.25
         w_loc = 0.15 if preferred_loc else 0.0
 
@@ -202,12 +222,21 @@ class MultiAgentEngine:
             lab_dem = float(p.get("labour_demand", 0.7))
             sal_gro = float(p.get("salary_growth", 0.7))
 
-            # Derived AI resilience index (0.0 to 1.0)
-            ai_resilience = max(0.1, min(1.0, 1.0 - auto_risk + (0.2 * aug_pot)))
+            # Authoritative single AI resilience index
+            ai_resilience = compute_canonical_ai_resilience(auto_risk, aug_pot)
 
-            # Location fit sub-score: check title and by
-            title_lower = p["udbud_titel"].lower()
-            loc_fit = 1.0 if preferred_loc and preferred_loc in title_lower else (0.5 if preferred_loc else 1.0)
+            # Structured location matching using database 'by' / 'institution' fields
+            prog_city = (p.get("by") or "").lower()
+            prog_inst = (p.get("institution") or "").lower()
+            prog_title = p["udbud_titel"].lower()
+
+            if preferred_loc:
+                if preferred_loc in prog_city or preferred_loc in prog_inst or preferred_loc in prog_title:
+                    loc_fit = 1.0
+                else:
+                    loc_fit = 0.3
+            else:
+                loc_fit = 1.0  # Neutral match when no location preferred
 
             # Composite match score
             composite = (
@@ -238,6 +267,7 @@ class MultiAgentEngine:
                 "kot_nr": str(p["kot_nr"]),
                 "udbud_titel": p["udbud_titel"],
                 "match_score": round(composite, 2),
+                "automation_exposure": round(auto_risk * 1.1, 2),
                 "automation_risk": round(auto_risk, 3),
                 "augmentation_potential": round(aug_pot, 3),
                 "labour_demand": round(lab_dem, 3),
@@ -262,6 +292,8 @@ class MultiAgentEngine:
 
     # 5. Counterargument Agent (Data-Backed Downside Risk Analysis)
     def _counterargument_agent(self, top_program):
+        if not top_program:
+            return "Ingen kandidatuddannelse at analysere for risikofaktorer."
         title = top_program.get("udbud_titel", "uddannelsen")
         risk_pct = top_program.get("automation_risk_pct", "25%")
         return (
@@ -270,13 +302,15 @@ class MultiAgentEngine:
             f"Et muligt downside-scenarie er, at acceleration i AI-værktøjer omstrukturerer rutineopgaver for nyuddannede."
         )
 
-    # 6. Data Validator Agent (Comprehensive Model & Bounds Verification)
+    # 6. Data Validator Agent (Comprehensive Model Validation & Explicit Rejection Payload)
     def _data_validator_agent(self, scored_programs):
         conn = duckdb.connect(self.duckdb_path)
-        verified = []
+        valid_programs = []
+        rejected_programs = []
+        rejection_reasons = {}
 
         for p in scored_programs:
-            # Validate numerical bounds for ALL model metrics
+            kot = p.get("kot_nr", "")
             score = p.get("match_score", 0)
             auto_risk = p.get("automation_risk", 0)
             aug_pot = p.get("augmentation_potential", 0)
@@ -284,20 +318,53 @@ class MultiAgentEngine:
             sal_gro = p.get("salary_growth", 0)
             ai_res = p.get("ai_resilience", 0)
 
+            # 1. Bounds check
             if not (0.0 <= score <= 1.0 and 0.0 <= auto_risk <= 1.0 and 0.0 <= aug_pot <= 1.0 and
                     0.0 <= lab_dem <= 1.0 and 0.0 <= sal_gro <= 1.0 and 0.0 <= ai_res <= 1.0):
+                rejected_programs.append(p)
+                rejection_reasons[kot] = "Numerical metric out of bounds [0.0, 1.0]"
                 continue
 
-            # Validate program existence in education_profile_scores canonical table
-            db_row = conn.execute("SELECT kot_nr FROM education_profile_scores WHERE kot_nr = ?", [p["kot_nr"]]).fetchone()
+            # 2. Database existence check in canonical education_profile_scores table
+            db_row = conn.execute("SELECT kot_nr FROM education_profile_scores WHERE kot_nr = ?", [kot]).fetchone()
             if db_row:
-                verified.append(p)
+                valid_programs.append(p)
+            else:
+                rejected_programs.append(p)
+                rejection_reasons[kot] = "Program KOT ID missing from canonical database profile table"
 
         conn.close()
-        return verified if verified else scored_programs
 
-    # 7. Citation Agent (Deterministic Claim-to-Evidence Matching & Source Quality)
+        # Determine explicit validation status
+        if not scored_programs:
+            status = "NO_VALID_CANDIDATES"
+        elif len(valid_programs) == len(scored_programs):
+            status = "VALID"
+        elif len(valid_programs) > 0:
+            status = "PARTIALLY_VALID"
+        else:
+            status = "NO_VALID_CANDIDATES"
+
+        return {
+            "valid_programs": valid_programs,
+            "rejected_programs": rejected_programs,
+            "rejection_reasons": rejection_reasons,
+            "validation_status": status
+        }
+
+    # 7. Citation Agent (Separates source_authority, claim_relevance, and supports_claim)
     def _citation_agent(self, evidence, top_program):
+        if not top_program:
+            return [{
+                "claim_id": "claim-none",
+                "source": "Ingen kilde",
+                "url": "",
+                "quote": "Ingen kandidat matchet.",
+                "source_authority": "UNKNOWN",
+                "claim_relevance": 0.0,
+                "supports_claim": False
+            }]
+
         citations = []
         program_title = (top_program.get("udbud_titel") or "").lower()
         title_tokens = [w for w in program_title.split() if len(w) > 3][:3]
@@ -307,16 +374,16 @@ class MultiAgentEngine:
             source_title = c.get("report_title") or ""
             source_url = c.get("source_url") or ""
 
-            # Deterministic relevance scoring: require >= 2 matching domain tokens for relevance >= 0.70
+            # Evaluate claim relevance score
             matching_tokens = sum(1 for token in title_tokens if token in quote_text or token in source_title.lower())
             relevance_score = 0.30 + (0.25 * matching_tokens)
             relevance_score = min(0.95, round(relevance_score, 2))
 
-            # Classify source quality deterministically
-            quality = classify_source_quality(source_title, source_url)
+            # Classify source authority deterministically
+            authority = classify_source_authority(source_title, source_url)
 
-            # Set supports_claim = True ONLY if relevance >= 0.70
-            supports = relevance_score >= 0.70
+            # Set supports_claim = True ONLY IF source authority != UNKNOWN AND relevance >= 0.70
+            supports = (authority != "UNKNOWN") and (relevance_score >= 0.70)
 
             if supports:
                 citations.append({
@@ -324,34 +391,47 @@ class MultiAgentEngine:
                     "source": source_title,
                     "url": source_url,
                     "quote": c["chunk_text"],
-                    "relevance_score": relevance_score,
-                    "evidence_quality": quality,
+                    "source_authority": authority,
+                    "claim_relevance": relevance_score,
                     "supports_claim": True
                 })
 
-        # If no evidence passed the relevance threshold, return explicit unsupported claim status
         if not citations:
             return [{
                 "claim_id": f"claim-{top_program.get('kot_nr', '17020')}",
                 "source": "Ingen specifik kilde matchet",
                 "url": "",
                 "quote": "Ingen direkte verificeret evidenskilde fundet for dette specifikke fagområde.",
-                "relevance_score": 0.0,
-                "evidence_quality": "UNKNOWN",
+                "source_authority": "UNKNOWN",
+                "claim_relevance": 0.0,
                 "supports_claim": False
             }]
 
         return citations[:5]
 
     # 8. UI Formatter Agent
-    def _ui_formatter_agent(self, verified_programs, counterargument, citations, user_query):
-        top_kot = verified_programs[0]["kot_nr"] if verified_programs else "17020"
+    def _ui_formatter_agent(self, validation_payload, counterargument, citations, user_query):
+        valid_programs = validation_payload["valid_programs"]
+        val_status = validation_payload["validation_status"]
+
+        if val_status == "NO_VALID_CANDIDATES" or not valid_programs:
+            return {
+                "status": "no_relevant_candidates",
+                "query": user_query,
+                "message": f"Ingen relevante uddannelser matchede søgningen '{user_query}'. Prøv en mere overordnet fagbeskrivelse.",
+                "validation_details": validation_payload,
+                "recommended_programs": [],
+                "evidence_citations": []
+            }
+
+        top_kot = valid_programs[0]["kot_nr"]
         scenario_proj = run_scenario_simulation(top_kot, target_year=2030)
 
         return {
             "status": "success",
             "query": user_query,
-            "recommended_programs": verified_programs,
+            "validation_status": val_status,
+            "recommended_programs": valid_programs,
             "devils_advocate_perspective": counterargument,
             "scenario_projections_2030": scenario_proj,
             "evidence_citations": citations,
@@ -371,12 +451,15 @@ class MultiAgentEngine:
         retrieved = self._retriever_agent(plan)
         evidence = self._evidence_agent(retrieved, plan)
         reasoning = self._reasoning_agent(plan, retrieved, evidence)
-        top_prog = reasoning[0] if reasoning else {}
+        
+        validation_payload = self._data_validator_agent(reasoning)
+        valid_progs = validation_payload["valid_programs"]
+        top_prog = valid_progs[0] if valid_progs else {}
+        
         counterargument = self._counterargument_agent(top_prog)
-        validated_programs = self._data_validator_agent(reasoning)
         citations = self._citation_agent(evidence, top_prog)
 
-        final_payload = self._ui_formatter_agent(validated_programs, counterargument, citations, user_query)
+        final_payload = self._ui_formatter_agent(validation_payload, counterargument, citations, user_query)
         return final_payload
 
 

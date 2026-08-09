@@ -66,12 +66,12 @@ export async function POST(request: Request) {
     }, { status: 503 });
 
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : "Der opstod en fejl under beregningen.";
+    // Log exception details server-side safely without exposing internal paths or stack traces to client
+    console.error("[API Route Error] MultiAgentEngine execution failed:", err);
     return NextResponse.json({
       status: "unavailable",
       error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
-      message: "Studievalgsanalysen er midlertidigt utilgængelig.",
-      details: errorMsg
+      message: "Studievalgsanalysen er midlertidigt utilgængelig."
     }, { status: 503 });
   }
 }

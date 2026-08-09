@@ -1,5 +1,5 @@
 # Methodological Documentation & Analytics Specifications
-**Uddannelsesindsigt — Analytical Framework & Model Architecture (v2026.1)**
+**Uddannelsesindsigt — Analytical Framework & Model Architecture (v2026.2 Production Hardened)**
 
 ---
 
@@ -27,53 +27,73 @@ Canonical Feature Extraction (DISCO-08 Task Exposure & Income Progression)
         ↓
 Multi-Factor Weighted Scoring Engine (0.0 to 1.0 Normalized Internal Scale)
         ↓
-Candidate Recommendation & Diversity Deduplication
+Staged Retrieval & Candidate Diversity Deduplication
         ↓
 Structured UI Presentation & Citational Explanation
 ```
 
-### Data Provenance Metadata Schema
-
-Every metric computed by the platform carries explicit provenance metadata:
-
-- **`metric`**: Identifies the metric (`automation_risk`, `labour_demand`, `salary_growth`, `augmentation_potential`).
-- **`source`**: The authoritative dataset (e.g. *Danmarks Statistik Income Register (IND)*, *O*NET 28.1*).
-- **`dataset_version`**: Version identifier (e.g. `2026.1 (Release July 2026)`).
-- **`methodology`**: Specific analytical procedure (e.g. *Task-weighted econometric model*).
-- **`confidence`**: Categorical evidence quality (`HIGH` for register data, `MEDIUM` for task taxonomy models, `LOW` for unmapped defaults).
-- **`last_updated`**: ISO timestamp of data sync.
-
 ---
 
-## 3. Metric Definitions & Scientific Interpretation
+## 3. Authoritative Metric Definitions & Canonical AI Resilience Formula
 
-| Metric | Internal Scale | Display Scale | Definition & Interpretation |
+The model preserves four distinct AI dimensions to prevent confusing task exposure with displacement risk or productivity augmentation:
+
+| Metric | Internal Scale | Display Scale | Definition & Formula |
 | :--- | :--- | :--- | :--- |
-| **`automation_risk`** | `0.00 – 1.00` | `0 – 100%` | Estimated percentage of routine cognitive and manual job tasks susceptible to technical automation by generative AI and autonomous agents over a 5–10 year horizon. |
-| **`automation_exposure`** | `0.00 – 1.00` | `0 – 100%` | Extent to which daily work activities interact with or overlap with AI tool capabilities. High exposure does NOT imply job loss, but indicates task evolution. |
+| **`automation_exposure`** | `0.00 – 1.00` | `0 – 100%` | Extent to which daily work activities interact with or overlap with AI tool capabilities ($1.1 \times \text{automation\_risk}$). High exposure indicates task evolution, NOT necessarily job loss. |
+| **`automation_risk`** | `0.00 – 1.00` | `0 – 100%` | Estimated percentage of routine cognitive and manual job tasks susceptible to direct technical replacement by AI. |
 | **`augmentation_potential`**| `0.00 – 1.00` | `0 – 100%` | Degree to which AI tools enhance human productivity, decision quality, and output volume without replacing human oversight. |
-| **`labour_demand`** | `0.00 – 1.00` | `0 – 100%` | Dimittend-employment score derived from 1–2 year post-graduation employment rates and national vacancy ratios from Danmarks Statistik. |
+| **`ai_resilience`** *(Derived Index)* | `0.00 – 1.00` | `0 – 100%` | **Authoritative Derived Index Formula**: <br> $\text{ai\_resilience} = \max\left(0.1, \min\left(1.0, 1.0 - \text{automation\_risk} + 0.2 \cdot \text{augmentation\_potential}\right)\right)$ |
+| **`labour_demand`** | `0.00 – 1.00` | `0 – 100%` | Graduate employment score derived from 1–2 year post-graduation employment rates and national vacancy ratios (Danmarks Statistik). |
 | **`salary_growth`** | `0.00 – 1.00` | `0 – 100%` | 5-year post-graduation earnings trajectory relative to national graduate median income profiles. |
-| **`ai_resilience`** | `0.00 – 1.00` | `0 – 100%` | Computed as $100 - \text{automation\_risk}$. Measures overall job stability against direct AI substitution. |
 
 ---
 
-## 4. Multi-Factor Recommendation Matching Model
+## 4. Staged Retrieval Strategy (Unbiased Recall)
 
-The recommendation score ($\text{overall\_score} \in [0.0, 1.0]$) is computed using an explicit, deterministic weighted composite formula:
+To prevent methodological bias, candidate retrieval uses a strict 4-stage recall process without high-salary fallback bias:
 
-$$\text{overall\_score} = \bar{w}_{\text{ai}} \cdot \text{ai\_resilience} + \bar{w}_{\text{sal}} \cdot \text{salary\_growth} + \bar{w}_{\text{job}} \cdot \text{labour\_demand} + \bar{w}_{\text{loc}} \cdot \text{location\_fit}$$
-
-where normalized weights $\bar{w}_i$ satisfy $\sum \bar{w}_i = 1.0$:
-
-- $w_{\text{ai}} = 0.35$
-- $w_{\text{sal}} = 0.25 \times \text{salary\_priority} \times 2.0$
-- $w_{\text{job}} = 0.25$
-- $w_{\text{loc}} = 0.15$ (if location preference is active, else $0.0$)
+1. **Stage 1 (Exact Match)**: Exact title/keyword match against candidate titles and DISCO-08 occupational descriptions.
+2. **Stage 2 (Synonym Expansion)**: Expansion via curated Danish academic domain synonym mapping.
+3. **Stage 3 (Broad Subject Token Match)**: Substring token matching against program titles and DISCO titles.
+4. **Stage 4 (No Candidates Match)**: If no candidates match the user's query domain, the system explicitly returns `status: "no_relevant_candidates"`. **It NEVER falls back to returning unrelated high-salary or high-demand engineering programs.**
 
 ---
 
-## 5. Macro-Scenario Simulator & Model Uncertainty
+## 5. Data Validator Payload & Status Enforcement
+
+The Data Validator Agent (`_data_validator_agent`) checks every candidate program for:
+- Finite numerical bounds ($0.0 \le \text{metric} \le 1.0$).
+- Program existence in the canonical `education_profile_scores` database table.
+
+It produces an explicit validation payload:
+```json
+{
+  "valid_programs": [...],
+  "rejected_programs": [...],
+  "rejection_reasons": {},
+  "validation_status": "VALID | PARTIALLY_VALID | INVALID | NO_VALID_CANDIDATES"
+}
+```
+If `valid_programs` is empty, the system returns `validation_status: "NO_VALID_CANDIDATES"` and never outputs unvalidated recommendations.
+
+---
+
+## 6. Citation Agent: Separated Source Authority & Claim Relevance
+
+The Evidence Engine evaluates citations by separating source authority from claim relevance:
+
+- **`source_authority`**:
+  - `HIGH`: Official registers and statutory institutions (Danmarks Statistik, UFM, OECD, Kraka-Deloitte, AE-rådet).
+  - `MEDIUM`: Recognized institutional research and university study boards.
+  - `LOW`: Secondary publications.
+  - `UNKNOWN`: Unverified metadata.
+- **`claim_relevance`**: Token relevance score ($0.0 \le R \le 1.0$).
+- **`supports_claim`**: Set to `true` **ONLY IF** `source_authority != "UNKNOWN"` AND `claim_relevance >= 0.70`.
+
+---
+
+## 7. Macro-Scenario Simulator & Model Uncertainty
 
 The scenario engine (`engine/scenario_simulator.py`) projects future task automation ranges (2025 $\rightarrow$ 2030) across 3 macro scenarios:
 
@@ -86,8 +106,8 @@ Rather than reporting artificial "confidence intervals" based on Monte Carlo sam
 
 ---
 
-## 6. Model Limitations & Scope Disclaimer
+## 8. Model Limitations & Scope Disclaimer
 
-- **No Individual Guarantees**: Model scores represent aggregated statistical trajectories across study programs and occupational categories. They do not constitute individual career or salary guarantees.
-- **Model Uncertainty**: Long-term projections (2030+) are subject to macro-economic shifts, regulatory changes, and unforeseen technological developments.
+- **Model-Based Estimates**: Model scores represent aggregated statistical trajectories across study programs and occupational categories. They do not constitute individual career or salary guarantees.
+- **Illustrative Scenarios**: Projections for 2030 are model-based scenario estimates under explicit macro parameters.
 - **Guidance Context**: Platform outputs are intended to serve as one decision-support tool among several and should be complemented by professional academic counseling (*studievejledning*).

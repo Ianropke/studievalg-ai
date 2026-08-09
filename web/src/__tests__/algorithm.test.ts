@@ -198,7 +198,12 @@ export function runUnitTests() {
   console.assert(!("recommended_programs" in safe503Response), "Test 19 Fejl: Safe 503 response må IKKE indeholde anbefalede kort!");
   console.log("  ✅ TEST-19: Safe HTTP 503 response godkendt (Ingen fabrikerede faldback-anbefalinger i API'et)");
 
-  console.log("🎉 Alle 19 Unit Tests bestået uden fejl!\n");
+  // Test 20: Kanonisk Afledt AI Resilience Indeks Semantik
+  const sampleResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15 });
+  console.assert(sampleResilienceProg.ai_resilience === 85, `Test 20 Fejl: ai_resilience bør være 85, fik ${sampleResilienceProg.ai_resilience}`);
+  console.log("  ✅ TEST-20: Kanonisk afledt AI Resilience indeks godkendt (ai_resilience = 100 - automation_risk = 85)");
+
+  console.log("🎉 Alle 20 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
