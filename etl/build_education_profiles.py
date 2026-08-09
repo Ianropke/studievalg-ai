@@ -110,13 +110,10 @@ def build_profiles() -> dict:
             examples = merged.loc[missing_rows, ["kot_nr", "udbud_titel"]].head(10).to_dict("records")
             raise ValueError(f"Incomplete source coverage for {int(missing_rows.sum())} programmes. Examples: {examples}")
 
-        # Transparent derived labour-demand indicator. It is not a direct observation.
         merged["labour_demand"] = (
             0.7 * _percentile(merged["employment_rate"], True)
             + 0.3 * _percentile(merged["unemployment_rate"], False)
         ).clip(0, 1)
-
-        # Transparent derived salary-growth indicator from observed five-year growth.
         merged["salary_growth"] = _percentile(merged["salary_5y_growth"], True).clip(0, 1)
 
         conn.execute("DROP TABLE IF EXISTS education_profile_scores")
@@ -166,7 +163,7 @@ def build_profiles() -> dict:
                 str(r.ai_source), str(r.ai_dataset), str(r.ai_period), str(r.ai_source_url),
             ])
 
-        conn.executemany("INSERT INTO education_profile_scores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+        conn.executemany("INSERT INTO education_profile_scores VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     finally:
         conn.close()
 
