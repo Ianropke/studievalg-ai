@@ -47,11 +47,11 @@ Rules:
 
 ## 3. Graduate labour-market observations
 
-File: `data/sources/labour_market_by_programme.csv`
+File: `data/sources/labour_market_by_education.csv`
 
 Required columns:
 
-- `kot_nr`
+- `education_code`
 - `period`
 - `employment_rate` — decimal 0–1.
 - `unemployment_rate` — decimal 0–1.
@@ -59,9 +59,13 @@ Required columns:
 - `dataset`
 - `source_url`
 
+**Important grain rule:** labour-market observations are attached to the official education group, not directly to KOT programmes. Multiple KOT programmes may map to the same education group and therefore legitimately share the same underlying observation.
+
 Preferred official source:
 
-**UFM Datavarehus — Beskæftigelse.** The published measure is the graduate employment rate during months 12–23 after completion, calculated from days in employment versus days unemployed. UFM states that the source is its Datavarehus based on Danish Statistics register data. If the available source grain is education group rather than individual KOT programme, the education mapping must be explicit and the UI must not describe it as a programme-specific observation.
+**UFM Datavarehus — Beskæftigelse.** The published measure is graduate employment rate during months 12–23 after completion, calculated as days in employment divided by days in employment plus days unemployed. UFM states that the source is its Datavarehus based on Danish Statistics register data. If the available source grain is education group rather than individual KOT programme, the mapping must be explicit and the UI must not describe it as a programme-specific observation.
+
+UFM also publishes cross-education indicators for graduate unemployment and time to first job. These should be kept as separate metrics rather than silently folded into employment rate.
 
 Supporting sources may include other official UFM/DST labour-market datasets where their population and grain are documented.
 
@@ -72,23 +76,23 @@ File: `data/sources/salary_by_education.csv`
 Required columns:
 
 - `education_code`
-- `period`
-- `salary_median`
-- `salary_5y_growth`
+- `period` — calendar/statistical year as an integer year.
+- `salary_median` — positive amount in the documented unit.
 - `source`
 - `dataset`
 - `source_url`
 
 Preferred official source:
 
-**Danmarks Statistik LONS11 — Løn efter uddannelse, sektor, aflønningsform, lønmodtagergruppe, lønkomponenter og køn.** The repository must record the exact dimensions selected and the unit. Salary data must be linked to programmes through `programme_education_mapping.csv`, never fuzzy title matching.
+**Danmarks Statistik LONS11 — Løn efter uddannelse, sektor, aflønningsform, lønmodtagergruppe, lønkomponenter og køn.** The ingestion manifest must record the exact dimensions selected, including sector, pay form, employee group, pay component, sex and unit.
 
 Rules:
 
 - `salary_median` must be an observed value from the identified salary source.
-- `salary_5y_growth` must be calculated from a comparable salary series or supplied as a documented source-derived measure.
-- It may never be generated from `labour_demand`, KOT scores, or another model score.
-- If comparable five-year data cannot be established, the pipeline must leave the growth metric unavailable rather than invent it.
+- The canonical pipeline calculates five-year growth itself from comparable observations exactly five years apart for the same `education_code`.
+- No interpolation, extrapolation or model-based replacement is permitted.
+- If comparable five-year data cannot be established, salary growth remains unavailable and the production build fails rather than inventing it.
+- `salary_5y_growth` is no longer an input column; it is a derived value.
 
 ## 5. AI occupation exposure
 
