@@ -1,5 +1,3 @@
-import allProgramsCatalog from "@public/data/all_programs_catalog.json";
-
 export interface CatalogProgramItem {
   [key: string]: unknown;
   kot_nr?: string;
@@ -50,23 +48,14 @@ export function createProgramSlug(prog: Record<string, unknown>): string {
   return slugify(raw);
 }
 
-export function getAllPrograms(): CatalogProgramItem[] {
-  return allProgramsCatalog as CatalogProgramItem[];
-}
-
-export function getProgramBySlug(slug: string): CatalogProgramItem | null {
-  const all = getAllPrograms();
-  
-  // First attempt: exact match on created slug
+export function findProgramBySlug(all: CatalogProgramItem[], slug: string): CatalogProgramItem | null {
   const match = all.find((p) => createProgramSlug(p) === slug);
   if (match) return match;
 
-  // Second attempt: match by KOT prefix at start of slug (e.g. '10140-...')
   const kotMatch = slug.match(/^(\d{5})/);
   if (kotMatch) {
     const targetKot = kotMatch[1];
-    const found = all.find((p) => String(p.kot_nr) === targetKot);
-    if (found) return found;
+    return all.find((p) => String(p.kot_nr) === targetKot) ?? null;
   }
 
   return null;
