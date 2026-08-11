@@ -39,8 +39,10 @@ def run_scenario_simulation(kot_nr, target_year=2030, iterations=1000):
     base_demand = float(profile[5])
 
     year_delta = max(0, target_year - 2025)
+    # Stable seed makes a scenario reproducible for the same input and model version.
+    rng = random.Random(f"{kot_nr}:{target_year}:{iterations}:v2026.5")
 
-    # Defined parameter distributions per scenario: (rate_mean, rate_std, shift_mean, shift_std)
+    # Explicit assumption settings for illustrative scenarios, not observed forecast parameters.
     scenario_configs = {
         "konservativt": {
             "title": "Konservativt scenarie (Gradvis adoption)",
@@ -72,11 +74,11 @@ def run_scenario_simulation(kot_nr, target_year=2030, iterations=1000):
 
         for _ in range(iterations):
             # Sample both scenario parameters and stochastic variation
-            sampled_rate = random.gauss(cfg["rate_mean"], cfg["rate_std"])
-            sampled_shift = random.gauss(cfg["shift_mean"], cfg["shift_std"])
+            sampled_rate = rng.gauss(cfg["rate_mean"], cfg["rate_std"])
+            sampled_shift = rng.gauss(cfg["shift_mean"], cfg["shift_std"])
 
-            stochastic_noise_auto = random.gauss(0, 0.015)
-            stochastic_noise_demand = random.gauss(0, 0.015)
+            stochastic_noise_auto = rng.gauss(0, 0.015)
+            stochastic_noise_demand = rng.gauss(0, 0.015)
 
             proj_auto = min(0.95, max(0.05, base_automation + (sampled_rate * year_delta) + stochastic_noise_auto))
             proj_demand = min(0.98, max(0.10, base_demand + (sampled_shift * year_delta) + stochastic_noise_demand))
@@ -109,12 +111,13 @@ def run_scenario_simulation(kot_nr, target_year=2030, iterations=1000):
         "disco_titel": profile[2],
         "baseline_year": 2025,
         "target_year": target_year,
+        "model_version": "2026.5",
         "baseline_2025": {
             "automation_risk": base_automation,
             "augmentation_potential": base_augmentation,
             "labour_demand": base_demand
         },
-        "methodology_disclaimer": "Illustrativ scenariomodelsimulering baseret på antagne parameterfordelinger (5.–95. percentilinterval). Udgør et modelbaseret skøn, ikke en deterministisk profeti.",
+        "methodology_disclaimer": "Illustrativ scenariomodel baseret på eksplicitte antagelser og deterministisk sampling. Intervallet er betinget af disse antagelser; det er ikke en empirisk prognose.",
         "projections": results
     }
 
