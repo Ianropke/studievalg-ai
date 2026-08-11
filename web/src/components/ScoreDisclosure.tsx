@@ -50,8 +50,9 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
         <span className="font-semibold">Datakvalitet: {qualityLabel(scores)}</span>
       </div>
       <p className="mt-1 leading-relaxed">
-        AI-robusthed er et modelestimat baseret på opgaveeksponering og augmentationspotentiale — ikke en prognose for arbejdsløshed eller en jobgaranti.
+        AI-robusthed er et crosswalk-/modelestimat baseret på opgaveeksponering og augmentationspotentiale — ikke en prognose for arbejdsløshed eller en jobgaranti.
         {!compact && " Job- og lønscorer skal læses som model-/registerafledte indikatorer, ikke som sikre udfald for den enkelte."}
+        {!compact && overallStatus === "PROVENANCE_REQUIRED" && " Den aktuelle katalogversion mangler dokumenteret uddannelsesspecifik kildekobling for mindst én metrik."}
       </p>
       {!compact && (
         <p className="mt-1 leading-relaxed">
