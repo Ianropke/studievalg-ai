@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { createProgramSlug } from "@/lib/slugs";
+import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 
 interface ProgramItem {
   kot_nr?: string;
@@ -31,12 +32,12 @@ const DualRadarGraph = dynamic(() => Promise.resolve(function DualRadarGraphComp
   const scale = (val: number) => R * (val / 100);
 
   const eA = getEnrichedScores(progA.udbud_titel, progA.scores);
-  const robA = 100 - (eA.automation_risk || 0);
+  const robA = eA.ai_resilience;
   const jobA = eA.labour_demand || 0;
   const salA = eA.salary_growth || 0;
 
   const eB = getEnrichedScores(progB.udbud_titel, progB.scores);
-  const robB = 100 - (eB.automation_risk || 0);
+  const robB = eB.ai_resilience;
   const jobB = eB.labour_demand || 0;
   const salB = eB.salary_growth || 0;
 
@@ -603,8 +604,8 @@ export default function AIInsightsPage() {
                   {(() => { const eA = getEnrichedScores(programA.udbud_titel, programA.scores); const eB = getEnrichedScores(programB.udbud_titel, programB.scores); return (<>
                   <tr className="hover:bg-[#F7F8FA] transition">
                     <td className="py-2.5 px-3 font-semibold">AI-robusthed</td>
-                    <td className="py-2.5 px-3 font-mono-data font-bold text-[#0B7A57]">{100 - (eA.automation_risk || 0)}/100</td>
-                    <td className="py-2.5 px-3 font-mono-data font-bold text-[#0B7A57]">{100 - (eB.automation_risk || 0)}/100</td>
+                    <td className="py-2.5 px-3 font-mono-data font-bold text-[#0B7A57]">{eA.ai_resilience}/100</td>
+                    <td className="py-2.5 px-3 font-mono-data font-bold text-[#0B7A57]">{eB.ai_resilience}/100</td>
                   </tr>
                   <tr className="hover:bg-[#F7F8FA] transition">
                     <td className="py-2.5 px-3 font-semibold">Jobmuligheder</td>
@@ -624,6 +625,10 @@ export default function AIInsightsPage() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+              <ScoreDisclosure scores={getEnrichedScores(programA.udbud_titel, programA.scores)} compact />
+              <ScoreDisclosure scores={getEnrichedScores(programB.udbud_titel, programB.scores)} compact />
             </div>
           )}
         </section>
