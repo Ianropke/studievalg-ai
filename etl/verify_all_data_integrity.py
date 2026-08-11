@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DUCKDB_PATH = DATA_DIR / "kot_data.duckdb"
 PARQUET_PATH = DATA_DIR / "kot_data.parquet"
-CATALOG_PATH = BASE_DIR / "web" / "src" / "data" / "all_programs_catalog.json"
+CATALOG_PATH = BASE_DIR / "web" / "public" / "data" / "all_programs_catalog.json"
 
 
 def audit_data_integrity():
@@ -86,10 +86,11 @@ def audit_data_integrity():
         print(f"✓ Web Catalog: Validating {len(catalog)} programs in {CATALOG_PATH.name}...")
         assert len(catalog) >= 1400, f"Incomplete web catalog: found {len(catalog)} entries"
 
-        for entry in catalog[:50]:
+        for entry in catalog:
             assert "kot_nr" in entry, "Missing kot_nr in catalog entry"
             assert "udbud_titel" in entry, "Missing udbud_titel in catalog entry"
             assert "scores" in entry, "Missing scores object in catalog entry"
+            assert isinstance(entry["scores"], dict), "Catalog scores must be an object"
 
         print("✓ Web catalog format and entry integrity verified.")
 
