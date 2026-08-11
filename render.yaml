@@ -2,6 +2,7 @@ services:
   - type: web
     name: studievalg-ai-analytics
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python services/analytics_api.py
     healthCheckPath: /health
