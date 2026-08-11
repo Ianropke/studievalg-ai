@@ -34,8 +34,27 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
       "@type": "ListItem",
       "position": item.rank,
       "name": item.program.udbud_titel,
-      "url": `https://uddannelsesindsigt.dk/uddannelse/${createProgramSlug(item.program)}`,
+      "url": `https://uddannelsesindsigt.com/uddannelse/${createProgramSlug(item.program)}`,
     })),
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Forside",
+        "item": "https://uddannelsesindsigt.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": config.title,
+        "item": `https://uddannelsesindsigt.com/lister/${slug}`
+      }
+    ]
   };
 
   return (
@@ -44,6 +63,10 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <Header />
