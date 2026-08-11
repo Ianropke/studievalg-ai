@@ -1,3 +1,5 @@
+import catalogData from "../../public/data/all_programs_catalog.json";
+
 export interface CatalogProgramItem {
   [key: string]: unknown;
   kot_nr?: string;
@@ -30,6 +32,8 @@ export interface CatalogProgramItem {
   }>;
 }
 
+const catalog = catalogData as CatalogProgramItem[];
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -59,4 +63,13 @@ export function findProgramBySlug(all: CatalogProgramItem[], slug: string): Cata
   }
 
   return null;
+}
+
+
+export function getAllPrograms(): CatalogProgramItem[] {
+  return catalog;
+}
+
+export function getProgramBySlug(slug: string): CatalogProgramItem | null {
+  return findProgramBySlug(catalog, slug);
 }
