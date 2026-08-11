@@ -53,6 +53,7 @@ export function Footer() {
               <Link href="/sammenlign" className="hover:text-[#12172B] transition">Sammenlign uddannelser</Link>
               <Link href="/analyse" className="hover:text-[#12172B] transition">AI Insights</Link>
               <Link href="/evidens" className="hover:text-[#12172B] transition">Bag om dine scorer</Link>
+              <Link href="/om-os" className="hover:text-[#12172B] transition">Om Uddannelsesindsigt</Link>
             </nav>
           </div>
 
