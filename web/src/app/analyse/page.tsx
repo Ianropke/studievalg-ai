@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { createProgramSlug } from "@/lib/slugs";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
+import { LiveAnalysisPanel } from "@/components/LiveAnalysisPanel";
 
 interface ProgramItem {
   kot_nr?: string;
@@ -256,18 +257,20 @@ export default function AIInsightsPage() {
             AI Insights
           </h1>
           <p className="text-sm text-[#545D71] leading-relaxed">
-            Interaktive analyser baseret på 14.934 officielle optagelsesposter og international AI-forskning.
+            Start med modelanalysen nedenfor. De efterfølgende visualiseringer er illustrative scenarier og ikke dokumentation for observerede AI-effekter.
           </p>
         </div>
+
+        <LiveAnalysisPanel />
 
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-6 space-y-6 card-shadow">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E9EF] pb-4">
             <div>
               <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">
-                ANALYSE 1 (SIGNATURANALYSE)
+                ILLUSTRATIVT SCENARIE — IKKE MÅLT HISTORIK
               </span>
               <h2 className="text-xl font-bold text-[#12172B] font-display">
-                Har AI ændret de unges studievalg – og i hvor høj grad?
+                Illustration af mulige AI-relaterede forskydninger
               </h2>
             </div>
 
@@ -276,13 +279,13 @@ export default function AIInsightsPage() {
                 onClick={() => setScenarioMode("faktisk")}
                 className={`px-3 py-1 rounded-md font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] ${scenarioMode === "faktisk" ? "bg-[#12172B] text-[#FFFFFF]" : "text-[#545D71] hover:text-[#12172B]"}`}
               >
-                Faktisk udvikling (2015–2026)
+                Illustrativ udvikling
               </button>
               <button
                 onClick={() => setScenarioMode("kontrafaktisk")}
                 className={`px-3 py-1 rounded-md font-semibold transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] ${scenarioMode === "kontrafaktisk" ? "bg-[#12172B] text-[#FFFFFF]" : "text-[#545D71] hover:text-[#12172B]"}`}
               >
-                Uden AI
+                Alternativt scenarie
               </button>
             </div>
           </div>
@@ -291,13 +294,13 @@ export default function AIInsightsPage() {
             
             <div className="md:col-span-2 bg-[#FFFFFF] p-4 rounded-xl border border-[#E7E9EF] space-y-3 relative">
               <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="text-[#545D71]">Ansøgerindeks (2015 = 100)</span>
+                <span className="text-[#545D71]">Illustrativt indeks (2015 = 100)</span>
                 <div className="flex items-center gap-4 text-[11px]">
                   <span className={`flex items-center gap-1.5 transition ${scenarioMode === "faktisk" ? "text-[#12172B] font-bold" : "text-[#8891A3]"}`}>
-                    <span className={`w-3 h-0.5 inline-block ${scenarioMode === "faktisk" ? "bg-[#12172B] h-1" : "bg-[#8891A3]"}`}></span> Faktisk søgning
+                    <span className={`w-3 h-0.5 inline-block ${scenarioMode === "faktisk" ? "bg-[#12172B] h-1" : "bg-[#8891A3]"}`}></span> Illustrativ kurve
                   </span>
                   <span className={`flex items-center gap-1.5 transition ${scenarioMode === "kontrafaktisk" ? "text-[#2563EB] font-bold" : "text-[#8891A3]"}`}>
-                    <span className={`w-3 h-0.5 border-t inline-block ${scenarioMode === "kontrafaktisk" ? "border-solid border-[#2563EB] border-t-2" : "border-dashed border-[#8891A3]"}`}></span> Kontrafaktisk trend (Uden AI)
+                    <span className={`w-3 h-0.5 border-t inline-block ${scenarioMode === "kontrafaktisk" ? "border-solid border-[#2563EB] border-t-2" : "border-dashed border-[#8891A3]"}`}></span> Alternativ illustration
                   </span>
                 </div>
               </div>
@@ -329,7 +332,7 @@ export default function AIInsightsPage() {
                     className="transition-all duration-300"
                   />
 
-                  {/* Faktisk søgningskurve */}
+                  {/* Illustrativ kurveskurve */}
                   <path
                     d="M 40 120 L 120 107 L 200 93 L 280 80 L 320 70 L 360 87 L 400 100 L 440 107 L 480 113"
                     fill="none"
@@ -370,34 +373,34 @@ export default function AIInsightsPage() {
               {scenarioMode === "faktisk" ? (
                 <>
                   <p>
-                    <strong className="text-[#12172B]">Modelbaseret sammenligning (med vs. uden AI):</strong> Sammenlignet med en kontrafaktisk fremskrivning (hvad ansøgertallet formentlig ville have været uden ChatGPT) peger data på et <strong className="text-[#12172B]">fald på ca. 8,9% i ansøgninger</strong> til skrive- og tekstprægede fag efter udgangen af 2022, mens fysiske og menneskenære fag (fx Odontologi og Medicin) har oplevet øget søgning i samme periode.
+                    <strong className="text-[#12172B]">Illustrativ sammenligning:</strong> Kurverne er en pædagogisk visualisering af mulige udviklingsforløb. De er ikke en kausal måling af AI's effekt og må ikke læses som dokumenterede procenttal eller statistisk test.
                   </p>
 
                   <div className="bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF] space-y-1 card-shadow">
                     <div className="flex justify-between">
-                      <span>Estimeret søgningsdivergens:</span>
-                      <span className="font-bold text-[#B45309] font-mono-data">–8,9% på AI-udsatte fag</span>
+                      <span>Scenarieforskel:</span>
+                      <span className="font-bold text-[#B45309] font-mono-data">Illustrativ — ikke estimeret</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Statistisk sikkerhed:</span>
-                      <span className="font-bold text-[#12172B] font-mono-data">Høj (p &lt; 0,01)</span>
+                      <span>Empirisk test:</span>
+                      <span className="font-bold text-[#12172B] font-mono-data">Ikke beregnet for denne visualisering</span>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
                   <p>
-                    <strong className="text-[#2563EB]">Kontrafaktisk fremskrivning (Uden AI):</strong> Viser den forventede ansøgerkurve hvis ChatGPT ikke var blevet lanceret i 2022. Modellen fremskriver en uafbrudt stigning til et ansøgerindeks på <strong className="text-[#2563EB]">127 i 2026</strong> for humanistiske/sprogmæssige fag (mod det faktiske indeks på 102).
+                    <strong className="text-[#2563EB]">Alternativ illustration:</strong> Dette er et pædagogisk kontrastscenarie. Det er ikke en observeret tidsserie eller en valideret kontrafaktisk prognose.
                   </p>
 
                   <div className="bg-[#EFF6FF] p-3 rounded-lg border border-[#2563EB]/20 space-y-1 card-shadow">
                     <div className="flex justify-between">
-                      <span className="text-[#1E40AF]">Urealiseret ansøgervækst:</span>
-                      <span className="font-bold text-[#2563EB] font-mono-data">+24,5% uden AI-chok</span>
+                      <span className="text-[#1E40AF]">Scenarieforskel:</span>
+                      <span className="font-bold text-[#2563EB] font-mono-data">Illustrativ — ikke beregnet</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[#1E40AF]">Modelnøjagtighed (LOSO R²):</span>
-                      <span className="font-bold text-[#12172B] font-mono-data">0,94 (Stærk pasform)</span>
+                      <span className="text-[#1E40AF]">Valideringsmål:</span>
+                      <span className="font-bold text-[#12172B] font-mono-data">Ikke beregnet for denne visualisering</span>
                     </div>
                   </div>
                 </>
@@ -411,11 +414,12 @@ export default function AIInsightsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E7E9EF] pb-4">
             <div>
               <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">
-                INTERAKTIV ANALYSE #9 (TIDSMASKINE)
+                ILLUSTRATIV TIDSMASKINE
               </span>
               <h2 className="text-xl font-bold text-[#12172B] font-display">
-                Tidsmaskinen – Fra 2018 over 2026 til 2030
+                Illustrative udviklingsscenarier
               </h2>
+              <p className="mt-1 text-xs text-[#545D71] max-w-xl">Årstal, ændringer og fremtidige udfald nedenfor er eksempler på modelantagelser — ikke observerede data eller prognoser.</p>
             </div>
             <span className="text-xs px-3 py-1 rounded-full border border-[#D8DBE4] bg-[#FFFFFF] font-mono-data font-semibold text-[#12172B]">
               {timeMachineData.label}
@@ -478,7 +482,7 @@ export default function AIInsightsPage() {
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-6 space-y-6 card-shadow">
           <div className="border-b border-[#E7E9EF] pb-4">
             <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">
-              INTERAKTIV ANALYSE #5
+              ILLUSTRATIVE OPGAVEEKSEMPLER
             </span>
             <h2 className="text-xl font-bold text-[#12172B] font-display">
               AI-termometeret – Opgavenedbrydning pr. erhverv
@@ -533,7 +537,7 @@ export default function AIInsightsPage() {
                 ))}
               </div>
               <p className="text-[10px] text-[#8891A3] mt-2 italic">
-                ~{currentGauge.score}% estimeret AI-støtte i opgaver · Baseret på O*NET-opgavedata, se metode
+                ~{currentGauge.score}% estimeret AI-støtte i opgaver · Eksempler på modelantagelser — ikke job- eller uddannelsesspecifikke målinger
               </p>
             </div>
           </div>
