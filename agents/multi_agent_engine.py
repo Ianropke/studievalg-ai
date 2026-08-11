@@ -80,11 +80,15 @@ def classify_source_authority(source_title: str, url: str) -> str:
 def compute_canonical_ai_resilience(auto_risk: float, aug_pot: float) -> float:
     """
     Canonical authoritative formula for derived AI Resilience Index.
-    Formula: max(0.1, min(1.0, 1.0 - automation_risk + (0.2 * augmentation_potential)))
+    Formula: 0.75 * (1 - automation_risk) + 0.25 * augmentation_potential,
+    bounded to the interval [0.1, 1.0].
+
+    This is a crosswalk/model estimate, not an observed employment outcome.
     """
     risk = max(0.0, min(1.0, float(auto_risk)))
     aug = max(0.0, min(1.0, float(aug_pot)))
-    resilience = 1.0 - risk + (0.2 * aug)
+    risk_resilience = 1.0 - risk
+    resilience = (0.75 * risk_resilience) + (0.25 * aug)
     return round(max(0.1, min(1.0, resilience)), 3)
 
 
