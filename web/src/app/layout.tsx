@@ -24,7 +24,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://uddannelsesindsigt.dk"),
+  metadataBase: new URL("https://uddannelsesindsigt.com"),
   title: "Uddannelsesindsigt | Fremtidssikret Studievejledning & AI-Arbejdsmarkedsanalyse",
   description:
     "Uddannelsesindsigt tilbyder uafhængig statistisk beslutningsstøtte til danske uddannelsessøgende baseret på UFM optagelsesdata, Danmarks Statistik og AI-arbejdsmarkedsmodeller.",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Uddannelsesindsigt | Hvilken uddannelse passer til dig?",
     description: "Sammenlign 1.413 danske videregående uddannelser på AI-robusthed, jobmuligheder og lønpotentiale med dit eget snit.",
-    url: "https://uddannelsesindsigt.dk",
+    url: "https://uddannelsesindsigt.com",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
     type: "website",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     description: "Fremtidssikret pædagogisk studievejledning baseret på registerdata og AI-opgavetaksonomi.",
   },
   alternates: {
-    canonical: "https://uddannelsesindsigt.dk",
+    canonical: "https://uddannelsesindsigt.com",
   },
   robots: {
     index: true,
@@ -72,7 +72,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     "name": "Uddannelsesindsigt Danmark",
-    "url": "https://uddannelsesindsigt.dk",
+    "url": "https://uddannelsesindsigt.com",
     "description": "Uafhængig pædagogisk beslutningsstøtte og datadrevet studievejledning for videregående uddannelser i Danmark.",
     "sameAs": [],
     "provider": {
