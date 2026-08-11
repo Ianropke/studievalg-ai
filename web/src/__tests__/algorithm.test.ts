@@ -210,13 +210,18 @@ export function runUnitTests() {
   console.assert(sampleResilienceProg.ai_resilience > riskierProg.ai_resilience, "Test 20 Fejl: AI-robusthed skal være differentieret mellem programmer");
   console.log("  ✅ TEST-20: Differentieret AI-resilience-indeks godkendt (75% risikoresiliens + 25% augmentation)");
 
-  // Test 21: “Alle optaget”-listen må ikke inkludere numeriske adgangskvotienter.
-  console.assert(isAllAdmitted("Alle optaget") === true, "Test 21 Fejl: 'Alle optaget' skal genkendes");
-  console.assert(isAllAdmitted("") === true, "Test 21 Fejl: Tom kvotient skal behandles som alle optaget");
-  console.assert(isAllAdmitted("7,3") === false, "Test 21 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
-  console.log("  ✅ TEST-21: Adgangslisten filtrerer korrekt på 'Alle optaget'");
+  // Test 21: Frontend-kontrakten bruger samme AI-formel for eksplicit risiko og augmentation.
+  const explicitResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15, augmentation_potential: 0.8 });
+  console.assert(explicitResilienceProg.ai_resilience === 84, `Test 21 Fejl: 75/25-formlen bør give 84, fik ${explicitResilienceProg.ai_resilience}`);
+  console.log("  ✅ TEST-21: Frontendkontrakt for 75/25 AI-resiliens godkendt");
 
-  console.log("🎉 Alle 21 Unit Tests bestået uden fejl!\n");
+  // Test 22: “Alle optaget”-listen må ikke inkludere numeriske adgangskvotienter.
+  console.assert(isAllAdmitted("Alle optaget") === true, "Test 22 Fejl: 'Alle optaget' skal genkendes");
+  console.assert(isAllAdmitted("") === true, "Test 22 Fejl: Tom kvotient skal behandles som alle optaget");
+  console.assert(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
+  console.log("  ✅ TEST-22: Adgangslisten filtrerer korrekt på 'Alle optaget'");
+
+  console.log("🎉 Alle 22 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
