@@ -329,7 +329,7 @@ export default function Dashboard() {
 
       let score = Math.round(weightedComposite);
       if (meetsGpa) score = Math.min(99, score + 2);
-      score = Math.max(50, score);
+      // Keep the score interpretable: do not inflate low scores to an artificial 50% floor.
 
       let relevanceBoost = 0;
       const pTitle = prog.udbud_titel || "";
@@ -567,6 +567,9 @@ export default function Dashboard() {
               </select>
             </div>
           </div>
+          <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
+            AI-robusthed er et modelestimat baseret på opgaveeksponering og augmentationspotentiale — ikke en prognose for arbejdsløshed eller en garanti for job.
+          </div>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#545D71] uppercase tracking-wider flex items-center gap-1.5">
@@ -707,7 +710,7 @@ export default function Dashboard() {
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-[#0B7A57]">#{index + 1} Match ({prog.matchScore}%)</span>
+                            <span className="font-bold text-[#0B7A57]">#{index + 1} Modelscore ({prog.matchScore}%)</span>
                             <span>•</span>
                             <span>{prog.institution}</span>
                             <span>•</span>
@@ -955,7 +958,7 @@ export default function Dashboard() {
                     const topScore = matchedPrograms.length > 0 ? matchedPrograms[0].matchScore : "89";
                     navigator.share({
                       title: `Mit match: ${topTitle} (${topScore}%)`,
-                      text: `Jeg matcher ${topScore}% med ${topTitle} på Uddannelsesindsigt! Se hvad du matcher med:`,
+                      text: `Min modelscore er ${topScore}% for ${topTitle} på Uddannelsesindsigt! Se hvad du matcher med:`,
                       url: shareUrl,
                     }).catch(() => {});
                   }}
@@ -971,7 +974,7 @@ export default function Dashboard() {
                   const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
                   const topScore = matchedPrograms.length > 0 ? matchedPrograms[0].matchScore : "89";
                   const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
-                  const storyText = `🎯 Mit top-match er ${topTitle} (${topScore}% match) på Uddannelsesindsigt!\n\nFind dit eget match her: ${shareUrl}`;
+                  const storyText = `🎯 Min top-modelscore er ${topTitle} (${topScore}%) på Uddannelsesindsigt!\n\nFind dit eget match her: ${shareUrl}`;
                   navigator.clipboard.writeText(storyText);
                   setCopiedToast(true);
                   setTimeout(() => setCopiedToast(false), 3000);
