@@ -113,7 +113,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     limit: 10,
     getValue: (p) => {
       const enriched = getEnrichedScores(p.udbud_titel, p.scores);
-      const val = 100 - (enriched.automation_risk || 0);
+      const val = enriched.ai_resilience;
       return { display: `${val}/100 (Lav)`, numeric: val, raw: val };
     },
     sortOrder: "asc",
