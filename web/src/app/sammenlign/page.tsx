@@ -8,6 +8,7 @@ import { createProgramSlug, getProgramBySlug } from "@/lib/slugs";
 import { ProgramItem } from "@/lib/lists";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 
 // Pure SVG multi-triangle radar for 2-3 programs
 function MultiTriangleRadar({ programs }: { programs: ProgramItem[] }) {
@@ -41,7 +42,7 @@ function MultiTriangleRadar({ programs }: { programs: ProgramItem[] }) {
         {programs.map((prog, idx) => {
           const color = colors[idx % colors.length];
           const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
-          const robust = 100 - (enriched.automation_risk || 0);
+          const robust = enriched.ai_resilience;
           const job = enriched.labour_demand || 50;
           const salary = enriched.salary_growth || 50;
           const rRob = R * (robust / 100);
@@ -169,11 +170,16 @@ function ComparisonContent() {
             <tbody className="divide-y divide-[#E7E9EF]">
               <tr><td className="p-4 font-semibold text-[#545D71]">Institution &amp; By</td>{selectedPrograms.map((prog) => <td key={prog.id} className="p-4 text-[#12172B]"><div className="font-medium">{prog.institution || prog.institution_navn}</div><div className="text-[11px] text-[#8891A3]">{prog.by || "Danmark"} • KOT {prog.kot_nr}</div></td>)}</tr>
               <tr><td className="p-4 font-semibold text-[#545D71]">Kvote 1 Adgangskvotient</td>{selectedPrograms.map((prog) => { const kv = String(prog.latest_kvotient || "Alle optaget"); const kvNum = parseFloat(kv.replace(",", ".")); const meets = isNaN(kvNum) || userGpa >= kvNum; return <td key={prog.id} className="p-4"><span className="font-mono-data font-bold text-sm text-[#12172B] block">{kv}</span><span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1 ${meets ? "bg-[#E6F4ED] text-[#0B7A57]" : "bg-[#FEE2E2] text-[#DC2626]"}`}>{meets ? "✓ Adgangssnit opfyldt" : "⚠️ Kvote 2 anbefales"}</span></td>; })}</tr>
-              <tr><td className="p-4 font-semibold text-[#545D71]">AI-robusthedsscore</td>{selectedPrograms.map((prog) => { const enriched = getEnrichedScores(prog.udbud_titel, prog.scores); const rob = 100 - (enriched.automation_risk || 0); return <td key={prog.id} className="p-4"><span className="font-mono-data font-bold text-sm text-[#0F9D6E] block">{rob}/100</span><div className="w-full bg-[#E7E9EF] h-2 rounded-full mt-1.5 overflow-hidden"><div className="bg-[#0F9D6E] h-full rounded-full" style={{ width: `${rob}%` }}></div></div></td>; })}</tr>
+              <tr><td className="p-4 font-semibold text-[#545D71]">AI-robusthedsscore</td>{selectedPrograms.map((prog) => { const enriched = getEnrichedScores(prog.udbud_titel, prog.scores); const rob = enriched.ai_resilience; return <td key={prog.id} className="p-4"><span className="font-mono-data font-bold text-sm text-[#0F9D6E] block">{rob}/100</span><div className="w-full bg-[#E7E9EF] h-2 rounded-full mt-1.5 overflow-hidden"><div className="bg-[#0F9D6E] h-full rounded-full" style={{ width: `${rob}%` }}></div></div></td>; })}</tr>
               <tr><td className="p-4 font-semibold text-[#545D71]">Jobmuligheder &amp; Efterspørgsel</td>{selectedPrograms.map((prog) => { const enriched = getEnrichedScores(prog.udbud_titel, prog.scores); const job = enriched.labour_demand || 50; return <td key={prog.id} className="p-4"><span className="font-mono-data font-bold text-sm text-[#2563EB] block">{job}/100</span><div className="w-full bg-[#E7E9EF] h-2 rounded-full mt-1.5 overflow-hidden"><div className="bg-[#2563EB] h-full rounded-full" style={{ width: `${job}%` }}></div></div></td>; })}</tr>
               <tr><td className="p-4 font-semibold text-[#545D71]">Lønpotentiale</td>{selectedPrograms.map((prog) => { const enriched = getEnrichedScores(prog.udbud_titel, prog.scores); const sal = enriched.salary_growth || 50; return <td key={prog.id} className="p-4"><span className="font-mono-data font-bold text-sm text-[#7C3AED] block">{sal}/100</span><div className="w-full bg-[#E7E9EF] h-2 rounded-full mt-1.5 overflow-hidden"><div className="bg-[#7C3AED] h-full rounded-full" style={{ width: `${sal}%` }}></div></div></td>; })}</tr>
               <tr><td className="p-4 font-semibold text-[#545D71]">Kernekompetencer</td>{selectedPrograms.map((prog) => <td key={prog.id} className="p-4">{prog.skills_hierarchy?.skills && prog.skills_hierarchy.skills.length > 0 ? <div className="flex flex-wrap gap-1">{prog.skills_hierarchy.skills.slice(0, 3).map((skill, sIdx) => <span key={sIdx} className="bg-[#F7F8FA] border border-[#E7E9EF] px-1.5 py-0.5 rounded text-[10px] text-[#12172B]">{skill}</span>)}</div> : <span className="text-[#8891A3]">Tværdisciplinære evner</span>}</td>)}</tr>
             </tbody></table></div>
+        </div>
+        <div className="space-y-2">
+          {selectedPrograms.map((prog) => (
+            <ScoreDisclosure key={prog.id} scores={getEnrichedScores(prog.udbud_titel, prog.scores)} compact />
+          ))}
         </div>
       </main>
       {showSearchModal && <div className="fixed inset-0 bg-[#12172B]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowSearchModal(false)} onKeyDown={(e) => { if (e.key === "Escape") setShowSearchModal(false); }}><div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-2xl max-w-lg w-full p-6 space-y-4 card-shadow" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Vælg uddannelse til sammenligning"><div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3"><h3 className="font-bold text-base text-[#12172B]">Vælg uddannelse til sammenligning</h3><button onClick={() => setShowSearchModal(false)} className="text-[#8891A3] hover:text-[#12172B] text-lg font-bold">✕</button></div><input type="text" placeholder="Søg på uddannelse (fx Datalogi, Sygeplejerske, CBS)..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full px-4 py-2.5 bg-[#F7F8FA] border border-[#D8DBE4] rounded-xl text-xs focus:outline-none focus:border-[#2563EB]" autoFocus/><div className="max-h-60 overflow-y-auto divide-y divide-[#E7E9EF]">{searchResults.map((prog) => { const slug = createProgramSlug(prog); const isSelected = selectedSlugs.includes(slug); return <button key={slug} onClick={() => addProgram(prog)} disabled={isSelected} className={`w-full p-3 text-left hover:bg-[#EFF6FF] transition flex justify-between items-center text-xs ${isSelected ? "opacity-50 cursor-not-allowed" : ""}`}><div><span className="font-bold text-[#12172B] block">{prog.udbud_titel}</span><span className="text-[11px] text-[#545D71]">{prog.institution || prog.institution_navn} • KOT {prog.kot_nr}</span></div>{isSelected ? <span className="text-[10px] text-[#8891A3]">Valgt</span> : <span className="text-xs font-bold text-[#2563EB]">+ Vælg</span>}</button>; })}</div></div></div>}
