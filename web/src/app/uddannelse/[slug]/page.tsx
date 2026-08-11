@@ -5,6 +5,8 @@ import { Header } from "@/components/Header";
 import { Metadata } from "next";
 import { getAllPrograms, getProgramBySlug, createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { ScoreDisclosure } from "@/components/ScoreDisclosure";
+import { EvidenceList } from "@/components/EvidenceList";
 
 // Pure server SVG triangle radar component
 function CompactTriangleRadar({ robust, job, salary }: { robust: number; job: number; salary: number }) {
@@ -102,7 +104,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const inst = prog.institution || prog.institution_navn || "";
   const kv = prog.latest_kvotient || "Alle optaget";
   const enriched = getEnrichedScores(title, prog.scores);
-  const robust = 100 - (enriched.automation_risk || 0);
+  const robust = enriched.ai_resilience;
   const job = enriched.labour_demand || 50;
 
   return {
@@ -129,7 +131,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
   const kv = prog.latest_kvotient || "Alle optaget";
 
   const enriched = getEnrichedScores(title, prog.scores);
-  const robustScore = 100 - (enriched.automation_risk || 0);
+  const robustScore = enriched.ai_resilience;
   const jobScore = enriched.labour_demand || 50;
   const salScore = enriched.salary_growth || 50;
 
@@ -284,8 +286,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           <div className="space-y-4 pt-4 border-t border-[#E7E9EF]">
             <h3 className="text-base font-bold text-[#12172B]">Evidensforklaring & Modelanalyse</h3>
             <p className="text-xs text-[#545D71] leading-relaxed">
-              Uddannelsen <strong className="text-[#12172B]">{title}</strong> har en beregnet AI-robusthedsscore på <strong className="text-[#0B7A57]">{robustScore}/100</strong> baseret på O*NET opgavetaksonomi og økonometrisk fremskrivning. Kvote 1-adgangskvotienten var senest <strong className="text-[#12172B]">{kv}</strong>.
+              Uddannelsen <strong className="text-[#12172B]">{title}</strong> har en beregnet AI-robusthedsscore på <strong className="text-[#0B7A57]">{robustScore}/100</strong>. Kvote 1-adgangskvotienten var senest <strong className="text-[#12172B]">{kv}</strong>.
             </p>
+            <ScoreDisclosure scores={enriched} />
+            <EvidenceList evidence={prog.rag_evidence} />
 
             {prog.skills_hierarchy && (
               <div className="bg-[#F7F8FA] p-4 rounded-xl border border-[#E7E9EF] space-y-2 text-xs">
@@ -315,9 +319,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
               {getAllPrograms()
                 .filter((p) => createProgramSlug(p) !== slug && p.udbud_titel)
                 .map((p) => {
-                  const pRob = 100 - (p.scores?.automation_risk || 0);
-                  const pJob = p.scores?.labour_demand || 50;
-                  const pSal = p.scores?.salary_growth || 50;
+                  const pEnriched = getEnrichedScores(p.udbud_titel, p.scores);
+                  const pRob = pEnriched.ai_resilience;
+                  const pJob = pEnriched.labour_demand;
+                  const pSal = pEnriched.salary_growth;
                   const dist = Math.hypot(pRob - robustScore, pJob - jobScore, pSal - salScore);
                   return { program: p, slug: createProgramSlug(p), dist, pRob, pJob, pSal };
                 })
