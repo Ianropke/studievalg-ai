@@ -46,6 +46,15 @@ class AnalyticsHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
 
+    def do_HEAD(self) -> None:
+        # Render may probe the root path with HEAD before using healthCheckPath.
+        # Return a lightweight response instead of the default 501.
+        self.send_response(200 if self.path in {"/", "/health"} else 404)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", CORS_ORIGIN)
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+
     def do_GET(self) -> None:
         if self.path == "/health":
             json_response(self, {"status": "ok", "service": "analytics-engine"}, 200)
