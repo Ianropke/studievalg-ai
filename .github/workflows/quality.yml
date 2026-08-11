@@ -51,6 +51,9 @@ jobs:
       - name: Install Python dependencies
         run: python -m pip install -r requirements.txt
 
+      - name: Analytics service syntax
+        run: python -m py_compile services/analytics_api.py
+
       - name: Run Python tests
         run: python -m unittest discover -s tests -p "test_*.py"
 
