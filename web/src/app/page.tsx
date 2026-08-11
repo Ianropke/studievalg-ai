@@ -849,7 +849,7 @@ export default function Dashboard() {
                           <span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">
                             Modelstatus og evidenskilder
                           </span>
-                          <ScoreDisclosure scores={prog.scoreDetails} />
+                          <ScoreDisclosure scores={prog.scoreDetails!} />
                           <EvidenceList evidence={prog.rag_evidence} />
                         </div>
                       </div>
