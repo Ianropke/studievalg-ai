@@ -8,6 +8,8 @@ import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
+import { ScoreDisclosure } from "@/components/ScoreDisclosure";
+import { EvidenceList } from "@/components/EvidenceList";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -317,7 +319,7 @@ export default function Dashboard() {
       const meetsGpa = kvNum !== null ? gpa >= kvNum : true;
       
       const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
-      const robustScore = 100 - (enriched.automation_risk || 0);
+      const robustScore = enriched.ai_resilience;
       const jobScore = enriched.labour_demand || 50;
       const salScore = enriched.salary_growth || 50;
 
@@ -387,7 +389,7 @@ export default function Dashboard() {
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
       const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
       const cityName = (prog.by || "") as string;
-      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore, locationsCount: 1, locationsList: [formatCityName(cityName)] };
+      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
@@ -843,14 +845,10 @@ export default function Dashboard() {
                         </div>
                         <div className="space-y-2 pt-2 border-t border-[#E7E9EF]">
                           <span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">
-                            PEFF Evidenskilder og citater
+                            Modelstatus og evidenskilder
                           </span>
-                          {prog.rag_evidence?.map((ev: { quote: string; source: string }, i: number) => (
-                            <div key={i} className="bg-[#F7F8FA] p-3 rounded-lg border border-[#E7E9EF] space-y-1">
-                              <p className="text-[#12172B] italic">&quot;{ev.quote}&quot;</p>
-                              <span className="text-[#545D71] font-semibold text-[11px] block">Kilde: {ev.source}</span>
-                            </div>
-                          ))}
+                          <ScoreDisclosure scores={prog.scoreDetails} />
+                          <EvidenceList evidence={prog.rag_evidence} />
                         </div>
                       </div>
                     )}
