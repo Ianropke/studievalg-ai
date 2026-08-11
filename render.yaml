@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: studievalg-ai-analytics
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python services/analytics_api.py
+    healthCheckPath: /health
+    envVars:
+      - key: ANALYTICS_API_TOKEN
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://uddannelsesindsigt.com
