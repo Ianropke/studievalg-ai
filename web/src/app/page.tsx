@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
-import { normalizeProgramName } from "@/lib/lists";
+import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
