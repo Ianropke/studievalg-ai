@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { LIST_CONFIGS, getListData } from "@/lib/lists";
 import { createProgramSlug } from "@/lib/slugs";
 import { Header } from "@/components/Header";
+import { getEnrichedScores } from "@/lib/domainScoring";
+import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 
 export async function generateStaticParams() {
   return Object.keys(LIST_CONFIGS).map((slug) => ({
@@ -94,7 +96,8 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
             const progSlug = createProgramSlug(program);
             const inst = program.institution || program.institution_navn || "Uddannelsessted";
             const kv = program.latest_kvotient || "Alle optaget";
-            const rob = 100 - (program.scores?.automation_risk || 0);
+            const scoreDetails = getEnrichedScores(program.udbud_titel, program.scores);
+            const rob = scoreDetails.ai_resilience;
 
             return (
               <div
@@ -126,6 +129,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
                       <span>Kvote 1: <strong className="font-mono-data text-[#12172B]">{kv}</strong></span>
                       <span>•</span>
                       <span>AI-robusthed: <strong className="font-mono-data text-[#0B7A57]">{rob}/100</strong></span>
+                      <ScoreDisclosure scores={scoreDetails} compact />
                     </div>
                   </div>
                 </div>
