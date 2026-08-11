@@ -974,9 +974,11 @@ export default function Dashboard() {
               <button
                 onClick={() => {
                   const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
-                  const topScore = matchedPrograms.length > 0 ? matchedPrograms[0].matchScore : "89";
+                  const topScore = matchedPrograms.length > 0 ? String(matchedPrograms[0].matchScore) : null;
                   const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
-                  const storyText = `🎯 Min top-modelscore er ${topTitle} (${topScore}%) på Uddannelsesindsigt!\n\nFind dit eget match her: ${shareUrl}`;
+                  const storyText = topScore
+                    ? `🎯 Min top-modelscore er ${topTitle} (${topScore}%) på Uddannelsesindsigt!\\n\\nFind dit eget match her: ${shareUrl}`
+                    : `Jeg har endnu ikke et beregnet uddannelsesmatch på Uddannelsesindsigt.\\n\\nFind dit eget match her: ${shareUrl}`;
                   navigator.clipboard.writeText(storyText);
                   setCopiedToast(true);
                   setTimeout(() => setCopiedToast(false), 3000);
