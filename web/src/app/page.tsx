@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import type { NormalizedScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
@@ -250,6 +251,7 @@ interface ProgramItem {
   };
   skills_hierarchy?: { courses?: string[] };
   rag_evidence?: Array<{ quote: string; source: string }>;
+  scoreDetails?: NormalizedScores;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
