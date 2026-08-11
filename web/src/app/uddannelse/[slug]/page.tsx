@@ -111,7 +111,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${title} — Adgangskvotient 2026, AI-robusthed & Jobudsigter | Uddannelsesindsigt`,
     description: `${title} ved ${inst}: Seneste Kvote 1 adgangskvotient ${kv} (2026). AI-robusthedsscore ${robust}/100, jobmuligheder ${job}/100. Se fuld analyse og sammenlign med dine egne prioriteter.`,
     alternates: {
-      canonical: `https://uddannelsesindsigt.dk/uddannelse/${slug}`,
+      canonical: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
+    },
+    openGraph: {
+      title: `${title} | Uddannelsesindsigt`,
+      description: `${title} ved ${inst}: adgangskvotient ${kv} (2026), AI-robusthed ${robust}/100 og jobmuligheder ${job}/100.`,
+      url: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
+      siteName: "Uddannelsesindsigt",
+      locale: "da_DK",
+      type: "website",
     },
   };
 }
@@ -144,11 +152,40 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
     "provider": {
       "@type": "EducationalOrganization",
       "name": inst,
-      "address": city,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": city,
+        "addressCountry": "DK"
+      },
     },
     "identifier": kot,
     "description": `Adgangskvotient ${kv}. AI-robusthedsscore ${robustScore}/100. Jobmuligheder ${jobScore}/100.`,
-    "url": `https://uddannelsesindsigt.dk/uddannelse/${slug}`,
+    "url": `https://uddannelsesindsigt.com/uddannelse/${slug}`,
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Forside",
+        "item": "https://uddannelsesindsigt.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Uddannelser",
+        "item": "https://uddannelsesindsigt.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": title,
+        "item": `https://uddannelsesindsigt.com/uddannelse/${slug}`
+      }
+    ]
   };
 
   return (
@@ -157,6 +194,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <Header />
@@ -191,7 +232,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
               <span className="text-[11px] text-[#8891A3] block">Kvote 1 adgangskvotient (2026)</span>
               <span className="text-2xl font-bold text-[#12172B] font-mono-data">{kv}</span>
               <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E6F4ED] text-[#0B7A57] border border-[#0F9D6E]/20 mt-1 block">
-                Offektiv UFM registerdata
+                Officiel UFM-registerdata
               </span>
             </div>
           </div>
