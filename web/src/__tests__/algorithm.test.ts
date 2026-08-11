@@ -1,4 +1,5 @@
 import { getEnrichedScores } from "../lib/domainScoring";
+import { isAllAdmitted } from "../lib/lists";
 import { z } from "zod";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
@@ -204,10 +205,18 @@ export function runUnitTests() {
 
   // Test 20: Kanonisk Afledt AI Resilience Indeks Semantik
   const sampleResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15 });
-  console.assert(sampleResilienceProg.ai_resilience === 100, `Test 20 Fejl: ai_resilience bør følge den kanoniske formel og være 100, fik ${sampleResilienceProg.ai_resilience}`);
-  console.log("  ✅ TEST-20: Kanonisk afledt AI Resilience indeks godkendt (ai_resilience = clamp(1 - automation_risk + 0.2 * augmentation_potential) = 100)");
+  console.assert(sampleResilienceProg.ai_resilience === 84, `Test 20 Fejl: ai_resilience bør følge den vægtede formel og være 84, fik ${sampleResilienceProg.ai_resilience}`);
+  const riskierProg = getEnrichedScores("Andet fag", { automation_risk: 0.35, augmentation_potential: 0.2 });
+  console.assert(sampleResilienceProg.ai_resilience > riskierProg.ai_resilience, "Test 20 Fejl: AI-robusthed skal være differentieret mellem programmer");
+  console.log("  ✅ TEST-20: Differentieret AI-resilience-indeks godkendt (75% risikoresiliens + 25% augmentation)");
 
-  console.log("🎉 Alle 20 Unit Tests bestået uden fejl!\n");
+  // Test 21: “Alle optaget”-listen må ikke inkludere numeriske adgangskvotienter.
+  console.assert(isAllAdmitted("Alle optaget") === true, "Test 21 Fejl: 'Alle optaget' skal genkendes");
+  console.assert(isAllAdmitted("") === true, "Test 21 Fejl: Tom kvotient skal behandles som alle optaget");
+  console.assert(isAllAdmitted("7,3") === false, "Test 21 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
+  console.log("  ✅ TEST-21: Adgangslisten filtrerer korrekt på 'Alle optaget'");
+
+  console.log("🎉 Alle 21 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
