@@ -55,7 +55,8 @@ export function normalizeMetricValue(val: unknown, fallback: number): number {
 
 /**
  * Returns canonical scores from database/catalog data.
- * Does NOT override database values with title-based heuristics.\n * AI resilience follows the canonical methodology: clamp(1 - risk + 0.2 * augmentation).
+ * Does NOT override database values with title-based heuristics.
+ * AI resilience follows the canonical methodology: clamp(1 - risk + 0.2 * augmentation).
  */
 export function getEnrichedScores(title?: string, rawScores?: RawProgramScores): NormalizedScores {
   const datasetVersion = "2026.1 (Release July 2026)";
@@ -74,7 +75,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
       augmentation_potential: augPot,
       labour_demand: labDemand,
       salary_growth: salGrowth,
-      ai_resilience: 100 - autoRisk,
+      ai_resilience: Math.min(100, Math.max(10, Math.round((1 - (autoRisk / 100) + 0.2 * (augPot / 100)) * 100))),
       data_quality: "HIGH",
       is_baseline_estimate: false,
       provenance: {
