@@ -626,10 +626,10 @@ export default function AIInsightsPage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-              <ScoreDisclosure scores={getEnrichedScores(programA.udbud_titel, programA.scores)} compact />
-              <ScoreDisclosure scores={getEnrichedScores(programB.udbud_titel, programB.scores)} compact />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                <ScoreDisclosure scores={getEnrichedScores(programA.udbud_titel, programA.scores)} compact />
+                <ScoreDisclosure scores={getEnrichedScores(programB.udbud_titel, programB.scores)} compact />
+              </div>
             </div>
           )}
         </section>
