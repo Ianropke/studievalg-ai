@@ -52,23 +52,23 @@ export default function EvidensPage() {
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#0F9D6E] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
                 <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 1: OFFICIEL REGISTERDATA (HÅRDE TAL)</h3>
-                <span className="font-mono-data text-[10px] text-[#0B7A57] bg-[#E3F6EE] px-2 py-0.5 rounded font-bold border border-[#0F9D6E]/20">Højeste vægt (100% fakta)</span>
+                <span className="font-mono-data text-[10px] text-[#0B7A57] bg-[#E3F6EE] px-2 py-0.5 rounded font-bold border border-[#0F9D6E]/20">Observeret / registerdata</span>
               </div>
-              <p className="text-xs text-[#545D71] leading-relaxed">Danmarks Statistik og UFM (KOT). Udgør det urokkelige fundament for alle adgangskvotienter, frafaldsprocenter og dimittendledighed. Vægtes som <strong>facit</strong> i alle beregninger og kan aldrig overstyres af AI.</p>
+              <p className="text-xs text-[#545D71] leading-relaxed">Danmarks Statistik og UFM (KOT) leverer observerede tal for blandt andet optagelse og adgangskvotienter. De beskriver historiske eller registrerede forhold — ikke nødvendigvis fremtidig efterspørgsel eller den enkeltes udfald.</p>
             </div>
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#2563EB] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
                 <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 2: MODEL- OG ARBEJDSMARKEDSDATA</h3>
                 <span className="font-mono-data text-[10px] text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded font-bold border border-[#2563EB]/20">Modelleret</span>
               </div>
-              <p className="text-xs text-[#545D71] leading-relaxed">Arbejdsmarkeds- og opgavedata anvendes til at estimere efterspørgsel, lønpotentiale og AI-robusthed. Modellerede mål skal læses som beslutningsstøtte og ikke som garantier for den enkelte.</p>
+              <p className="text-xs text-[#545D71] leading-relaxed">Arbejdsmarkeds- og opgavedata anvendes til at estimere efterspørgsel, lønpotentiale og AI-robusthed. Disse mål er model- eller registerafledte indikatorer og skal læses som beslutningsstøtte — ikke som garantier for den enkelte.</p>
             </div>
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#7C3AED] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
                 <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 3: AI-ANALYSE</h3>
                 <span className="font-mono-data text-[10px] text-[#7C3AED] bg-[#F5F3FF] px-2 py-0.5 rounded font-bold border border-[#7C3AED]/20">Supplerende</span>
               </div>
-              <p className="text-xs text-[#545D71] leading-relaxed">AI anvendes til at strukturere og fortolke information, men må ikke overstyre dokumenterede registerdata. Resultaterne bør kunne spores tilbage til kilde, metode og beregningsregel.</p>
+              <p className="text-xs text-[#545D71] leading-relaxed">AI kan bruges til at strukturere og fortolke information, men må ikke fremstilles som den numeriske sandhed. Resultaterne bør kunne spores tilbage til kilde, metode og beregningsregel, og manglende program-evidens skal vises som usikkerhed.</p>
             </div>
           </div>
         </section>
@@ -87,7 +87,7 @@ export default function EvidensPage() {
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-4">
           <h2 className="text-xl font-bold text-[#12172B] font-display">Ofte stillede spørgsmål</h2>
           <div className="space-y-3 text-sm text-[#545D71]">
-            <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> Beregningerne kombinerer registerdata, arbejdsmarkedsdata og dokumenterede modelregler.</p>
+            <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> AI-robusthed beregnes efter den fælles formel: 1 − automation_risk + 0,2 × augmentation_potential, med værdier begrænset til 10–100. Det er et modelestimat — ikke en prognose for arbejdsløshed.</p>
             <p><strong>Hvor kommer dataene fra?</strong> Platformen anvender blandt andet UFM, Danmarks Statistik og internationale arbejdsmarkeds- og opgavedatasæt.</p>
           </div>
         </section>
