@@ -3,7 +3,7 @@ import { getAllPrograms, createProgramSlug } from "@/lib/slugs";
 import { LIST_CONFIGS } from "@/lib/lists";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://uddannelsesindsigt.dk";
+  const baseUrl = "https://uddannelsesindsigt.com";
   const allPrograms = getAllPrograms();
 
   const programUrls = allPrograms.map((prog) => ({
