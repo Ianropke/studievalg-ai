@@ -37,14 +37,15 @@ export interface ListConfig {
   limit: number;
   getValue: (p: ProgramItem) => { display: string; numeric: number; raw: unknown };
   sortOrder: "asc" | "desc";
+  filter?: (p: ProgramItem) => boolean;
 }
 
 export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-mest-ai-robuste-uddannelser": {
     slug: "top-10-mest-ai-robuste-uddannelser",
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
-    badge: "100% Modellerede O*NET-data",
-    description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore baseret på opgavetaksonomi og økonometriske fremskrivninger.",
+    badge: "AI-modelestimat fra O*NET-opgaver",
+    description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore. Scoren er et modelestimat baseret på opgavetaksonomi — ikke observerede uddannelsesudfald.",
     introHedge: "Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. juli 2026. Tallene bygger på opgavedata fra O*NET og analyser af studieordninger — se 'Bag om dine scorer' for fuld metode.",
     metricLabel: "AI-robusthed",
     limit: 10,
@@ -58,8 +59,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-hoejest-loennede-uddannelser": {
     slug: "top-10-hoejest-loennede-uddannelser",
     title: "Top 10 Bedst Lønnede Uddannelser",
-    badge: "DST & UFM Registerdata",
-    description: "De 10 videregående uddannelser med det højeste beregnede lønpotentiale og stærkeste historiske lønudvikling for nyligt uddannede dimittender.",
+    badge: "Model-/registerafledt indikator",
+    description: "De 10 videregående uddannelser med det højeste beregnede lønpotentiale. Scoren er en model-/registerafledt indikator og ikke en garanti for individuel løn.",
     introHedge: "Baseret på data fra Danmarks Statistik og UFM viser denne liste de 10 uddannelser med det højeste vurderede lønpotentiale. Tallene er vores bedste bud ud fra statistik og modeller — ikke en garanti for individuel startløn.",
     metricLabel: "Lønpotentiale",
     limit: 10,
@@ -73,8 +74,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-laveste-ledighed": {
     slug: "top-10-laveste-ledighed",
     title: "Top 10 Uddannelser med Laveste Ledighed",
-    badge: "Offentlig Dimittend-registerdata",
-    description: "De 10 uddannelser med den højeste efterspørgsel på arbejdsmarkedet og laveste observerede dimittendledighed 1-2 år efter fuldførelse.",
+    badge: "Historisk arbejdsmarkedsindikator",
+    description: "De 10 uddannelser med den højeste beregnede jobmulighedsindikator. Tallet skal læses som en historisk/modelafledt indikator — ikke som en sikker individuel ledighedsprognose.",
     introHedge: "Registerbaseret oversigt over de 10 uddannelser med stærkest observeret jobefterspørgsel. Tallene afspejler historiske data for dimittendbeskæftigelse.",
     metricLabel: "Jobmuligheder",
     limit: 10,
@@ -156,7 +157,8 @@ export function getListData(slug: string): { config: ListConfig; items: Array<{ 
   if (!config) return null;
 
   const catalog = getProgramCatalog() as ProgramItem[];
-  const scored = catalog.map((prog) => {
+  const candidates = config.filter ? catalog.filter(config.filter) : catalog;
+  const scored = candidates.map((prog) => {
     const val = config.getValue(prog);
     return { program: prog, valueDisplay: val.display, numeric: val.numeric };
   });
