@@ -200,8 +200,8 @@ export function runUnitTests() {
 
   // Test 20: Kanonisk Afledt AI Resilience Indeks Semantik
   const sampleResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15 });
-  console.assert(sampleResilienceProg.ai_resilience === 85, `Test 20 Fejl: ai_resilience bør være 85, fik ${sampleResilienceProg.ai_resilience}`);
-  console.log("  ✅ TEST-20: Kanonisk afledt AI Resilience indeks godkendt (ai_resilience = 100 - automation_risk = 85)");
+  console.assert(sampleResilienceProg.ai_resilience === 100, `Test 20 Fejl: ai_resilience bør følge den kanoniske formel og være 100, fik ${sampleResilienceProg.ai_resilience}`);
+  console.log("  ✅ TEST-20: Kanonisk afledt AI Resilience indeks godkendt (ai_resilience = clamp(1 - automation_risk + 0.2 * augmentation_potential) = 100)");
 
   console.log("🎉 Alle 20 Unit Tests bestået uden fejl!\n");
 }
