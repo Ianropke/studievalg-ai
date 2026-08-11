@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${config.title} (2026) | Uddannelsesindsigt`,
     description: config.description,
     alternates: {
-      canonical: `https://uddannelsesindsigt.dk/lister/${slug}`,
+      canonical: `https://uddannelsesindsigt.com/lister/${slug}`,
     },
     openGraph: {
       title: `${config.title} | Uddannelsesindsigt`,
       description: config.description,
-      url: `https://uddannelsesindsigt.dk/lister/${slug}`,
+      url: `https://uddannelsesindsigt.com/lister/${slug}`,
       siteName: "Uddannelsesindsigt",
       locale: "da_DK",
       type: "website",
