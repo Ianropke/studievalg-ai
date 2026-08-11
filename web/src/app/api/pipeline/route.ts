@@ -46,9 +46,14 @@ function validatePipelineResponse(payload: unknown): unknown | null {
   return payload;
 }
 
-async function callRemoteEngine(input: z.infer<typeof PipelineInputSchema>): Promise<unknown | null> {
+type RemoteEngineResult = {
+  payload: unknown | null;
+  timedOut: boolean;
+};
+
+async function callRemoteEngine(input: z.infer<typeof PipelineInputSchema>): Promise<RemoteEngineResult> {
   const engineUrl = process.env.ANALYTICS_ENGINE_URL?.trim();
-  if (!engineUrl) return null;
+  if (!engineUrl) return { payload: null, timedOut: false };
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REMOTE_ENGINE_TIMEOUT_MS);
@@ -81,10 +86,15 @@ async function callRemoteEngine(input: z.infer<typeof PipelineInputSchema>): Pro
       return null;
     }
 
-    return validatePipelineResponse(payload);
+    return { payload: validatePipelineResponse(payload), timedOut: false };
   } catch (error) {
-    console.error("[API Route Error] Remote analytics engine request failed:", error);
-    return null;
+    const timedOut = error instanceof Error && error.name === "AbortError";
+    if (timedOut) {
+      console.warn("[API Route Warning] Remote analytics engine is still waking up.");
+    } else {
+      console.error("[API Route Error] Remote analytics engine request failed:", error);
+    }
+    return { payload: null, timedOut };
   } finally {
     clearTimeout(timeout);
   }
@@ -139,9 +149,9 @@ export async function POST(request: Request) {
 
     // Production path: configure ANALYTICS_ENGINE_URL to a hosted Python service.
     // Local development path: use the repository venv when it is available.
-    const remotePayload = await callRemoteEngine(input);
-    if (remotePayload) {
-      return NextResponse.json(remotePayload);
+    const remoteResult = await callRemoteEngine(input);
+    if (remoteResult.payload) {
+      return NextResponse.json(remoteResult.payload);
     }
 
     const localPayload = await runLocalEngine(input);
@@ -151,9 +161,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       status: "unavailable",
-      error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
-      message: "Studievalgsanalysen er midlertidigt utilgængelig. Venligst benyt den klient-side baserede søge- og filter-motor på forsiden."
-    }, { status: 503 });
+      error_code: remoteResult.timedOut ? "ANALYTICS_ENGINE_WAKING" : "ANALYTICS_ENGINE_UNAVAILABLE",
+      message: remoteResult.timedOut
+        ? "Analyse-servicen er ved at vågne efter inaktivitet. Prøv igen om cirka 30-60 sekunder."
+        : "Studievalgsanalysen er midlertidigt utilgængelig. Venligst benyt den klient-side baserede søge- og filter-motor på forsiden."
+    }, {
+      status: 503,
+      headers: remoteResult.timedOut ? { "Retry-After": "30" } : undefined
+    });
   } catch (err: unknown) {
     console.error("[API Route Exception]", err);
     return NextResponse.json({
