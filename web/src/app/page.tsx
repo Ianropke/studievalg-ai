@@ -496,10 +496,10 @@ export default function Dashboard() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Uddannelsesindsigt",
-    "url": "https://uddannelsesindsigt.dk",
+    "url": "https://uddannelsesindsigt.com",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://uddannelsesindsigt.dk/?q={search_term_string}",
+      "target": "https://uddannelsesindsigt.com/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   };
