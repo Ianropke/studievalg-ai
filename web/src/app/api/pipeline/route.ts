@@ -78,12 +78,12 @@ async function callRemoteEngine(input: z.infer<typeof PipelineInputSchema>): Pro
       payload = JSON.parse(responseText);
     } catch {
       console.error("[API Route Error] Remote analytics engine returned invalid JSON.");
-      return null;
+      return { payload: null, timedOut: false };
     }
 
     if (!response.ok) {
       console.error("[API Route Error] Remote analytics engine returned HTTP", response.status);
-      return null;
+      return { payload: null, timedOut: false };
     }
 
     return { payload: validatePipelineResponse(payload), timedOut: false };
