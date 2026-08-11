@@ -483,6 +483,7 @@ export default function AIInsightsPage() {
             <h2 className="text-xl font-bold text-[#12172B] font-display">
               AI-termometeret – Opgavenedbrydning pr. erhverv
             </h2>
+            <p className="text-xs text-[#92400E]">Illustrative modelestimater på opgaveniveau — ikke observerede jobtabsrater eller prognoser for den enkelte.</p>
           </div>
 
           <div className="space-y-4">
@@ -532,7 +533,7 @@ export default function AIInsightsPage() {
                 ))}
               </div>
               <p className="text-[10px] text-[#8891A3] mt-2 italic">
-                ~{currentGauge.score}% AI-støtte i hverdagen · Baseret på O*NET-opgavedata, se metode
+                ~{currentGauge.score}% estimeret AI-støtte i opgaver · Baseret på O*NET-opgavedata, se metode
               </p>
             </div>
           </div>
