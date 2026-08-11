@@ -62,10 +62,11 @@ export function normalizeMetricValue(val: unknown, fallback: number): number {
 }
 
 function canonicalAiResilience(autoRisk: number, augPot: number): number {
-  return Math.min(
-    100,
-    Math.max(10, Math.round((1 - autoRisk / 100 + 0.2 * (augPot / 100)) * 100))
-  );
+  // Keep risk as the primary signal while using augmentation as a bounded
+  // secondary signal. A weighted average avoids the old formula saturating
+  // large parts of the catalogue at 100/100.
+  const riskResilience = 100 - autoRisk;
+  return Math.min(100, Math.max(10, Math.round(riskResilience * 0.75 + augPot * 0.25)));
 }
 
 /**
@@ -88,7 +89,7 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
     const labDemand = normalizeMetricValue(rawScores.labour_demand, 72);
     const salGrowth = normalizeMetricValue(rawScores.salary_growth, 70);
     const augPot = normalizeMetricValue(rawScores.augmentation_potential, 80);
-    const crosswalkSource = "O*NET 28.1 & DISCO-08 occupational task crosswalk";
+    const crosswalkSource = "O*NET 28.1 / DISCO-08 occupational crosswalk (modelestimat, ikke observeret uddannelsesdata)";
 
     return {
       automation_risk: autoRisk,
