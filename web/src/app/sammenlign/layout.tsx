@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description:
     "Sammenlign op til 3 danske videregående uddannelser side-om-side på AI-robusthed, jobmuligheder, lønpotentiale og adgangskvotienter.",
   alternates: {
-    canonical: "https://uddannelsesindsigt.dk/sammenlign",
+    canonical: "https://uddannelsesindsigt.com/sammenlign",
   },
   openGraph: {
     title: "Sammenlign Uddannelser | Uddannelsesindsigt",
     description: "Sammenlign op til 3 uddannelser på nøgletal som AI-robusthed, jobmuligheder og lønpotentiale.",
-    url: "https://uddannelsesindsigt.dk/sammenlign",
+    url: "https://uddannelsesindsigt.com/sammenlign",
   },
 };
 
