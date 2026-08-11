@@ -505,6 +505,7 @@ export default function Dashboard() {
   };
 
   const topMatches = matchedPrograms.slice(0, visibleCount);
+  const preferenceSummary = ["AI " + aiRobustnessWeight + "%", "Job " + jobOpportunitiesWeight + "%", "Løn " + salaryWeight + "%"].join(" · ");
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
@@ -579,8 +580,8 @@ export default function Dashboard() {
               <span className="text-xs font-bold text-[#545D71] uppercase tracking-wider flex items-center gap-1.5">
                 <SlidersIcon /> Hvad betyder mest for dig?
               </span>
-              <span className="text-[11px] text-[#545D71] font-mono-data">
-                Sorterer i realtid
+              <span aria-live="polite" className="text-[11px] text-[#0B7A57] font-mono-data font-semibold">
+                Opdateret nu · {preferenceSummary}
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -594,7 +595,10 @@ export default function Dashboard() {
                   min="0"
                   max="100"
                   value={aiRobustnessWeight}
-                  onChange={(e) => setAiRobustnessWeight(Number(e.target.value))}
+                  onInput={(e) => {
+                    setAiRobustnessWeight(Number(e.currentTarget.value));
+                    setVisibleCount(10);
+                  }}
                   aria-label={`AI-robusthed vægt: ${aiRobustnessWeight}%`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#0F9D6E] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:ring-offset-2"
                 />
@@ -609,7 +613,10 @@ export default function Dashboard() {
                   min="0"
                   max="100"
                   value={jobOpportunitiesWeight}
-                  onChange={(e) => setJobOpportunitiesWeight(Number(e.target.value))}
+                  onInput={(e) => {
+                    setJobOpportunitiesWeight(Number(e.currentTarget.value));
+                    setVisibleCount(10);
+                  }}
                   aria-label={`Jobmuligheder vægt: ${jobOpportunitiesWeight}%`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
                 />
@@ -624,7 +631,10 @@ export default function Dashboard() {
                   min="0"
                   max="100"
                   value={salaryWeight}
-                  onChange={(e) => setSalaryWeight(Number(e.target.value))}
+                  onInput={(e) => {
+                    setSalaryWeight(Number(e.currentTarget.value));
+                    setVisibleCount(10);
+                  }}
                   aria-label={`Lønpotentiale vægt: ${salaryWeight}%`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#7C3AED] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2"
                 />
@@ -702,7 +712,10 @@ export default function Dashboard() {
                <p className="text-xs text-[#545D71]">Analyserer 1.413 uddannelser over 42 parametre.</p>
             </div>
           ) : topMatches.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-4" data-testid="ranked-program-results">
+              <p aria-live="polite" className="text-xs text-[#545D71]">
+                Rangeringen opdateres ved hvert slidertræk. Aktuelle prioriteter: <span className="font-semibold text-[#12172B]">{preferenceSummary}</span>
+              </p>
               {topMatches.map((prog, index) => {
                 const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
                 return (
@@ -715,6 +728,7 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-[#0B7A57]">#{index + 1} Modelscore ({prog.matchScore}%)</span>
+                            <span className="font-mono-data text-[#8891A3]">Vægtet: {prog.weightedComposite.toFixed(1)}</span>
                             <span>•</span>
                             <span>{prog.institution}</span>
                             <span>•</span>
