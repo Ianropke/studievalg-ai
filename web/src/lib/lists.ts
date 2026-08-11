@@ -40,6 +40,11 @@ export interface ListConfig {
   filter?: (p: ProgramItem) => boolean;
 }
 
+export function isAllAdmitted(value: unknown): boolean {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return normalized === "" || normalized.includes("alle optaget");
+}
+
 export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-mest-ai-robuste-uddannelser": {
     slug: "top-10-mest-ai-robuste-uddannelser",
