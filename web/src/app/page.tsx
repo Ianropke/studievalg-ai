@@ -955,10 +955,12 @@ export default function Dashboard() {
                   onClick={() => {
                     const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
                     const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
-                    const topScore = matchedPrograms.length > 0 ? matchedPrograms[0].matchScore : "89";
+                    const topScore = matchedPrograms.length > 0 ? String(matchedPrograms[0].matchScore) : null;
                     navigator.share({
-                      title: `Mit match: ${topTitle} (${topScore}%)`,
-                      text: `Min modelscore er ${topScore}% for ${topTitle} på Uddannelsesindsigt! Se hvad du matcher med:`,
+                      title: topScore ? `Mit match: ${topTitle} (${topScore}%)` : "Mit uddannelsesmatch på Uddannelsesindsigt",
+                      text: topScore
+                        ? `Min modelscore er ${topScore}% for ${topTitle} på Uddannelsesindsigt! Se hvad du matcher med:`
+                        : "Jeg har endnu ikke et beregnet uddannelsesmatch. Se mit match på Uddannelsesindsigt:",
                       url: shareUrl,
                     }).catch(() => {});
                   }}
