@@ -1,8 +1,16 @@
 /**
  * Canonical Domain Scoring & Provenance Engine.
- * Provides normalized scores (0.0 to 1.0 internal scale) backed by official register data 
- * (Danmarks Statistik, UFM KOT) and O*NET / DISCO-08 occupational task taxonomies.
+ * All display values use a 0..100 scale, while provenance describes how
+ * each metric should be interpreted.
  */
+
+export type EvidenceStatus =
+  | "OBSERVED"
+  | "DERIVED"
+  | "CROSSWALK"
+  | "MODEL"
+  | "PROVENANCE_REQUIRED"
+  | "UNKNOWN";
 
 export interface ScoreProvenance {
   metric: string;
@@ -12,6 +20,7 @@ export interface ScoreProvenance {
   confidence: "HIGH" | "MEDIUM" | "LOW" | "UNKNOWN";
   is_baseline_estimate: boolean;
   last_updated: string;
+  status?: EvidenceStatus;
 }
 
 export interface RawProgramScores {
@@ -24,14 +33,15 @@ export interface RawProgramScores {
 }
 
 export interface NormalizedScores {
-  automation_risk: number;      // 0..100 for display representation
-  automation_exposure: number;  // 0..100
-  augmentation_potential: number; // 0..100
-  labour_demand: number;       // 0..100
-  salary_growth: number;       // 0..100
-  ai_resilience: number;       // 0..100 (1 - automation_risk + 0.2 * augmentation_potential)
+  automation_risk: number;
+  automation_exposure: number;
+  augmentation_potential: number;
+  labour_demand: number;
+  salary_growth: number;
+  ai_resilience: number;
   data_quality: "HIGH" | "MEDIUM" | "LOW";
   is_baseline_estimate: boolean;
+  overall_status?: EvidenceStatus;
   provenance: Record<string, ScoreProvenance>;
 }
 
@@ -43,31 +53,42 @@ export function normalizeMetricValue(val: unknown, fallback: number): number {
   if (val === null || val === undefined) return fallback;
   const num = Number(val);
   if (isNaN(num) || !isFinite(num)) return fallback;
-  
-  // If value is in 0..1 scale, convert to percentage 0..100
+
   if (num >= 0 && num <= 1.0) {
     return Math.round(num * 100);
   }
-  
-  // Clamp between 0 and 100
+
   return Math.min(100, Math.max(0, Math.round(num)));
+}
+
+function canonicalAiResilience(autoRisk: number, augPot: number): number {
+  return Math.min(
+    100,
+    Math.max(10, Math.round((1 - autoRisk / 100 + 0.2 * (augPot / 100)) * 100))
+  );
 }
 
 /**
  * Returns canonical scores from database/catalog data.
- * Does NOT override database values with title-based heuristics.
- * AI resilience follows the canonical methodology: clamp(1 - risk + 0.2 * augmentation).
+ * Raw catalog values are not automatically treated as observed programme
+ * outcomes: AI values are crosswalk/model estimates and labour/salary
+ * provenance still requires an explicit programme-level source mapping.
  */
 export function getEnrichedScores(title?: string, rawScores?: RawProgramScores): NormalizedScores {
   const datasetVersion = "2026.1 (Release July 2026)";
   const lastUpdated = "2026-07-29";
+  const hasProgramScores = Boolean(
+    rawScores &&
+      ["automation_risk", "augmentation_potential", "labour_demand", "salary_growth"]
+        .some((metric) => rawScores[metric] !== undefined)
+  );
 
-  // 1. Primary path: Use empirical database/catalog scores when available
-  if (rawScores && (rawScores.automation_risk !== undefined || rawScores.labour_demand !== undefined)) {
+  if (hasProgramScores && rawScores) {
     const autoRisk = normalizeMetricValue(rawScores.automation_risk, 28);
     const labDemand = normalizeMetricValue(rawScores.labour_demand, 72);
     const salGrowth = normalizeMetricValue(rawScores.salary_growth, 70);
     const augPot = normalizeMetricValue(rawScores.augmentation_potential, 80);
+    const crosswalkSource = "O*NET 28.1 & DISCO-08 occupational task crosswalk";
 
     return {
       automation_risk: autoRisk,
@@ -75,46 +96,70 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
       augmentation_potential: augPot,
       labour_demand: labDemand,
       salary_growth: salGrowth,
-      ai_resilience: Math.min(100, Math.max(10, Math.round((1 - (autoRisk / 100) + 0.2 * (augPot / 100)) * 100))),
-      data_quality: "HIGH",
+      ai_resilience: canonicalAiResilience(autoRisk, augPot),
+      data_quality: "MEDIUM",
       is_baseline_estimate: false,
+      overall_status: "PROVENANCE_REQUIRED",
       provenance: {
         automation_risk: {
           metric: "automation_risk",
-          source: "O*NET 28.1 & DISCO-08 Occupational Task Taxonomy",
+          source: crosswalkSource,
           dataset_version: datasetVersion,
-          methodology: "Task-weighted econometric model",
+          methodology: "Task-weighted occupational crosswalk/model estimate",
           confidence: "MEDIUM",
           is_baseline_estimate: false,
-          last_updated: lastUpdated
+          last_updated: lastUpdated,
+          status: "CROSSWALK"
+        },
+        augmentation_potential: {
+          metric: "augmentation_potential",
+          source: crosswalkSource,
+          dataset_version: datasetVersion,
+          methodology: "Task-weighted occupational crosswalk/model estimate",
+          confidence: "MEDIUM",
+          is_baseline_estimate: false,
+          last_updated: lastUpdated,
+          status: "CROSSWALK"
         },
         labour_demand: {
           metric: "labour_demand",
-          source: "Danmarks Statistik & UFM Dimittend-register",
+          source: "Programme-level source mapping is not established in the client catalog",
           dataset_version: datasetVersion,
-          methodology: "2-year graduate employment rate & vacancy ratio",
-          confidence: "HIGH",
+          methodology: "Raw catalogue value requires documented population, period and transformation",
+          confidence: "UNKNOWN",
           is_baseline_estimate: false,
-          last_updated: lastUpdated
+          last_updated: lastUpdated,
+          status: "PROVENANCE_REQUIRED"
         },
         salary_growth: {
           metric: "salary_growth",
-          source: "Danmarks Statistik Income Register (IND)",
+          source: "Programme-level source mapping is not established in the client catalog",
           dataset_version: datasetVersion,
-          methodology: "5-year graduate earnings progression trajectory",
-          confidence: "HIGH",
+          methodology: "Raw catalogue value requires documented population, period and transformation",
+          confidence: "UNKNOWN",
           is_baseline_estimate: false,
-          last_updated: lastUpdated
+          last_updated: lastUpdated,
+          status: "PROVENANCE_REQUIRED"
         }
       }
     };
   }
 
-  // 2. Fallback for unmapped records: Default baseline values with explicit LOW confidence and is_baseline_estimate flag
   const defaultAutoRisk = 28;
   const defaultLabDemand = 72;
   const defaultSalGrowth = 70;
   const defaultAugPot = 75;
+
+  const baselineProvenance = (metric: string, source: string): ScoreProvenance => ({
+    metric,
+    source,
+    dataset_version: datasetVersion,
+    methodology: "National/domain baseline assumption",
+    confidence: "LOW",
+    is_baseline_estimate: true,
+    last_updated: lastUpdated,
+    status: "MODEL"
+  });
 
   return {
     automation_risk: defaultAutoRisk,
@@ -122,37 +167,15 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
     augmentation_potential: defaultAugPot,
     labour_demand: defaultLabDemand,
     salary_growth: defaultSalGrowth,
-    ai_resilience: Math.min(100, Math.max(10, Math.round((1 - (defaultAutoRisk / 100) + 0.2 * (defaultAugPot / 100)) * 100))),
+    ai_resilience: canonicalAiResilience(defaultAutoRisk, defaultAugPot),
     data_quality: "LOW",
     is_baseline_estimate: true,
+    overall_status: "MODEL",
     provenance: {
-      automation_risk: {
-        metric: "automation_risk",
-        source: "Sectoral Average Baseline",
-        dataset_version: datasetVersion,
-        methodology: "Default domain baseline",
-        confidence: "LOW",
-        is_baseline_estimate: true,
-        last_updated: lastUpdated
-      },
-      labour_demand: {
-        metric: "labour_demand",
-        source: "UFM National Average Baseline",
-        dataset_version: datasetVersion,
-        methodology: "National average baseline",
-        confidence: "LOW",
-        is_baseline_estimate: true,
-        last_updated: lastUpdated
-      },
-      salary_growth: {
-        metric: "salary_growth",
-        source: "National Graduate Median Baseline",
-        dataset_version: datasetVersion,
-        methodology: "National graduate baseline",
-        confidence: "LOW",
-        is_baseline_estimate: true,
-        last_updated: lastUpdated
-      }
+      automation_risk: baselineProvenance("automation_risk", "Sectoral average baseline"),
+      augmentation_potential: baselineProvenance("augmentation_potential", "Sectoral average baseline"),
+      labour_demand: baselineProvenance("labour_demand", "UFM national average baseline"),
+      salary_growth: baselineProvenance("salary_growth", "National graduate median baseline")
     }
   };
 }
