@@ -167,6 +167,10 @@ export function runUnitTests() {
   const enrichedDb = getEnrichedScores("Medicin", dbScores);
   console.assert(enrichedDb.automation_risk === 15, `Test 15 Fejl: Database score bør bevares (15), fik ${enrichedDb.automation_risk}`);
   console.log("  ✅ TEST-15: Kanonisk databasemodel godkendt (Empiriske databasetal overskrives ikke af title-heuristikker)");
+  console.assert(enrichedDb.overall_status === "PROVENANCE_REQUIRED", "Test 15b Fejl: Raw katalogtal skal kræve eksplicit provenance");
+  console.assert(enrichedDb.provenance.automation_risk.status === "CROSSWALK", "Test 15c Fejl: AI-risiko skal markeres som crosswalk-estimat");
+  console.assert(enrichedDb.provenance.labour_demand.status === "PROVENANCE_REQUIRED", "Test 15d Fejl: Jobscore skal markeres som provenance required");
+  console.log("  ✅ TEST-15b: Epistemisk status på rå katalogtal godkendt");
 
   // Test 17: Zod Schema Input Validering & Grænsekontrol
   const PipelineInputSchema = z.object({
