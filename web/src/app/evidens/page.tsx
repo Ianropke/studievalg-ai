@@ -19,7 +19,7 @@ export default function EvidensPage() {
         "name": "Hvordan beregnes AI-robusthedsscorerne?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Beregningerne vægter officiel registerdata fra UFM/DST, økonometriske fremskrivningsmodeller samt AI-analyse af studieordninger."
+          "text": "AI-robusthed er et crosswalk-/modelestimat: 75% af indekset kommer fra lavere automatiseringsrisiko og 25% fra augmentationspotentiale. Optagelsestal er observerede UFM-data; job og løn er model-/registerafledte indikatorer."
         }
       },
       {
@@ -87,7 +87,7 @@ export default function EvidensPage() {
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-4">
           <h2 className="text-xl font-bold text-[#12172B] font-display">Ofte stillede spørgsmål</h2>
           <div className="space-y-3 text-sm text-[#545D71]">
-            <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> AI-robusthed beregnes efter den fælles formel: 1 − automation_risk + 0,2 × augmentation_potential, med værdier begrænset til 10–100. Det er et modelestimat — ikke en prognose for arbejdsløshed.</p>
+            <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> AI-robusthed beregnes efter den fælles formel: 75% × (1 − automation_risk) + 25% × augmentation_potential, med værdier begrænset til 10–100. Det er et crosswalk-/modelestimat — ikke en prognose for arbejdsløshed eller jobmuligheder.</p>
             <p><strong>Hvor kommer dataene fra?</strong> Platformen anvender blandt andet UFM, Danmarks Statistik og internationale arbejdsmarkeds- og opgavedatasæt.</p>
           </div>
         </section>
