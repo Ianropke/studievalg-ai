@@ -1,5 +1,4 @@
-import { getEnrichedScores } from "../lib/domainScoring";
-import { isAllAdmitted } from "../lib/lists";
+import { getEnrichedScores, isAllAdmitted } from "../lib/domainScoring";
 import { z } from "zod";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {

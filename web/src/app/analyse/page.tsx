@@ -373,7 +373,7 @@ export default function AIInsightsPage() {
               {scenarioMode === "faktisk" ? (
                 <>
                   <p>
-                    <strong className="text-[#12172B]">Illustrativ sammenligning:</strong> Kurverne er en pædagogisk visualisering af mulige udviklingsforløb. De er ikke en kausal måling af AI's effekt og må ikke læses som dokumenterede procenttal eller statistisk test.
+                    <strong className="text-[#12172B]">Illustrativ sammenligning:</strong> Kurverne er en pædagogisk visualisering af mulige udviklingsforløb. De er ikke en kausal måling af AI&apos;s effekt og må ikke læses som dokumenterede procenttal eller statistisk test.
                   </p>
 
                   <div className="bg-[#FFFFFF] p-3 rounded-lg border border-[#E7E9EF] space-y-1 card-shadow">

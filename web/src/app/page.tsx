@@ -275,6 +275,11 @@ export default function Dashboard() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
 
+  const updateWeight = (setter: (value: number) => void, value: string) => {
+    setter(Number(value));
+    setVisibleCount(10);
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -581,7 +586,7 @@ export default function Dashboard() {
                 <SlidersIcon /> Hvad betyder mest for dig?
               </span>
               <span aria-live="polite" className="text-[11px] text-[#0B7A57] font-mono-data font-semibold">
-                Opdateret nu · {preferenceSummary}
+                <span data-testid="weight-summary">Opdateret nu · {preferenceSummary}</span>
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -591,14 +596,12 @@ export default function Dashboard() {
                   <span className="text-[#0B7A57] font-mono-data font-bold">{aiRobustnessWeight}%</span>
                 </div>
                 <input
+                  id="ai-weight-slider"
                   type="range"
                   min="0"
                   max="100"
                   value={aiRobustnessWeight}
-                  onInput={(e) => {
-                    setAiRobustnessWeight(Number(e.currentTarget.value));
-                    setVisibleCount(10);
-                  }}
+                  onChange={(e) => updateWeight(setAiRobustnessWeight, e.currentTarget.value)}
                   aria-label={`AI-robusthed vægt: ${aiRobustnessWeight}%`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#0F9D6E] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:ring-offset-2"
                 />
@@ -609,14 +612,12 @@ export default function Dashboard() {
                   <span className="text-[#1D4ED8] font-mono-data font-bold">{jobOpportunitiesWeight}%</span>
                 </div>
                 <input
+                  id="job-weight-slider"
                   type="range"
                   min="0"
                   max="100"
                   value={jobOpportunitiesWeight}
-                  onInput={(e) => {
-                    setJobOpportunitiesWeight(Number(e.currentTarget.value));
-                    setVisibleCount(10);
-                  }}
+                  onChange={(e) => updateWeight(setJobOpportunitiesWeight, e.currentTarget.value)}
                   aria-label={`Jobmuligheder vægt: ${jobOpportunitiesWeight}%`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
                 />
@@ -627,14 +628,12 @@ export default function Dashboard() {
                   <span className="text-[#6D28D9] font-mono-data font-bold">{salaryWeight}%</span>
                 </div>
                 <input
+                  id="salary-weight-slider"
                   type="range"
                   min="0"
                   max="100"
                   value={salaryWeight}
-                  onInput={(e) => {
-                    setSalaryWeight(Number(e.currentTarget.value));
-                    setVisibleCount(10);
-                  }}
+                  onChange={(e) => updateWeight(setSalaryWeight, e.currentTarget.value)}
                   aria-label={`Lønpotentiale vægt: ${salaryWeight}%`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#7C3AED] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2"
                 />
@@ -649,6 +648,7 @@ export default function Dashboard() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Søg efter uddannelse eller erhverv"
               placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..."
               className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#8891A3] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]"
             />
@@ -721,6 +721,8 @@ export default function Dashboard() {
                 return (
                   <article
                     key={prog.kot_nr}
+                    data-testid="program-card"
+                    data-program-id={prog.kot_nr}
                     className="border border-[#E7E9EF] bg-[#FFFFFF] rounded-xl p-5 card-shadow hover:border-[#D8DBE4] transition space-y-4"
                   >
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -748,7 +750,7 @@ export default function Dashboard() {
                             <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
                           </button>
                         </div>
-                        <h3 className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition">
+                        <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition">
                           <Link href={`/uddannelse/${createProgramSlug(prog)}`}>
                             {prog.udbud_titel}
                           </Link>
@@ -796,7 +798,7 @@ export default function Dashboard() {
                         {/* Bar 1: AI-robusthed */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
-                            <span className="flex items-center gap-1.5 text-[#12172B]">
+                            <span data-testid="metric-ai" className="flex items-center gap-1.5 text-[#12172B]">
                               <span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-robusthed
                             </span>
                             <span className="font-mono-data font-bold text-[#0F9D6E]">{prog.robustScore}/100</span>
@@ -809,7 +811,7 @@ export default function Dashboard() {
                         {/* Bar 2: Jobmuligheder */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
-                            <span className="flex items-center gap-1.5 text-[#12172B]">
+                            <span data-testid="metric-job" className="flex items-center gap-1.5 text-[#12172B]">
                               <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span> Jobmuligheder
                             </span>
                             <span className="font-mono-data font-bold text-[#2563EB]">{prog.jobScore}/100</span>
@@ -822,7 +824,7 @@ export default function Dashboard() {
                         {/* Bar 3: Lønpotentiale */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
-                            <span className="flex items-center gap-1.5 text-[#12172B]">
+                            <span data-testid="metric-salary" className="flex items-center gap-1.5 text-[#12172B]">
                               <span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span> Lønpotentiale
                             </span>
                             <span className="font-mono-data font-bold text-[#7C3AED]">{prog.salScore}/100</span>

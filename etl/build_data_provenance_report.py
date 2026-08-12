@@ -9,9 +9,24 @@ import json
 from collections import Counter, defaultdict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-CATALOG_CANDIDATES = [BASE_DIR / "data" / "all_programs_catalog.json", BASE_DIR / "web" / "src" / "data" / "all_programs_catalog.json"]
+CATALOG_CANDIDATES = [
+    BASE_DIR / "data" / "all_programs_catalog.json",
+    BASE_DIR / "web" / "public" / "data" / "all_programs_catalog.json",
+    BASE_DIR / "web" / "src" / "data" / "all_programs_catalog.json",
+]
 OUTPUT_PATH = BASE_DIR / "data" / "DATA_PROVENANCE_REPORT.json"
 METRICS = ("automation_risk", "augmentation_potential", "labour_demand", "salary_growth")
+EXPLICIT_STATUSES = {
+    "OBSERVED",
+    "DERIVED",
+    "CROSSWALK",
+    "CROSSWALK_OR_MODEL",
+    "MODEL",
+    "MODEL_OR_CROSSWALK",
+    "PROVENANCE_REQUIRED",
+    "UNKNOWN",
+}
+REQUIRED_METRIC_PROVENANCE = ("source", "source_url", "dataset", "period", "transformation")
 
 
 def _catalog_path():
@@ -30,11 +45,28 @@ def _status_from_export(programme, metric, value):
     explicit = provenance.get("epistemic_status")
     if value is None:
         return "MISSING"
-    if explicit:
+    if explicit in EXPLICIT_STATUSES:
         return explicit
     if metric in {"automation_risk", "augmentation_potential"}:
-        return "MODEL_OR_CROSSWALK"
+        mapping = programme.get("mapping_provenance") or {}
+        disco = str(programme.get("disco08") or "").strip().upper()
+        mapping_is_explicit = (
+            disco not in {"", "NONE", "NAN", "DEFAULT"}
+            and str(mapping.get("source") or "").strip()
+            and str(mapping.get("period") or "").strip()
+            and str(mapping.get("confidence") or "").upper() not in {"", "UNKNOWN", "NAN"}
+        )
+        return "MODEL_OR_CROSSWALK" if mapping_is_explicit else "PROVENANCE_REQUIRED"
     return "PROVENANCE_REQUIRED"
+
+
+def _has_complete_metric_provenance(exported, status):
+    if status in {"MISSING", "PROVENANCE_REQUIRED", "UNKNOWN"}:
+        return False
+    return (
+        all(str(exported.get(field) or "").strip() for field in REQUIRED_METRIC_PROVENANCE)
+        and str(exported.get("confidence") or "").upper() not in {"", "UNKNOWN", "NAN"}
+    )
 
 
 def build_report():
@@ -44,6 +76,8 @@ def build_report():
 
     programme_rows = []
     status_counter = Counter()
+    status_by_metric = {metric: Counter() for metric in METRICS}
+    coverage_by_metric = {metric: {"value_count": 0, "complete_provenance_count": 0} for metric in METRICS}
     signature_groups = defaultdict(list)
     default_mapping_count = 0
 
@@ -72,17 +106,25 @@ def build_report():
             value = scores.get(metric)
             exported = (programme.get("score_provenance") or {}).get(metric) or {}
             status = _status_from_export(programme, metric, value)
+            complete_provenance = _has_complete_metric_provenance(exported, status)
             row["metrics"][metric] = {
                 "value": value,
                 "epistemic_status": status,
                 "source": exported.get("source"),
+                "source_url": exported.get("source_url"),
                 "dataset": exported.get("dataset"),
                 "period": exported.get("period"),
                 "transformation": exported.get("transformation"),
                 "coverage": exported.get("coverage"),
                 "confidence": exported.get("confidence", "UNKNOWN"),
+                "provenance_complete": complete_provenance,
             }
             status_counter[status] += 1
+            status_by_metric[metric][status] += 1
+            if value is not None:
+                coverage_by_metric[metric]["value_count"] += 1
+            if complete_provenance:
+                coverage_by_metric[metric]["complete_provenance_count"] += 1
 
         programme_rows.append(row)
 
@@ -118,6 +160,14 @@ def build_report():
             "unique_score_vectors": len(signature_groups),
             "repeated_score_vector_groups": len(repeated_groups),
             "largest_repeated_score_vector": largest_group,
+            "status_counts_by_metric": {metric: dict(counts) for metric, counts in status_by_metric.items()},
+            "metric_provenance_coverage": {
+                metric: {
+                    **counts,
+                    "coverage_share": round(counts["complete_provenance_count"] / len(catalog), 4) if catalog else 0,
+                }
+                for metric, counts in coverage_by_metric.items()
+            },
             "critical_warnings": [
                 warning for warning in [
                     "DEFAULT occupation mapping is present for a substantial number of programmes." if default_mapping_count else None,

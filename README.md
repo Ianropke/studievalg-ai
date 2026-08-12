@@ -41,6 +41,9 @@ python3 -m unittest discover -s tests -p "test_*.py"
 
 # TypeScript frontend & algoritme tests
 cd web && npx tsx src/__tests__/algorithm.test.ts
+
+# Browsertests for søgning, sliders og navigation
+cd web && npx playwright install chromium && npm run e2e
 ```
 
 ### 4. Start Next.js Frontend Server
@@ -54,5 +57,11 @@ npm run dev
 ## 📊 Datakilder & Metoder
 
 - **`data/kot_data.duckdb`**: Lokal DuckDB database med historiske optagelsestal, grænsekvotienter og DISCO-08 erhvervskoder.
-- **`web/src/data/all_programs_catalog.json`**: Eksporteret kanonisk katalog med empiriske registermålinger.
+- **`web/public/data/all_programs_catalog.json`**: Eksporteret katalog, som indlæses af den deployed webapp.
 - **`docs/MODEL_METHODOLOGY.md`**: Komplet metodisk dokumentation for formler, Monte Carlo scenarier og datakilder.
+
+AI-robusthed er et crosswalk-/modelestimat. Job- og lønindikatorer må kun kaldes
+programniveau-observationer, når deres konkrete kilde, population, periode og
+transformation følger med i katalogets provenancefelter. Den strenge provenance-audit
+køres manuelt, indtil hele kataloget opfylder datadækningskravene; den almindelige CI
+genererer i stedet en rapport som artifact.
