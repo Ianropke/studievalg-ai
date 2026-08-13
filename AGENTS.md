@@ -51,7 +51,7 @@ When a durable rule, command, service boundary, or source contract changes, upda
 - This AI score is a crosswalk/model estimate, not an observed Danish job-loss rate, employment guarantee, or individual forecast.
 - Labour-demand and salary values must not be described as programme-level observed outcomes until source, dataset, population, period, and transformation are documented.
 - Preserve epistemic labels such as `OBSERVED`, `DERIVED`, `CROSSWALK`, `MODEL`, `PROVENANCE_REQUIRED`, and `UNKNOWN`.
-- The homepage ranking normalizes the AI, job, and salary weights. GPA eligibility contributes the existing `+15` ranking bonus when the current GPA meets a numeric Kvote 1 threshold. Preserve these behaviours unless the product task explicitly changes the preference model.
+- The homepage ranking normalizes the AI, job, and salary weights in `priority` mode. In `requirements` mode, the same sliders are minimum thresholds; `0` disables a requirement, and the default `all` logic requires every active threshold while `any` accepts at least one. GPA eligibility contributes the existing `+15` ranking bonus when the current GPA meets a numeric Kvote 1 threshold. Preserve these behaviours unless the product task explicitly changes the preference model.
 - University filters use KOT-prefix/structured institution rules. Do not replace them with naive campus-city matching.
 - Search, ranking, and slider changes must be derived from current React state. Add a regression test when changing ranking or interaction behaviour.
 

@@ -49,7 +49,19 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(firstCard.locator('text=Trekant-profil')).toBeVisible();
   });
 
-  test('E2E-04: Søgning opdaterer resultater uden manuel genindlæsning', async ({ page }) => {
+  test('E2E-04: Prioritering og minimumskrav kan skelnes tydeligt i interfacet', async ({ page }) => {
+    await expect(page.getByTestId('preference-help')).toContainText('Sliderne bestemmer');
+    await page.locator('#preference-mode').selectOption('requirements');
+    await expect(page.getByTestId('preference-help')).toContainText('minimumsniveauer');
+    await expect(page.getByTestId('weight-summary')).toContainText('Minimumskrav');
+    await expect(page.locator('#requirement-match-mode')).toBeVisible();
+
+    await page.locator('#requirement-match-mode').selectOption('any');
+    await expect(page.getByTestId('weight-summary')).toContainText('mindst ét aktivt krav');
+    await expect(page.locator('#ai-weight-slider')).toHaveAttribute('aria-label', /minimum/);
+  });
+
+  test('E2E-05: Søgning opdaterer resultater uden manuel genindlæsning', async ({ page }) => {
     const searchInput = page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' });
     await searchInput.fill('læge');
 
@@ -57,7 +69,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.getByText(/matchede uddannelser/)).toBeVisible();
   });
 
-  test('E2E-05: Navigering til AI Insights og PEFF Evidens undersider', async ({ page }) => {
+  test('E2E-06: Navigering til AI Insights og PEFF Evidens undersider', async ({ page }) => {
     const navigation = page.getByRole('navigation', { name: 'Hovednavigation' });
     await navigation.getByRole('link', { name: 'AI Insights' }).click();
     await expect(page).toHaveURL(/.*analyse/);

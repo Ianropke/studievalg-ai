@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { evaluatePreference, type PreferenceMode, type RequirementMatchMode } from "@/lib/preferenceMatching";
 import type { NormalizedScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
@@ -269,6 +270,8 @@ export default function Dashboard() {
   const [aiRobustnessWeight, setAiRobustnessWeight] = useState(80);
   const [jobOpportunitiesWeight, setJobOpportunitiesWeight] = useState(70);
   const [salaryWeight, setSalaryWeight] = useState(60);
+  const [preferenceMode, setPreferenceMode] = useState<PreferenceMode>("priority");
+  const [requirementMatchMode, setRequirementMatchMode] = useState<RequirementMatchMode>("all");
 
   const [expandedProgram, setExpandedProgram] = useState<ProgramItem | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
@@ -280,6 +283,11 @@ export default function Dashboard() {
     setVisibleCount(10);
   };
 
+  const formatPreferenceValue = (value: number): string => {
+    if (preferenceMode === "priority") return `${value}%`;
+    return value === 0 ? "ignoreret" : `≥ ${value}%`;
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -287,14 +295,18 @@ export default function Dashboard() {
       const urlAi = params.get("wAi");
       const urlJob = params.get("wJob");
       const urlSal = params.get("wSal");
+      const urlMode = params.get("mode");
+      const urlMatch = params.get("match");
       const urlQ = params.get("q");
 
-      if (urlGpa || urlAi || urlJob || urlSal || urlQ) {
+      if (urlGpa || urlAi || urlJob || urlSal || urlMode || urlMatch || urlQ) {
         requestAnimationFrame(() => {
           if (urlGpa && !isNaN(Number(urlGpa))) setGpa(Number(urlGpa));
           if (urlAi && !isNaN(Number(urlAi))) setAiRobustnessWeight(Number(urlAi));
           if (urlJob && !isNaN(Number(urlJob))) setJobOpportunitiesWeight(Number(urlJob));
           if (urlSal && !isNaN(Number(urlSal))) setSalaryWeight(Number(urlSal));
+          if (urlMode === "priority" || urlMode === "requirements") setPreferenceMode(urlMode);
+          if (urlMatch === "all" || urlMatch === "any") setRequirementMatchMode(urlMatch);
           if (urlQ) setSearchQuery(urlQ);
         });
       }
@@ -318,7 +330,13 @@ export default function Dashboard() {
     });
 
     const exactMajors = EXACT_MAJOR_MAP[rawQuery] || EXACT_MAJOR_MAP[normalizedQuery] || [];
-    const totalWeight = Math.max(1, aiRobustnessWeight + jobOpportunitiesWeight + salaryWeight);
+    const preferenceSettings = {
+      mode: preferenceMode,
+      requirementMatchMode,
+      ai: aiRobustnessWeight,
+      job: jobOpportunitiesWeight,
+      salary: salaryWeight,
+    };
 
     let list = allPrograms.map((prog) => {
       const latestKv = prog.latest_kvotient;
@@ -330,11 +348,11 @@ export default function Dashboard() {
       const jobScore = enriched.labour_demand || 50;
       const salScore = enriched.salary_growth || 50;
 
-      const weightedComposite = (
-        (robustScore * aiRobustnessWeight) +
-        (jobScore * jobOpportunitiesWeight) +
-        (salScore * salaryWeight)
-      ) / totalWeight;
+      const preferenceEvaluation = evaluatePreference(
+        { ai: robustScore, job: jobScore, salary: salScore },
+        preferenceSettings
+      );
+      const weightedComposite = preferenceEvaluation.composite;
 
       let score = Math.round(weightedComposite);
       if (meetsGpa) score = Math.min(99, score + 2);
@@ -368,7 +386,10 @@ export default function Dashboard() {
       }
 
       const gpaEligibilityBonus = (kvNum !== null && meetsGpa) ? 15 : 0;
-      const totalSortScore = weightedComposite + relevanceBoost + gpaEligibilityBonus;
+      const requirementBoost = preferenceMode === "requirements" && preferenceEvaluation.activeRequirementCount > 0
+        ? (preferenceEvaluation.requirementsMet / preferenceEvaluation.activeRequirementCount) * 10
+        : 0;
+      const totalSortScore = weightedComposite + relevanceBoost + gpaEligibilityBonus + requirementBoost;
 
       prog.udbud_titel = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
 
@@ -396,12 +417,13 @@ export default function Dashboard() {
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
       const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
       const cityName = (prog.by || "") as string;
-      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore, locationsCount: 1, locationsList: [formatCityName(cityName)] };
+      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, matchScore: score, weightedComposite, totalSortScore, whyText, meetsGpa, kvNum, robustScore, jobScore, salScore, meetsRequirements: preferenceEvaluation.meetsRequirements, requirementsMet: preferenceEvaluation.requirementsMet, activeRequirementCount: preferenceEvaluation.activeRequirementCount, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const item = p as Record<string, any>;
+      if (preferenceMode === "requirements" && !item.meetsRequirements) return false;
       if (deferredSearchQuery.trim()) {
         const pTitle = (item.udbud_titel || "").toLowerCase();
         const pDisco = (item.disco_titel || "").toLowerCase();
@@ -495,7 +517,7 @@ export default function Dashboard() {
     }
 
     return sorted;
-  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, aiRobustnessWeight, jobOpportunitiesWeight, salaryWeight, allPrograms]);
+  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, aiRobustnessWeight, jobOpportunitiesWeight, salaryWeight, preferenceMode, requirementMatchMode, allPrograms]);
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -510,7 +532,13 @@ export default function Dashboard() {
   };
 
   const topMatches = matchedPrograms.slice(0, visibleCount);
-  const preferenceSummary = ["AI " + aiRobustnessWeight + "%", "Job " + jobOpportunitiesWeight + "%", "Løn " + salaryWeight + "%"].join(" · ");
+  const preferenceSummary = ["AI " + formatPreferenceValue(aiRobustnessWeight), "Job " + formatPreferenceValue(jobOpportunitiesWeight), "Løn " + formatPreferenceValue(salaryWeight)].join(" · ");
+  const preferenceModeLabel = preferenceMode === "priority"
+    ? "Prioritering"
+    : `Minimumskrav · ${requirementMatchMode === "all" ? "alle aktive krav" : "mindst ét aktivt krav"}`;
+  const preferenceHelpText = preferenceMode === "priority"
+    ? "Sliderne bestemmer, hvor meget hvert kriterium tæller i den samlede rangering."
+    : "Sliderne er minimumsniveauer. 0 betyder, at kriteriet ignoreres.";
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
@@ -580,20 +608,54 @@ export default function Dashboard() {
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
             AI-robusthed er et modelestimat baseret på opgaveeksponering og augmentationspotentiale — ikke en prognose for arbejdsløshed eller en garanti for job.
           </div>
-          <div className="space-y-4">
+<div data-testid="preference-mode-panel" className="rounded-lg border border-[#D8DBE4] bg-[#FFFFFF] px-4 py-3 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-[#12172B]">Hvordan skal kriterierne bruges?</p>
+                <p data-testid="preference-help" className="text-[11px] text-[#545D71] mt-1">{preferenceHelpText}</p>
+              </div>
+              <label className="text-xs font-semibold text-[#12172B] flex items-center gap-2">
+                <span className="sr-only">Vælg brug af kriterier</span>
+                <select
+                  id="preference-mode"
+                  value={preferenceMode}
+                  onChange={(e) => setPreferenceMode(e.target.value as PreferenceMode)}
+                  className="bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg px-3 py-2 text-xs text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]"
+                >
+                  <option value="priority">Prioritér kriterier</option>
+                  <option value="requirements">Sæt minimumskrav</option>
+                </select>
+              </label>
+            </div>
+            {preferenceMode === "requirements" && (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-[#E7E9EF]">
+                <label htmlFor="requirement-match-mode" className="text-xs font-semibold text-[#12172B]">Kravlogik</label>
+                <select
+                  id="requirement-match-mode"
+                  value={requirementMatchMode}
+                  onChange={(e) => setRequirementMatchMode(e.target.value as RequirementMatchMode)}
+                  className="bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg px-3 py-2 text-xs text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]"
+                >
+                  <option value="all">Alle aktive krav skal være opfyldt</option>
+                  <option value="any">Mindst ét aktivt krav skal være opfyldt</option>
+                </select>
+              </div>
+            )}
+          </div>
+                    <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-[#545D71] uppercase tracking-wider flex items-center gap-1.5">
-                <SlidersIcon /> Hvad betyder mest for dig?
+                <SlidersIcon /> {preferenceMode === "priority" ? "Hvad betyder mest for dig?" : "Hvilke minimumskrav skal opfyldes?"}
               </span>
               <span aria-live="polite" className="text-[11px] text-[#0B7A57] font-mono-data font-semibold">
-                <span data-testid="weight-summary">Opdateret nu · {preferenceSummary}</span>
+                <span data-testid="weight-summary">{preferenceMode === "priority" ? "Aktuelle prioriteter" : preferenceModeLabel} · {preferenceSummary}</span>
               </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#0B7A57]">AI-robusthed</span>
-                  <span className="text-[#0B7A57] font-mono-data font-bold">{aiRobustnessWeight}%</span>
+                  <span className="text-[#0B7A57]">{preferenceMode === "priority" ? "AI-robusthed" : "AI-robusthed minimum"}</span>
+                  <span className="text-[#0B7A57] font-mono-data font-bold">{formatPreferenceValue(aiRobustnessWeight)}</span>
                 </div>
                 <input
                   id="ai-weight-slider"
@@ -602,14 +664,14 @@ export default function Dashboard() {
                   max="100"
                   value={aiRobustnessWeight}
                   onChange={(e) => updateWeight(setAiRobustnessWeight, e.currentTarget.value)}
-                  aria-label={`AI-robusthed vægt: ${aiRobustnessWeight}%`}
+                  aria-label={`${preferenceMode === "priority" ? "AI-robusthed vægt" : "AI-robusthed minimum"}: ${formatPreferenceValue(aiRobustnessWeight)}`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#0F9D6E] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:ring-offset-2"
                 />
               </div>
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#1D4ED8]">Jobmuligheder</span>
-                  <span className="text-[#1D4ED8] font-mono-data font-bold">{jobOpportunitiesWeight}%</span>
+                  <span className="text-[#1D4ED8]">{preferenceMode === "priority" ? "Jobmuligheder" : "Jobmuligheder minimum"}</span>
+                  <span className="text-[#1D4ED8] font-mono-data font-bold">{formatPreferenceValue(jobOpportunitiesWeight)}</span>
                 </div>
                 <input
                   id="job-weight-slider"
@@ -618,14 +680,14 @@ export default function Dashboard() {
                   max="100"
                   value={jobOpportunitiesWeight}
                   onChange={(e) => updateWeight(setJobOpportunitiesWeight, e.currentTarget.value)}
-                  aria-label={`Jobmuligheder vægt: ${jobOpportunitiesWeight}%`}
+                  aria-label={`${preferenceMode === "priority" ? "Jobmuligheder vægt" : "Jobmuligheder minimum"}: ${formatPreferenceValue(jobOpportunitiesWeight)}`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
                 />
               </div>
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#6D28D9]">Lønpotentiale</span>
-                  <span className="text-[#6D28D9] font-mono-data font-bold">{salaryWeight}%</span>
+                  <span className="text-[#6D28D9]">{preferenceMode === "priority" ? "Lønpotentiale" : "Lønpotentiale minimum"}</span>
+                  <span className="text-[#6D28D9] font-mono-data font-bold">{formatPreferenceValue(salaryWeight)}</span>
                 </div>
                 <input
                   id="salary-weight-slider"
@@ -634,7 +696,7 @@ export default function Dashboard() {
                   max="100"
                   value={salaryWeight}
                   onChange={(e) => updateWeight(setSalaryWeight, e.currentTarget.value)}
-                  aria-label={`Lønpotentiale vægt: ${salaryWeight}%`}
+                  aria-label={`${preferenceMode === "priority" ? "Lønpotentiale vægt" : "Lønpotentiale minimum"}: ${formatPreferenceValue(salaryWeight)}`}
                   className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#7C3AED] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2"
                 />
               </div>
@@ -688,7 +750,9 @@ export default function Dashboard() {
                 Dine anbefalinger
               </h2>
               <p className="text-xs text-[#545D71] font-mono-data">
-                Vægtet sortering (AI: {aiRobustnessWeight}% · Job: {jobOpportunitiesWeight}% · Løn: {salaryWeight}%)
+                {preferenceMode === "priority"
+                   ? `Vægtet sortering (${preferenceSummary})`
+                   : `Minimumskrav (${requirementMatchMode === "all" ? "alle" : "mindst ét"}) · sorteret efter gennemsnit`}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -714,7 +778,7 @@ export default function Dashboard() {
           ) : topMatches.length > 0 ? (
             <div className="space-y-4" data-testid="ranked-program-results">
               <p aria-live="polite" className="text-xs text-[#545D71]">
-                Rangeringen opdateres ved hvert slidertræk. Aktuelle prioriteter: <span className="font-semibold text-[#12172B]">{preferenceSummary}</span>
+                Rangeringen opdateres ved hvert slidertræk. {preferenceMode === "priority" ? "Aktuelle prioriteter" : "Aktuelle minimumskrav"}: <span className="font-semibold text-[#12172B]">{preferenceSummary}</span>
               </p>
               {topMatches.map((prog, index) => {
                 const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
@@ -730,7 +794,7 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-[#0B7A57]">#{index + 1} Modelscore ({prog.matchScore}%)</span>
-                            <span className="font-mono-data text-[#8891A3]">Vægtet: {prog.weightedComposite.toFixed(1)}</span>
+                            <span className="font-mono-data text-[#8891A3]">{preferenceMode === "priority" ? "Vægtet" : "Profilgennemsnit"}: {prog.weightedComposite.toFixed(1)}</span>
                             <span>•</span>
                             <span>{prog.institution}</span>
                             <span>•</span>
@@ -877,7 +941,7 @@ export default function Dashboard() {
           ) : (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow">
               <h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3>
-              <p className="text-xs text-[#545D71]">Prøv at vælge et andet universitet eller ryd dit søgefelt.</p>
+              <p className="text-xs text-[#545D71]">{preferenceMode === "requirements" ? "Ingen uddannelser opfylder den valgte kravlogik. Sænk et minimumskrav eller vælg “mindst ét krav”." : "Prøv at vælge et andet universitet eller ryd dit søgefelt."}</p>
               <button
                 onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); }}
                 className="px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
@@ -955,7 +1019,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               <button
                 onClick={() => {
-                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}&mode=${preferenceMode}&match=${requirementMatchMode}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
                   navigator.clipboard.writeText(shareUrl);
                   setCopiedToast(true);
                   setTimeout(() => setCopiedToast(false), 3000);
@@ -969,7 +1033,7 @@ export default function Dashboard() {
               {typeof navigator !== "undefined" && "share" in navigator && (
                 <button
                   onClick={() => {
-                    const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                    const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}&mode=${preferenceMode}&match=${requirementMatchMode}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
                     const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
                     const topScore = matchedPrograms.length > 0 ? String(matchedPrograms[0].matchScore) : null;
                     navigator.share({
@@ -991,7 +1055,7 @@ export default function Dashboard() {
                 onClick={() => {
                   const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
                   const topScore = matchedPrograms.length > 0 ? String(matchedPrograms[0].matchScore) : null;
-                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}&mode=${preferenceMode}&match=${requirementMatchMode}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
                   const storyText = topScore
                     ? `🎯 Min top-modelscore er ${topTitle} (${topScore}%) på Uddannelsesindsigt!\\n\\nFind dit eget match her: ${shareUrl}`
                     : `Jeg har endnu ikke et beregnet uddannelsesmatch på Uddannelsesindsigt.\\n\\nFind dit eget match her: ${shareUrl}`;
