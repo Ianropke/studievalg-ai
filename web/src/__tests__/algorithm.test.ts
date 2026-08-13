@@ -1,4 +1,5 @@
 import { getEnrichedScores, isAllAdmitted } from "../lib/domainScoring";
+import { evaluatePreference } from "../lib/preferenceMatching";
 import { z } from "zod";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
@@ -94,6 +95,24 @@ export function runUnitTests() {
   const scoreA_JobFocus = computeCompositeScore(progA.robust, progA.job, progA.sal, 0, 100, 0);
   const scoreB_JobFocus = computeCompositeScore(progB.robust, progB.job, progB.sal, 0, 100, 0);
   console.assert(scoreB_JobFocus > scoreA_JobFocus, "Test 7 Fejl: ProgB bør være #1 ved AI=0%, Job=100%");
+  // Test 23: Minimumskrav kræver som standard, at alle aktive kriterier er opfyldt.
+  const allRequirements = evaluatePreference(
+    { ai: 90, job: 65, salary: 80 },
+    { mode: "requirements", requirementMatchMode: "all", ai: 80, job: 70, salary: 60 }
+  );
+  console.assert(allRequirements.meetsRequirements === false, "Test 23 Fejl: Alle aktive minimumskrav skal være opfyldt i all-tilstand");
+  console.assert(allRequirements.requirementsMet === 2 && allRequirements.activeRequirementCount === 3, "Test 23 Fejl: Kravoptællingen er forkert");
+  console.log("  ✅ TEST-23: Minimumskrav med all-logik godkendt (2 af 3 krav opfyldt giver intet match)");
+
+  // Test 24: Mindst ét krav kan vælges som alternativ kravlogik.
+  const anyRequirements = evaluatePreference(
+    { ai: 90, job: 65, salary: 80 },
+    { mode: "requirements", requirementMatchMode: "any", ai: 80, job: 70, salary: 60 }
+  );
+  console.assert(anyRequirements.meetsRequirements === true, "Test 24 Fejl: Ét opfyldt minimumskrav skal give match i any-tilstand");
+  console.assert(Math.abs(anyRequirements.composite - 78.33) < 0.1, `Test 24 Fejl: Kravtilstandens profilgennemsnit er forkert: ${anyRequirements.composite}`);
+  console.log("  ✅ TEST-24: Mindst ét krav-logik godkendt (2 af 3 krav opfyldt giver match)");
+
   // Test 8: SSG Slug Generering for alle 1.413 uddannelser
   const testSample = { kot_nr: "10140", udbud_titel: "Veterinærmedicin", institution: "Københavns Universitet", by: "Frederiksberg C" };
   const sampleSlug = `${testSample.kot_nr}-${testSample.udbud_titel}-${testSample.institution}-${testSample.by}`
@@ -220,7 +239,7 @@ export function runUnitTests() {
   console.assert(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
   console.log("  ✅ TEST-22: Adgangslisten filtrerer korrekt på 'Alle optaget'");
 
-  console.log("🎉 Alle 22 Unit Tests bestået uden fejl!\n");
+  console.log("🎉 Alle 24 Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {
