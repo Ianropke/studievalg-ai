@@ -16,15 +16,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DUCKDB_PATH = DATA_DIR / "kot_data.duckdb"
 OUTPUT_JSON_PATH = DATA_DIR / "all_programs_catalog.json"
-WEB_JSON_PATH = BASE_DIR / "web" / "src" / "data" / "all_programs_catalog.json"
+WEB_JSON_PATH = BASE_DIR / "web" / "public" / "data" / "all_programs_catalog.json"
 
 
-def _prov(value, status, source=None, dataset=None, period=None, transformation=None, confidence="UNKNOWN"):
+def _prov(value, status, source=None, dataset=None, period=None, transformation=None, confidence="UNKNOWN", source_url=None):
     numeric_value = None if value is None or pd.isnull(value) else float(value)
     return {
         "value": None if numeric_value is None else int(round(numeric_value * 100)),
         "epistemic_status": status,
         "source": source,
+        "source_url": source_url,
         "dataset": dataset,
         "period": period,
         "transformation": transformation,
@@ -80,19 +81,22 @@ def export_all_programs():
 
         mapping_confidence = str(r["mapping_confidence"])
         ai_confidence = str(r["ai_mapping_confidence"]) if "ai_mapping_confidence" in r.index else "UNKNOWN"
+        mapping_verified = (
+            str(r["education_code"]).strip().upper() not in {"", "NONE", "NAN", "DEFAULT"}
+            and str(r["disco08_code"]).strip().upper() not in {"", "NONE", "NAN", "DEFAULT"}
+        )
+        ai_status = "CROSSWALK_OR_MODEL" if mapping_verified else "PROVENANCE_REQUIRED"
 
         score_provenance = {
-            "automation_risk": _prov(r["automation_risk"], "CROSSWALK_OR_MODEL", r["ai_source"], r["ai_dataset"], r["ai_period"], "AI occupation exposure mapped through documented DISCO-08 crosswalk", ai_confidence),
-            "augmentation_potential": _prov(r["augmentation_potential"], "CROSSWALK_OR_MODEL", r["ai_source"], r["ai_dataset"], r["ai_period"], "AI occupation exposure mapped through documented DISCO-08 crosswalk", ai_confidence),
-            "labour_demand": _prov(r["labour_demand"], "DERIVED", r["labour_source"], r["labour_dataset"], r["labour_period"], "0.7 * employment percentile + 0.3 * inverse unemployment percentile", "HIGH"),
-            "salary_growth": _prov(r["salary_growth"], "DERIVED", r["salary_source"], r["salary_dataset"], r["salary_period"], "Cross-sectional percentile of observed five-year salary growth", "HIGH"),
+            "automation_risk": _prov(r["automation_risk"], ai_status, r["ai_source"], r["ai_dataset"], r["ai_period"], "AI occupation exposure mapped through documented DISCO-08 crosswalk", ai_confidence, source_url=r["ai_source_url"]),
+            "augmentation_potential": _prov(r["augmentation_potential"], ai_status, r["ai_source"], r["ai_dataset"], r["ai_period"], "AI occupation exposure mapped through documented DISCO-08 crosswalk", ai_confidence, source_url=r["ai_source_url"]),
+            "labour_demand": _prov(r["labour_demand"], "DERIVED", r["labour_source"], r["labour_dataset"], r["labour_period"], "0.7 * employment percentile + 0.3 * inverse unemployment percentile", "HIGH", source_url=r["labour_source_url"]),
+            "salary_growth": _prov(r["salary_growth"], "DERIVED", r["salary_source"], r["salary_dataset"], r["salary_period"], "Cross-sectional percentile of observed five-year salary growth", "HIGH", source_url=r["salary_source_url"]),
             "mobility": _prov(None, "NOT_AVAILABLE", transformation="No verified source is currently part of the canonical score pipeline"),
             "uncertainty": _prov(None, "NOT_AVAILABLE", transformation="No verified source is currently part of the canonical score pipeline"),
         }
 
         scores = {metric: item["value"] for metric, item in score_provenance.items()}
-        mapping_verified = str(r["disco08_code"]).strip().upper() not in {"", "NONE", "NAN", "DEFAULT"}
-
         catalog.append({
             "kot_nr": str(r["kot_nr"]),
             "udbud_titel": title,

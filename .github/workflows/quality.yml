@@ -30,10 +30,16 @@ jobs:
         run: npm run --prefix web lint
 
       - name: Algorithm tests
-        run: npx --yes --prefix web tsx web/src/__tests__/algorithm.test.ts
+        run: npm run --prefix web algorithm:test
 
       - name: Production build
         run: npm run --prefix web build
+
+      - name: Install Chromium for browser tests
+        run: npm exec --prefix web -- playwright install --with-deps chromium
+
+      - name: Browser E2E tests
+        run: npm run --prefix web e2e
 
   data:
     name: Python tests and data integrity
@@ -59,3 +65,14 @@ jobs:
 
       - name: Run data integrity gate
         run: python etl/verify_all_data_integrity.py
+
+      - name: Build provenance audit report
+        run: python etl/build_data_provenance_report.py
+
+      - name: Upload provenance audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-provenance-report
+          path: data/DATA_PROVENANCE_REPORT.json
+          if-no-files-found: error

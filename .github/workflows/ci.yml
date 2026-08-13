@@ -1,8 +1,8 @@
-name: Legacy provenance audit (manual)
+name: Strict provenance audit (manual)
 
 # The canonical automatic checks live in quality.yml.
-# This workflow remains available for manually reviewing the stricter
-# provenance audit, which currently reports incomplete source mappings.
+# This workflow remains manually invokable because the current catalogue still
+# has documented provenance gaps. It must fail rather than hide those gaps.
 
 on:
   workflow_dispatch:
@@ -22,3 +22,11 @@ jobs:
 
       - name: Run strict provenance audit
         run: python etl/validate_data_provenance.py
+
+      - name: Upload strict audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strict-data-provenance-report
+          path: data/DATA_PROVENANCE_REPORT.json
+          if-no-files-found: error

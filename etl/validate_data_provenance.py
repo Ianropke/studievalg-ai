@@ -8,11 +8,13 @@ This is deliberately a gate, not an automatic fixer: ambiguous data must be
 fixed at the ETL/source layer rather than silently rewritten.
 """
 
-from build_data_provenance_report import build_report
+try:
+    from .build_data_provenance_report import build_report
+except ImportError:  # Script execution from the etl directory / CI entrypoint.
+    from build_data_provenance_report import build_report
 
 
-def main():
-    report = build_report()
+def validate_report(report):
     summary = report["summary"]
     programmes = summary["programme_count"]
     default_share = summary["default_mapping_share"]
@@ -38,11 +40,24 @@ def main():
     # These metrics are not allowed to be represented as observed evidence by
     # the provenance layer until their source/transformations are attached.
     metric_counts = summary["metric_counts"]
-    for metric in ("PROVENANCE_REQUIRED",):
-        if metric_counts.get(metric, 0) > 0:
+    missing_provenance = metric_counts.get("PROVENANCE_REQUIRED", 0)
+    if missing_provenance > 0:
+        errors.append(f"{missing_provenance} metric values still lack documented raw provenance.")
+
+    for metric, coverage in summary.get("metric_provenance_coverage", {}).items():
+        value_count = coverage.get("value_count", 0)
+        complete_count = coverage.get("complete_provenance_count", 0)
+        if value_count and complete_count < value_count:
             errors.append(
-                f"{metric_counts[metric]} metric values still lack documented raw provenance."
+                f"{metric} has {value_count - complete_count} values without complete source metadata."
             )
+
+    return errors
+
+
+def main():
+    report = build_report()
+    errors = validate_report(report)
 
     if errors:
         print("DATA PROVENANCE GATE: FAILED")

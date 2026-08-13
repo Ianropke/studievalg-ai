@@ -45,6 +45,12 @@ export interface NormalizedScores {
   provenance: Record<string, ScoreProvenance>;
 }
 
+/** Returns whether an admission value means all qualified applicants were admitted. */
+export function isAllAdmitted(value: unknown): boolean {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return normalized === "" || normalized.includes("alle optaget");
+}
+
 /**
  * Normalizes any score value safely to 0..100 display scale.
  * Accepts values in 0.0..1.0 or 0..100 range.

@@ -1,8 +1,8 @@
 import { getProgramCatalog } from "./programCatalog";
-import { getEnrichedScores } from "./domainScoring";
+import { getEnrichedScores, isAllAdmitted } from "./domainScoring";
 import { normalizeProgramName } from "./programName";
 
-export { normalizeProgramName };
+export { normalizeProgramName, isAllAdmitted };
 
 export interface ProgramItem {
   id: string;
@@ -38,11 +38,6 @@ export interface ListConfig {
   getValue: (p: ProgramItem) => { display: string; numeric: number; raw: unknown };
   sortOrder: "asc" | "desc";
   filter?: (p: ProgramItem) => boolean;
-}
-
-export function isAllAdmitted(value: unknown): boolean {
-  const normalized = String(value ?? "").trim().toLowerCase();
-  return normalized === "" || normalized.includes("alle optaget");
 }
 
 export const LIST_CONFIGS: Record<string, ListConfig> = {

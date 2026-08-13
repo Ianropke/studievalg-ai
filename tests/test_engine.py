@@ -1,6 +1,6 @@
 """
 Python Unit Test Suite for Analytics Engine & Scenario Simulator (v2026.4 Targeted Correctness Pass).
-Tests query intent expansion, unbiased staged retrieval, canonical AI resilience,
+Tests query intent expansion, unbiased staged retrieval, canonical 75/25 AI resilience,
 user interest alignment (interest_fit), program-specific evidence quality,
 location source transparency (STRUCTURED, TITLE_FALLBACK, UNKNOWN),
 validator status payload, Modelbaseret forbehold terminology, and regression queries.
@@ -35,7 +35,7 @@ class TestMultiAgentEngine(unittest.TestCase):
 
     def test_03_canonical_ai_resilience_formula(self):
         res1 = compute_canonical_ai_resilience(0.35, 0.85)
-        self.assertAlmostEqual(res1, 0.82, places=2)
+        self.assertAlmostEqual(res1, 0.70, places=2)
         res_high_risk = compute_canonical_ai_resilience(0.99, 0.0)
         self.assertEqual(res_high_risk, 0.1)
 

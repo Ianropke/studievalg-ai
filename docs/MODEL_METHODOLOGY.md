@@ -68,11 +68,19 @@ data/DATA_PROVENANCE_REPORT.json
 |---|---|---|
 | `automation_risk` | Model / crosswalk | Estimated occupational task exposure to direct AI substitution. Not a Danish observed job-loss rate. |
 | `augmentation_potential` | Model / crosswalk | Estimated potential for AI to augment human work. |
-| `ai_resilience` | Derived model index | `clamp(1 - automation_risk + 0.2 * augmentation_potential, 0.1, 1.0)`. This is a model indicator, not a forecast. |
+| `ai_resilience` | Derived model index | `clamp(0.75 * (1 - automation_risk) + 0.25 * augmentation_potential, 0.1, 1.0)`. This is a model indicator, not a forecast. |
 | `labour_demand` | Provenance required | Must identify its actual raw source, population, period and transformation before being described as empirical programme-level demand. |
 | `salary_growth` | Provenance required | Must identify its actual raw source, population, period and transformation before being described as empirical programme-level salary growth. |
 
 `automation_exposure` is not a separate empirical metric and must not be displayed as an independently measured variable.
+
+The canonical AI-resilience score gives 75% weight to the inverse automation risk
+and 25% weight to augmentation potential. Internal values are bounded to 0.1–1.0;
+the web UI displays the rounded value on a 0–100 scale. The implementation and
+regression tests are maintained in `web/src/lib/domainScoring.ts`,
+`agents/multi_agent_engine.py`, `web/src/__tests__/algorithm.test.ts` and
+`tests/test_scoring_contract.py`. A change to this formula is a domain change and
+must update all four locations together.
 
 ---
 

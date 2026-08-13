@@ -33,8 +33,10 @@ When a durable rule, command, service boundary, or source contract changes, upda
 ## Architecture invariants
 
 - The repository is a hybrid monorepo: the Next.js application lives in `web/`; Python analytics, ETL, and DuckDB data live at the repository root.
-- The root workspace script delegates the production build to `web/`. Do not move the app, add a framework, or change the Vercel root/build contract without an explicit architecture task.
+- The root workspace script delegates the production build to `web/`. Webpack is explicit for both `web` development and production because the project has a Webpack configuration. Do not move the app, add a framework, or change the Vercel root/build contract without an explicit architecture task.
 - The browser catalogue and ranking path is client-side and must remain functional without Python. The static catalogue used by the deployed web app is under `web/public/data/`.
+- `etl/export_all_programs_json.py` must write the deployable catalogue to `web/public/data/all_programs_catalog.json`; `web/src/data/` is not the runtime catalogue location.
+- Static generation is intentionally limited to one worker in `web/next.config.ts` because the catalogue produces more than 1,400 pages on small build machines. Do not remove this limit without measuring deployment memory and disk usage.
 - `/api/pipeline` is the boundary for deep analysis. In production it calls the external analytics service first, uses local Python only when available, and returns an honest 503 when neither path is usable.
 - `services/analytics_api.py` is a separate HTTP service. Its token, CORS origin, health endpoint, timeout, and error semantics are part of the service contract.
 - The Vercel build intentionally excludes root Python/ETL/data paths through `.vercelignore`. Do not make the web build depend on files that Vercel excludes.
@@ -61,7 +63,7 @@ When a durable rule, command, service boundary, or source contract changes, upda
 - Treat KOT admissions as observed descriptive data. Treat occupational crosswalks, AI exposure, augmentation, and scenario outputs as derived/model-based unless the data contract explicitly establishes otherwise.
 - Scenario simulations must remain reproducible for identical inputs and model version. Percentile intervals from simulation are not empirical confidence intervals.
 - Data refreshes must go through the authoritative-source workflow and its quality/audit gates. Do not hand-edit generated snapshots or commit unverified source artefacts.
-- Generated Python bytecode and local caches are not feature inputs. The repository currently contains tracked `__pycache__` artefacts; do not update them as part of normal work.
+- Generated Python bytecode and local caches are not feature inputs. They are ignored by `.gitignore` and must not be committed.
 
 ## Database and ETL discipline
 
@@ -106,8 +108,10 @@ From the repository root, run the checks relevant to the change:
 npm install --prefix web --no-audit --no-fund
 npm run --prefix web typecheck
 npm run --prefix web lint
-npx --yes --prefix web tsx web/src/__tests__/algorithm.test.ts
+npm run --prefix web algorithm:test
 npm run --prefix web build
+npm exec --prefix web -- playwright install chromium
+npm run --prefix web e2e
 
 # Python/data
 python -m pip install -r requirements.txt
@@ -124,10 +128,10 @@ Do not claim a check passed unless it was executed. If a check cannot run, repor
 
 These are repository findings, not permissions to ignore them:
 
-1. `docs/MODEL_METHODOLOGY.md` still documents the old AI-resilience formula `1 - automation_risk + 0.2 * augmentation_potential`, while current code/tests use the 75/25 formula above. Resolve and update the methodology document before making further scoring changes.
-2. `.github/workflows/ci.yml` is labelled a legacy manual provenance audit but calls `etl/validate_data_provenance.py`, which is not present in the current repository tree. Do not treat that workflow as a passing validation path until repaired or explicitly retired.
+1. `docs/MODEL_METHODOLOGY.md` and current code/tests now share the 75/25 AI-resilience formula. Any future formula change must update all documented and executable contract locations together.
+2. `.github/workflows/ci.yml` is an intentionally manual strict provenance audit; it is expected to fail while the catalogue has incomplete mappings. `quality.yml` is the required release checklist and uploads an informational provenance report.
 3. `docs/DATA_PROVENANCE_GAPS.md` records incomplete programme-level labour/salary provenance and repeated/default score coverage. These are product limitations, not merely documentation issues.
-4. `README.md` and parts of the historical `antigravity-*.md` material describe earlier paths, formulas, or planned behaviour. Verify against current code and the authoritative documents before relying on them.
-5. The repository has no root agent contract until this file is committed, and it contains tracked Python cache artefacts. These reduce reproducibility and review clarity.
+4. `README.md` is current orientation, while parts of the historical `antigravity-*.md` material still describe earlier paths, formulas, or planned behaviour. Verify against current code and authoritative documents before relying on it.
+5. The catalogue export pipeline now includes explicit source URLs and provenance completeness fields, but the checked-in legacy catalogue still fails the strict audit until authoritative mapping inputs are refreshed.
 
 Do not conceal these conflicts by rewriting only the agent instructions. Resolve them in their owning source documents/code when the relevant task is undertaken.
