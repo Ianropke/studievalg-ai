@@ -1,0 +1,60 @@
+version: 1
+project: Ianropke/studievalg-ai
+owner: Ian Røpke
+currency: DKK
+policy: Ianropke/code-portfolio/RESOURCE_BUDGET_POLICY.md
+canonical_portfolio_register: Ianropke/code-portfolio/PORTFOLIO_BUDGETS.yaml
+
+approval:
+  status: pending_owner_approval
+  approved_by: null
+  approved_at: null
+
+cash_budget:
+  recurring_monthly_dkk: null
+  one_off_dkk: null
+
+quota_budgets:
+  github_actions_execution_month: null
+  vercel_build_runtime_bandwidth: null
+  render_compute_runtime: null
+  external_source_requests_rate_limits: null
+
+current_resources:
+  - provider: GitHub Actions
+    purpose: quality gates and monthly authoritative-data refresh
+    cost_driver: runner_execution_and_browser_tests
+    criticality: medium
+  - provider: Vercel
+    purpose: web application hosting
+    cost_driver: builds_runtime_bandwidth
+    criticality: medium
+  - provider: Render
+    purpose: analytics service
+    cost_driver: compute_runtime
+    criticality: medium
+  - provider: Official public sources
+    purpose: authoritative education data refresh
+    cost_driver: requests_and_rate_limits
+    criticality: high
+
+pending_policy:
+  existing_configuration_may_continue: true
+  allow_new_paid_services: false
+  allow_paid_overage: false
+  allow_plan_upgrades: false
+  allow_schedule_frequency_increase: false
+  allow_compute_or_storage_scale_up: false
+
+guardrails:
+  warning_threshold_percent: 70
+  constrained_threshold_percent: 90
+  hard_ceiling_percent: 100
+  require_cost_and_quota_estimate_before_resource_change: true
+  require_cheaper_alternatives_review: true
+  require_owner_approval_if_projected_ceiling_exceeded: true
+
+agent_rule: >-
+  Read this file before changing CI, browser-test cadence, hosting, analytics
+  compute, data-refresh schedules, external services, model/API use, or any other
+  metered resource. Do not create or expand cost/quota exposure while approval is pending.
