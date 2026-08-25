@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DATA_STATUS } from "@/lib/dataStatus";
 
 export function Footer() {
   return (
@@ -36,10 +37,13 @@ export function Footer() {
             <ul className="space-y-2 font-medium text-[#12172B] text-xs">
               <li className="flex items-center gap-2 text-[#0B7A57]">✓ Offentlige datakilder</li>
               <li className="flex items-center gap-2 text-[#0B7A57]">✓ Dokumenteret metode</li>
-              <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen behandling af personoplysninger</li>
-              <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen brugertracking eller cookies</li>
+              <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen login eller personlig profil</li>
+              <li className="flex items-center gap-2 text-[#0B7A57]">✓ Matchvalg gemmes ikke i en konto</li>
               <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen reklamer eller kommercielle interesser</li>
             </ul>
+            <p className="pt-1 text-[10px] leading-relaxed text-[#8891A3]">
+              Hosting kan levere tekniske drifts- og performance-målinger. Matchværktøjet opretter ikke en personlig brugerprofil.
+            </p>
           </div>
         </div>
 
@@ -83,7 +87,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-1.5 font-mono-data text-[#0B7A57] font-semibold">
             <span className="w-2 h-2 rounded-full bg-[#0F9D6E] animate-pulse"></span>
-            <span>Data senest opdateret: Juli 2026</span>
+            <span>Optagelsesdata: {DATA_STATUS.catalogue.admissionsUpdatedLabel} · Model: {DATA_STATUS.scoring.updatedLabel}</span>
           </div>
         </div>
 

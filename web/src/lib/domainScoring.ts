@@ -4,6 +4,8 @@
  * each metric should be interpreted.
  */
 
+import { DATA_STATUS } from "./dataStatus";
+
 export type EvidenceStatus =
   | "OBSERVED"
   | "DERIVED"
@@ -82,8 +84,8 @@ function canonicalAiResilience(autoRisk: number, augPot: number): number {
  * provenance still requires an explicit programme-level source mapping.
  */
 export function getEnrichedScores(title?: string, rawScores?: RawProgramScores): NormalizedScores {
-  const datasetVersion = "2026.1 (Release July 2026)";
-  const lastUpdated = "2026-07-29";
+  const datasetVersion = DATA_STATUS.scoring.datasetVersion;
+  const lastUpdated = DATA_STATUS.scoring.updatedAt;
   const hasProgramScores = Boolean(
     rawScores &&
       ["automation_risk", "augmentation_potential", "labour_demand", "salary_growth"]

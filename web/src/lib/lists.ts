@@ -1,6 +1,7 @@
 import { getProgramCatalog } from "./programCatalog";
 import { getEnrichedScores, isAllAdmitted } from "./domainScoring";
 import { normalizeProgramName } from "./programName";
+import { DATA_STATUS } from "./dataStatus";
 
 export { normalizeProgramName, isAllAdmitted };
 
@@ -46,7 +47,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
     badge: "AI-modelestimat fra O*NET-opgaver",
     description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore. Scoren er et modelestimat baseret på opgavetaksonomi — ikke observerede uddannelsesudfald.",
-    introHedge: "Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. juli 2026. Tallene bygger på opgavedata fra O*NET og analyser af studieordninger — se 'Bag om dine scorer' for fuld metode.",
+    introHedge: `Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. ${DATA_STATUS.scoring.updatedLabel}. Tallene bygger på opgavedata fra O*NET og analyser af studieordninger — se 'Bag om dine scorer' for fuld metode.`,
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {

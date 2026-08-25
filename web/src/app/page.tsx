@@ -12,6 +12,7 @@ import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { EvidenceList } from "@/components/EvidenceList";
+import { DATA_STATUS } from "@/lib/dataStatus";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -552,7 +553,7 @@ export default function Dashboard() {
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/20">
             <span className="w-2 h-2 rounded-full bg-[#0F9D6E]"></span>
-            <span>Seneste Optagelsesdata 26. juli 2026 • 1.413 Uddannelser</span>
+            <span>Optagelsesdata {DATA_STATUS.catalogue.admissionsUpdatedLabel} • {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#12172B] leading-tight font-display">
             Hvilken uddannelse <br className="hidden sm:inline" />
@@ -607,6 +608,7 @@ export default function Dashboard() {
           </div>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
             AI-robusthed er et modelestimat baseret på opgaveeksponering og augmentationspotentiale — ikke en prognose for arbejdsløshed eller en garanti for job.
+            <span className="mt-1 block">Scoringsmodellen er senest opdateret {DATA_STATUS.scoring.updatedLabel}. Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status på job- og lønindikatorerne.</span>
           </div>
 <div data-testid="preference-mode-panel" className="rounded-lg border border-[#D8DBE4] bg-[#FFFFFF] px-4 py-3 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -654,7 +656,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#0B7A57]">{preferenceMode === "priority" ? "AI-robusthed" : "AI-robusthed minimum"}</span>
+                  <span className="text-[#0B7A57]">{preferenceMode === "priority" ? "AI-robusthed" : "AI-robusthed minimum"}<span className="block text-[10px] font-normal text-[#8891A3]">Model-/crosswalkestimat</span></span>
                   <span className="text-[#0B7A57] font-mono-data font-bold">{formatPreferenceValue(aiRobustnessWeight)}</span>
                 </div>
                 <input
@@ -670,7 +672,7 @@ export default function Dashboard() {
               </div>
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#1D4ED8]">{preferenceMode === "priority" ? "Jobmuligheder" : "Jobmuligheder minimum"}</span>
+                  <span className="text-[#1D4ED8]">{preferenceMode === "priority" ? "Jobmuligheder" : "Jobmuligheder minimum"}<span className="block text-[10px] font-normal text-[#8891A3]">Afledt indikator</span></span>
                   <span className="text-[#1D4ED8] font-mono-data font-bold">{formatPreferenceValue(jobOpportunitiesWeight)}</span>
                 </div>
                 <input
@@ -686,7 +688,7 @@ export default function Dashboard() {
               </div>
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#6D28D9]">{preferenceMode === "priority" ? "Lønpotentiale" : "Lønpotentiale minimum"}</span>
+                  <span className="text-[#6D28D9]">{preferenceMode === "priority" ? "Lønpotentiale" : "Lønpotentiale minimum"}<span className="block text-[10px] font-normal text-[#8891A3]">Afledt indikator</span></span>
                   <span className="text-[#6D28D9] font-mono-data font-bold">{formatPreferenceValue(salaryWeight)}</span>
                 </div>
                 <input
@@ -862,8 +864,8 @@ export default function Dashboard() {
                         {/* Bar 1: AI-robusthed */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
-                            <span data-testid="metric-ai" className="flex items-center gap-1.5 text-[#12172B]">
-                              <span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-robusthed
+                              <span data-testid="metric-ai" className="flex items-center gap-1.5 text-[#12172B]">
+                                <span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-robusthed <span className="text-[10px] font-normal text-[#8891A3]">(modelestimat)</span>
                             </span>
                             <span className="font-mono-data font-bold text-[#0F9D6E]">{prog.robustScore}/100</span>
                           </div>
@@ -876,7 +878,7 @@ export default function Dashboard() {
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
                             <span data-testid="metric-job" className="flex items-center gap-1.5 text-[#12172B]">
-                              <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span> Jobmuligheder
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span> Jobmuligheder <span className="text-[10px] font-normal text-[#8891A3]">(afledt)</span>
                             </span>
                             <span className="font-mono-data font-bold text-[#2563EB]">{prog.jobScore}/100</span>
                           </div>
@@ -889,7 +891,7 @@ export default function Dashboard() {
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs font-semibold">
                             <span data-testid="metric-salary" className="flex items-center gap-1.5 text-[#12172B]">
-                              <span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span> Lønpotentiale
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span> Lønpotentiale <span className="text-[10px] font-normal text-[#8891A3]">(afledt)</span>
                             </span>
                             <span className="font-mono-data font-bold text-[#7C3AED]">{prog.salScore}/100</span>
                           </div>

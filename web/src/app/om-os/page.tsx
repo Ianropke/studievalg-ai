@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DATA_STATUS } from "@/lib/dataStatus";
 
 export const metadata: Metadata = {
   title: "Om Uddannelsesindsigt | Data, metode og ansvar",
@@ -32,7 +33,7 @@ export default function AboutPage() {
       "name": "Uddannelsesindsigt",
       "url": "https://uddannelsesindsigt.com",
     },
-    "dateModified": "2026-07-26",
+    "dateModified": DATA_STATUS.methodologyReviewedAt,
   };
 
   const breadcrumbJsonLd = {

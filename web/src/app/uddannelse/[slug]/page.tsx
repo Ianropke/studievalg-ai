@@ -7,6 +7,7 @@ import { getAllPrograms, getProgramBySlug, createProgramSlug } from "@/lib/slugs
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { EvidenceList } from "@/components/EvidenceList";
+import { DATA_STATUS } from "@/lib/dataStatus";
 
 // Pure server SVG triangle radar component
 function CompactTriangleRadar({ robust, job, salary }: { robust: number; job: number; salary: number }) {
@@ -318,7 +319,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
               </div>
               <div>
                 <span className="text-[#8891A3] block text-[11px]">Dataopdatering</span>
-                <span className="font-mono-data text-[#0B7A57] font-semibold">Juli 2026</span>
+                <span className="font-mono-data text-[#0B7A57] font-semibold">Optagelse {DATA_STATUS.catalogue.admissionsUpdatedLabel} · model {DATA_STATUS.scoring.updatedLabel}</span>
               </div>
             </div>
           </div>

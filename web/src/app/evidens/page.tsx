@@ -1,13 +1,15 @@
 import React from "react";
 import { Header } from "@/components/Header";
 import { getProgramCatalog } from "@/lib/programCatalog";
+import { DATA_STATUS } from "@/lib/dataStatus";
 
 export default function EvidensPage() {
   const catalog = getProgramCatalog();
   const dataStats = {
     total: catalog.length,
-    latest: "26. juli 2026",
-    params: 42
+    admissions: DATA_STATUS.catalogue.admissionsUpdatedLabel,
+    model: DATA_STATUS.scoring.updatedLabel,
+    sources: DATA_STATUS.registeredSourceCount,
   };
 
   const faqJsonLd = {
@@ -27,7 +29,7 @@ export default function EvidensPage() {
         "name": "Hvad er datakilderne bag Uddannelsesindsigt?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Platformen samler over 42 datakilder fra Uddannelses- og Forskningsministeriet (KOT), Danmarks Statistik, OECD, ESCO og O*NET."
+          "text": "Kilderegistret indeholder 42 registrerede kilder fra blandt andet Uddannelses- og Forskningsministeriet (KOT), Danmarks Statistik, OECD, ESCO og O*NET. Ikke alle kilder er knyttet til hvert uddannelsesudbud."
         }
       }
     ]
@@ -79,10 +81,14 @@ export default function EvidensPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Uddannelsesudbud</div><div className="text-2xl font-bold font-mono-data">{dataStats.total.toLocaleString("da-DK")}</div></div>
-            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Seneste data</div><div className="text-lg font-bold">{dataStats.latest}</div></div>
-            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Parametre</div><div className="text-2xl font-bold font-mono-data">{dataStats.params}</div></div>
+            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Optagelsesdata</div><div className="text-lg font-bold">{dataStats.admissions}</div></div>
+            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Scoringsmodel</div><div className="text-lg font-bold">{dataStats.model}</div></div>
           </div>
           <p className="text-xs text-[#545D71] leading-relaxed">Kataloget læses fra den samme statiske fil, som fortsat ligger i <code>public/data</code>. Det betyder, at den også kan hentes direkte som <code>/data/all_programs_catalog.json</code>, mens serverkoden undgår at importere filen gennem Webpacks modul-graf.</p>
+          <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-4 text-xs leading-relaxed text-[#92400E]">
+            <p className="font-bold text-[#78350F]">Vigtig dækningsstatus</p>
+            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede kilder, men uddannelsesspecifik dokumentation for job- og lønindikatorerne er <strong>{DATA_STATUS.provenanceCoverageLabel.toLowerCase()}</strong>. Derfor vises de som afledte indikatorer/modelestimater og ikke som sikre udfald.</p>
+          </div>
         </section>
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-4">
           <h2 className="text-xl font-bold text-[#12172B] font-display">Ofte stillede spørgsmål</h2>
@@ -92,9 +98,6 @@ export default function EvidensPage() {
           </div>
         </section>
       </main>
-      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-12 px-6 lg:px-16 text-[#545D71] text-xs mt-16">
-        <div className="max-w-4xl mx-auto text-center"><p>© 2026 Uddannelsesindsigt • Uafhængig pædagogisk beslutningsstøtte baseret på UFM og Danmarks Statistik</p></div>
-      </footer>
     </div>
   );
 }
