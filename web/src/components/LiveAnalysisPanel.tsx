@@ -47,8 +47,7 @@ export function LiveAnalysisPanel() {
   const [response, setResponse] = useState<AnalysisResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function runAnalysis(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitAnalysis() {
     if (!query.trim() || loading) return;
 
     setLoading(true);
@@ -82,6 +81,11 @@ export function LiveAnalysisPanel() {
     }
   }
 
+  function runAnalysis(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void submitAnalysis();
+  }
+
   const programs = response?.recommended_programs ?? [];
   const citations = response?.evidence_citations?.filter((citation) => citation.supports_claim) ?? [];
 
@@ -101,7 +105,7 @@ export function LiveAnalysisPanel() {
         </p>
       </div>
 
-      <form onSubmit={runAnalysis} className="space-y-4">
+      <form onSubmit={runAnalysis} className="space-y-4" aria-busy={loading}>
         <label className="block space-y-1">
           <span className="text-xs font-bold text-[#12172B]">Hvad interesserer dig?</span>
           <input
@@ -169,9 +173,17 @@ export function LiveAnalysisPanel() {
       </form>
 
       {response && response.status !== "success" && (
-        <p role="status" className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-3 text-xs text-[#92400E]">
-          {response.message || "Analysen kunne ikke gennemføres lige nu."}
-        </p>
+        <div role="status" className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-3 text-xs text-[#92400E]">
+          <p>{response.message || "Analysen kunne ikke gennemføres lige nu."}</p>
+          <button
+            type="button"
+            onClick={() => void submitAnalysis()}
+            disabled={loading}
+            className="mt-2 rounded-md border border-[#B45309]/30 bg-[#FFFFFF] px-3 py-1.5 font-semibold text-[#92400E] hover:bg-[#FEF3C7] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#B45309] focus:ring-offset-1"
+          >
+            Prøv analysen igen
+          </button>
+        </div>
       )}
 
       {response?.status === "success" && (
@@ -199,7 +211,7 @@ export function LiveAnalysisPanel() {
                   <div><dt className="text-[#8891A3]">AI-robusthed</dt><dd className="font-bold text-[#0B7A57]">{asPercent(program.ai_resilience)}/100</dd></div>
                   <div><dt className="text-[#8891A3]">Jobindikator</dt><dd className="font-bold text-[#1D4ED8]">{asPercent(program.labour_demand)}/100</dd></div>
                   <div><dt className="text-[#8891A3]">Lønindikator</dt><dd className="font-bold text-[#6D28D9]">{asPercent(program.salary_growth)}/100</dd></div>
-                  <div><dt className="text-[#8891A3]">Evidens</dt><dd className="font-bold">{program.evidence_quality || "ukendt"}</dd></div>
+                  <div><dt className="text-[#8891A3]">Kildekvalitet</dt><dd className="font-bold">{program.evidence_quality || "ukendt"}</dd></div>
                 </dl>
 
                 <div className="space-y-1 text-xs">
@@ -228,10 +240,12 @@ export function LiveAnalysisPanel() {
                   <li key={citation.url || citation.source || index}>
                     {citation.url ? <a href={citation.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#2563EB] hover:underline">{citation.source || "Kilde"} ↗</a> : (citation.source || "Kilde")}
                     {citation.source_authority ? ` (${citation.source_authority})` : ""}
+                    {citation.quote && <blockquote className="mt-1 border-l-2 border-[#D8DBE4] pl-2 text-[#8891A3]">&quot;{citation.quote}&quot;</blockquote>}
                   </li>
                 ))}
               </ul>
             )}
+            {citations.length === 0 && <p className="mt-2 text-[#92400E]">Ingen konkrete citations blev returneret for denne analyse; læs derfor resultatet som modelbaseret beslutningsstøtte.</p>}
           </div>
         </div>
       )}

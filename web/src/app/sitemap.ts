@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 import { getAllPrograms, createProgramSlug } from "@/lib/slugs";
 import { LIST_CONFIGS } from "@/lib/lists";
+import { DATA_STATUS } from "@/lib/dataStatus";
 
-const DATA_LAST_MODIFIED = "2026-07-26";
+const DATA_LAST_MODIFIED = DATA_STATUS.catalogue.admissionsUpdatedAt;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://uddannelsesindsigt.com";

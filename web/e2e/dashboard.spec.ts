@@ -14,7 +14,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   test('E2E-01: Forside indlæser korrekt med Nordisk Myndigheds-UI og top navigation', async ({ page }) => {
     await expect(page).toHaveTitle(/Uddannelsesindsigt/i);
     await expect(page.locator('h1')).toContainText('Hvilken uddannelse');
-    await expect(page.locator('text=Seneste Optagelsesdata')).toBeVisible();
+    await expect(page.locator('text=Optagelsesdata 26. juli 2026')).toBeVisible();
   });
 
   test('E2E-02: Søgning på "læge" placerer Medicin som #1 match', async ({ page }) => {

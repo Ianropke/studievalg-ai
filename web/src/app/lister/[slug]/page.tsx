@@ -6,6 +6,7 @@ import { createProgramSlug } from "@/lib/slugs";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
+import { DATA_STATUS } from "@/lib/dataStatus";
 
 export async function generateStaticParams() {
   return Object.keys(LIST_CONFIGS).map((slug) => ({
@@ -89,7 +90,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
               {config.badge}
             </span>
             <span className="text-[11px] text-[#8891A3]">
-              Seneste optagelses- &amp; AI-data: <strong className="text-[#12172B]">Juli 2026</strong>
+              Optagelsesdata: <strong className="text-[#12172B]">{DATA_STATUS.catalogue.admissionsUpdatedLabel}</strong> · model: <strong className="text-[#12172B]">{DATA_STATUS.scoring.updatedLabel}</strong>
             </span>
           </div>
 
