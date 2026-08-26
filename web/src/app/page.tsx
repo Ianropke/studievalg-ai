@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { track } from "@vercel/analytics/react";
 import { Header } from "@/components/Header";
 import { createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
@@ -13,6 +14,7 @@ import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { EvidenceList } from "@/components/EvidenceList";
 import { DATA_STATUS } from "@/lib/dataStatus";
+import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } from "@/lib/shareMatch";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -291,24 +293,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const urlGpa = params.get("gpa");
-      const urlAi = params.get("wAi");
-      const urlJob = params.get("wJob");
-      const urlSal = params.get("wSal");
-      const urlMode = params.get("mode");
-      const urlMatch = params.get("match");
-      const urlQ = params.get("q");
+      const shared = parseMatchShareParams(window.location.search);
 
-      if (urlGpa || urlAi || urlJob || urlSal || urlMode || urlMatch || urlQ) {
+      if (Object.keys(shared).length > 0) {
         requestAnimationFrame(() => {
-          if (urlGpa && !isNaN(Number(urlGpa))) setGpa(Number(urlGpa));
-          if (urlAi && !isNaN(Number(urlAi))) setAiRobustnessWeight(Number(urlAi));
-          if (urlJob && !isNaN(Number(urlJob))) setJobOpportunitiesWeight(Number(urlJob));
-          if (urlSal && !isNaN(Number(urlSal))) setSalaryWeight(Number(urlSal));
-          if (urlMode === "priority" || urlMode === "requirements") setPreferenceMode(urlMode);
-          if (urlMatch === "all" || urlMatch === "any") setRequirementMatchMode(urlMatch);
-          if (urlQ) setSearchQuery(urlQ);
+          if (shared.gpa !== undefined) setGpa(shared.gpa);
+          if (shared.ai !== undefined) setAiRobustnessWeight(shared.ai);
+          if (shared.job !== undefined) setJobOpportunitiesWeight(shared.job);
+          if (shared.salary !== undefined) setSalaryWeight(shared.salary);
+          if (shared.mode) setPreferenceMode(shared.mode);
+          if (shared.requirementMatchMode) setRequirementMatchMode(shared.requirementMatchMode);
+          if (shared.university) setSelectedUniversity(shared.university);
+          if (shared.query) setSearchQuery(shared.query);
         });
       }
     }
@@ -540,6 +536,16 @@ export default function Dashboard() {
   const preferenceHelpText = preferenceMode === "priority"
     ? "Sliderne bestemmer, hvor meget hvert kriterium tæller i den samlede rangering."
     : "Sliderne er minimumsniveauer. 0 betyder, at kriteriet ignoreres.";
+  const createShareUrl = () => `${window.location.origin}${buildMatchSharePath({
+    gpa,
+    ai: aiRobustnessWeight,
+    job: jobOpportunitiesWeight,
+    salary: salaryWeight,
+    mode: preferenceMode,
+    requirementMatchMode,
+    university: selectedUniversity as ShareableUniversity,
+    query: searchQuery,
+  })}`;
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
@@ -964,6 +970,37 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        <section data-testid="guide-links" aria-labelledby="guide-links-heading" className="rounded-2xl border border-[#D8DBE4] bg-[#FFFFFF] p-6 sm:p-8 card-shadow space-y-5">
+          <div className="max-w-2xl">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Gå et niveau dybere</p>
+            <h2 id="guide-links-heading" className="mt-1 text-xl font-bold font-display">Guides til dit næste valg</h2>
+            <p className="mt-2 text-xs leading-relaxed text-[#545D71]">
+              Brug matchresultatet som startpunkt, og få hjælp til at forstå adgangskvotienter, AI-modelestimater og forskellene mellem uddannelser.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { href: "/guides/hvad-kan-jeg-laese-med-mit-snit", title: "Hvad kan jeg læse med mit snit?", text: "Forstå Kvote 1-tal og find relevante alternativer." },
+              { href: "/guides/ai-og-uddannelsesvalg", title: "AI og uddannelsesvalg", text: "Brug AI-robusthed uden at læse modellen som en garanti." },
+              { href: "/guides/saadan-sammenligner-du-uddannelser", title: "Sammenlign uddannelser", text: "En enkel tjekliste til snit, indhold, job, løn og AI." },
+            ].map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                onClick={() => track("guide_open", { guide: guide.href.replace("/guides/", ""), source: "homepage" })}
+                className="rounded-xl border border-[#E7E9EF] bg-[#F7F8FA] p-4 hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition"
+              >
+                <span className="block text-sm font-bold text-[#12172B]">{guide.title}</span>
+                <span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">{guide.text}</span>
+                <span className="mt-3 block text-xs font-bold text-[#2563EB]">Læs guiden →</span>
+              </Link>
+            ))}
+          </div>
+          <Link href="/guides" className="inline-flex text-xs font-bold text-[#12172B] hover:underline">
+            Se alle guides og datadrevne toplister →
+          </Link>
+        </section>
       </main>
 
       {/* Share Match Modal */}
@@ -994,7 +1031,7 @@ export default function Dashboard() {
             {matchedPrograms.length > 0 && (
               <div className="bg-gradient-to-br from-[#12172B] to-[#1E293B] text-[#FFFFFF] rounded-xl p-5 space-y-4 shadow-md">
                 <div className="flex justify-between items-center text-[11px] text-[#A1A1AA] border-b border-[#3F3F46] pb-3">
-                  <span className="font-bold text-[#38BDF8]">UDDANNELSESINDSIGT.DK</span>
+                  <span className="font-bold text-[#38BDF8]">UDDANNELSESINDSIGT.COM</span>
                   <span className="bg-[#0F9D6E] text-white font-mono-data px-2 py-0.5 rounded text-[10px] font-bold">
                     {matchedPrograms[0].matchScore}% MATCH
                   </span>
@@ -1021,10 +1058,12 @@ export default function Dashboard() {
             <div className="space-y-3">
               <button
                 onClick={() => {
-                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}&mode=${preferenceMode}&match=${requirementMatchMode}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
-                  navigator.clipboard.writeText(shareUrl);
-                  setCopiedToast(true);
-                  setTimeout(() => setCopiedToast(false), 3000);
+                  const shareUrl = createShareUrl();
+                  navigator.clipboard.writeText(shareUrl).then(() => {
+                    track("match_share", { method: "copy_link", mode: preferenceMode });
+                    setCopiedToast(true);
+                    setTimeout(() => setCopiedToast(false), 3000);
+                  }).catch(() => {});
                 }}
                 className="w-full py-3 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
               >
@@ -1035,7 +1074,7 @@ export default function Dashboard() {
               {typeof navigator !== "undefined" && "share" in navigator && (
                 <button
                   onClick={() => {
-                    const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}&mode=${preferenceMode}&match=${requirementMatchMode}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                    const shareUrl = createShareUrl();
                     const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
                     const topScore = matchedPrograms.length > 0 ? String(matchedPrograms[0].matchScore) : null;
                     navigator.share({
@@ -1044,6 +1083,8 @@ export default function Dashboard() {
                         ? `Min modelscore er ${topScore}% for ${topTitle} på Uddannelsesindsigt! Se hvad du matcher med:`
                         : "Jeg har endnu ikke et beregnet uddannelsesmatch. Se mit match på Uddannelsesindsigt:",
                       url: shareUrl,
+                    }).then(() => {
+                      track("match_share", { method: "native", mode: preferenceMode });
                     }).catch(() => {});
                   }}
                   className="w-full py-3 bg-[#E3F6EE] hover:bg-[#D2F1E4] text-[#0B7A57] border border-[#0F9D6E]/30 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-[#0F9D6E]"
@@ -1057,13 +1098,15 @@ export default function Dashboard() {
                 onClick={() => {
                   const topTitle = matchedPrograms.length > 0 ? matchedPrograms[0].udbud_titel : "Uddannelse";
                   const topScore = matchedPrograms.length > 0 ? String(matchedPrograms[0].matchScore) : null;
-                  const shareUrl = `${window.location.origin}/?gpa=${gpa.toFixed(1)}&wAi=${aiRobustnessWeight}&wJob=${jobOpportunitiesWeight}&wSal=${salaryWeight}&mode=${preferenceMode}&match=${requirementMatchMode}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ""}`;
+                  const shareUrl = createShareUrl();
                   const storyText = topScore
                     ? `🎯 Min top-modelscore er ${topTitle} (${topScore}%) på Uddannelsesindsigt!\\n\\nFind dit eget match her: ${shareUrl}`
                     : `Jeg har endnu ikke et beregnet uddannelsesmatch på Uddannelsesindsigt.\\n\\nFind dit eget match her: ${shareUrl}`;
-                  navigator.clipboard.writeText(storyText);
-                  setCopiedToast(true);
-                  setTimeout(() => setCopiedToast(false), 3000);
+                  navigator.clipboard.writeText(storyText).then(() => {
+                    track("match_share", { method: "copy_text", mode: preferenceMode });
+                    setCopiedToast(true);
+                    setTimeout(() => setCopiedToast(false), 3000);
+                  }).catch(() => {});
                 }}
                 className="w-full py-3 bg-[#F7F8FA] hover:bg-[#E7E9EF] text-[#12172B] border border-[#E7E9EF] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
               >

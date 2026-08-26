@@ -80,4 +80,51 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.locator('h1')).toContainText('Bag om dine scorer');
   });
 
+  test('E2E-07: Et delt match gendanner snit, vægte, kravlogik, uddannelsessted og søgning', async ({ page }) => {
+    await page.goto('/?gpa=8.2&wAi=90&wJob=40&wSal=20&mode=requirements&match=any&u=au&q=medicin');
+
+    await expect(page.locator('#gpa-slider')).toHaveValue('8.2');
+    await expect(page.locator('#ai-weight-slider')).toHaveValue('90');
+    await expect(page.locator('#job-weight-slider')).toHaveValue('40');
+    await expect(page.locator('#salary-weight-slider')).toHaveValue('20');
+    await expect(page.locator('#preference-mode')).toHaveValue('requirements');
+    await expect(page.locator('#requirement-match-mode')).toHaveValue('any');
+    await expect(page.locator('#university-select')).toHaveValue('au');
+    await expect(page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' })).toHaveValue('medicin');
+  });
+
+  test('E2E-08: Guidehub og beslutningsguide kan åbnes fra hovednavigationen', async ({ page }) => {
+    const navigation = page.getByRole('navigation', { name: 'Hovednavigation' });
+    await navigation.getByRole('link', { name: 'Guides' }).click();
+    await expect(page).toHaveURL(/.*guides$/);
+    await expect(page.locator('h1')).toContainText('Guides til at vælge uddannelse');
+
+    await page.getByRole('link', { name: /Læs guiden/ }).first().click();
+    await expect(page).toHaveURL(/.*guides\/hvad-kan-jeg-laese-med-mit-snit/);
+    await expect(page.locator('h1')).toContainText('Hvad kan jeg læse med mit snit');
+  });
+
+  test('E2E-09: Alle tidligere domæner viderestiller permanent med sti og søgning bevaret', async ({ request }) => {
+    const legacyHosts = [
+      'www.uddannelsesindsigt.com',
+      'uddannelsesindsigt.dk',
+      'www.uddannelsesindsigt.dk',
+    ];
+
+    for (const host of legacyHosts) {
+      const response = await request.get(
+        'http://127.0.0.1:3000/guides/ai-og-uddannelsesvalg?fra=test',
+        {
+          headers: { Host: host },
+          maxRedirects: 0,
+        },
+      );
+
+      expect(response.status()).toBe(308);
+      expect(response.headers().location).toBe(
+        'https://uddannelsesindsigt.com/guides/ai-og-uddannelsesvalg?fra=test',
+      );
+    }
+  });
+
 });

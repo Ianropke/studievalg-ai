@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DATA_STATUS } from "@/lib/dataStatus";
+import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = {
   title: "Om Uddannelsesindsigt | Data, metode og ansvar",
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
     type: "website",
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
 };
 

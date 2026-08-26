@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Metadata } from "next";
 import { getAllPrograms, getProgramBySlug, createProgramSlug } from "@/lib/slugs";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { EvidenceList } from "@/components/EvidenceList";
 import { DATA_STATUS } from "@/lib/dataStatus";
@@ -121,6 +122,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: "Uddannelsesindsigt",
       locale: "da_DK",
       type: "website",
+      images: [DEFAULT_SOCIAL_IMAGE],
     },
   };
 }

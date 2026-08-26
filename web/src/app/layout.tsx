@@ -3,6 +3,7 @@ import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Footer } from "@/components/Footer";
+import { DEFAULT_SOCIAL_IMAGE, DEFAULT_SOCIAL_IMAGE_URL } from "@/lib/siteMetadata";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -25,9 +26,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://uddannelsesindsigt.com"),
-  title: "Uddannelsesindsigt | Fremtidssikret Studievejledning & AI-Arbejdsmarkedsanalyse",
+  title: "Find uddannelse efter snit, job og AI | Uddannelsesindsigt",
   description:
-    "Uddannelsesindsigt tilbyder uafhængig statistisk beslutningsstøtte til danske uddannelsessøgende baseret på UFM optagelsesdata, Danmarks Statistik og AI-arbejdsmarkedsmodeller.",
+    "Sammenlign 1.413 danske videregående uddannelser efter adgangskvotient, jobmuligheder, lønpotentiale og tydeligt markerede AI-modelestimater.",
   keywords: [
     "uddannelsesindsigt",
     "studievalg",
@@ -42,17 +43,19 @@ export const metadata: Metadata = {
   creator: "Uddannelsesindsigt",
   publisher: "Uddannelsesindsigt",
   openGraph: {
-    title: "Uddannelsesindsigt | Hvilken uddannelse passer til dig?",
+    title: "Hvilken uddannelse passer til dit snit og dine prioriteter?",
     description: "Sammenlign 1.413 danske videregående uddannelser på AI-robusthed, jobmuligheder og lønpotentiale med dit eget snit.",
     url: "https://uddannelsesindsigt.com",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
     type: "website",
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Uddannelsesindsigt",
-    description: "Fremtidssikret pædagogisk studievejledning baseret på registerdata og AI-opgavetaksonomi.",
+    title: "Find uddannelse efter snit, job og AI",
+    description: "Sammenlign danske uddannelser med officielle optagelsestal og tydeligt markerede modelestimater.",
+    images: [DEFAULT_SOCIAL_IMAGE_URL],
   },
   alternates: {
     canonical: "https://uddannelsesindsigt.com",
