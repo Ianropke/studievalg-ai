@@ -185,6 +185,43 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
           })}
         </div>
 
+        <section className="rounded-xl border border-[#D8DBE4] bg-[#FFFFFF] p-6 space-y-4 card-shadow">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Brug listen som startpunkt</p>
+            <h2 className="mt-1 text-lg font-bold font-display">Sådan får du et mere personligt resultat</h2>
+            <p className="mt-2 text-xs leading-relaxed text-[#545D71]">
+              En topliste bruger samme prioritering for alle. I matchværktøjet kan du kombinere dit gennemsnit, uddannelsessted og dine egne vægte for AI, job og løn.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <Link href="/" className="rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] p-4 font-semibold hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition">
+              Find dit personlige match →
+            </Link>
+            <Link href="/guides" className="rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] p-4 font-semibold hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition">
+              Læs guides til studievalg →
+            </Link>
+            <Link href="/evidens" className="rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] p-4 font-semibold hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition">
+              Kontrollér metode og datakvalitet →
+            </Link>
+          </div>
+        </section>
+
+        {config.readerQuestions && (
+          <section aria-labelledby="list-faq-heading" className="space-y-4">
+            <h2 id="list-faq-heading" className="text-lg font-bold font-display">Spørgsmål om listen</h2>
+            <div className="space-y-3">
+              {config.readerQuestions.map((item) => (
+                <details key={item.question} className="rounded-xl border border-[#E7E9EF] bg-[#FFFFFF] p-5">
+                  <summary className="cursor-pointer list-none text-sm font-bold text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] rounded">
+                    {item.question}
+                  </summary>
+                  <p className="mt-3 text-xs leading-relaxed text-[#545D71]">{item.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Bottom Navigation for Other Lists */}
         <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-6 space-y-4 card-shadow">
           <h3 className="font-bold text-sm text-[#12172B]">Udforsk Andre Statistiske Toplister</h3>
@@ -211,13 +248,6 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
           </Link>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-[#E7E9EF] bg-[#FFFFFF] py-12 px-6 lg:px-16 text-[#545D71] text-xs mt-16">
-        <div className="max-w-4xl mx-auto space-y-4 text-center">
-          <p>© 2026 Uddannelsesindsigt • Uafhængig pædagogisk beslutningsstøtte baseret på UFM og Danmarks Statistik</p>
-        </div>
-      </footer>
     </div>
   );
 }

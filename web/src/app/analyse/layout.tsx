@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = {
   title: "AI Insights & Uddannelsesanalyse | Uddannelsesindsigt",
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
     title: "AI Insights | Uddannelsesindsigt",
     description: "Dyb AI-analyse af to uddannelser med radar-visualisering, kompetenceprofiler og arbejdsmarkedsfremskrivninger.",
     url: "https://uddannelsesindsigt.com/analyse",
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
 };
 

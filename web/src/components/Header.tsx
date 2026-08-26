@@ -9,6 +9,7 @@ export function Header() {
   const navItems = [
     { label: "Matchværktøj", href: "/" },
     { label: "Toplister", href: "/lister/top-10-mest-ai-robuste-uddannelser" },
+    { label: "Guides", href: "/guides" },
     { label: "Sammenlign", href: "/sammenlign" },
     { label: "AI Insights", href: "/analyse" },
     { label: "Evidens", href: "/evidens" },

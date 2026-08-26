@@ -54,6 +54,7 @@ export function Footer() {
             <nav className="flex flex-wrap gap-x-6 gap-y-2 text-[#545D71]">
               <Link href="/" className="hover:text-[#12172B] transition">Matchværktøj</Link>
               <Link href="/lister/top-10-mest-ai-robuste-uddannelser" className="hover:text-[#12172B] transition">Toplister</Link>
+              <Link href="/guides" className="hover:text-[#12172B] transition">Guides til studievalg</Link>
               <Link href="/sammenlign" className="hover:text-[#12172B] transition">Sammenlign uddannelser</Link>
               <Link href="/analyse" className="hover:text-[#12172B] transition">AI Insights</Link>
               <Link href="/evidens" className="hover:text-[#12172B] transition">Bag om dine scorer</Link>

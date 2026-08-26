@@ -6,10 +6,11 @@ Uddannelsesindsigt hjælper unge med at finde uddannelser der matcher deres eget
 
 ## Vigtige Sider
 
-- [Forside / Matchværktøj](https://uddannelsesindsigt.dk/): Interaktivt værktøj til at finde uddannelser ud fra eget snit og prioriteter.
-- [AI Insights](https://uddannelsesindsigt.dk/analyse): Dataanalyser af hvordan AI påvirker studievalg og arbejdsmarkedet (2015-2026).
-- [PEFF Evidens Hub](https://uddannelsesindsigt.dk/evidens): Pædagogisk metode og datagrundlag bag AI-robusthedsscorerne.
-- [Uddannelsesdatabase](https://uddannelsesindsigt.dk/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og scorer.
+- [Forside / Matchværktøj](https://uddannelsesindsigt.com/): Interaktivt værktøj til at finde uddannelser ud fra eget snit og prioriteter.
+- [AI Insights](https://uddannelsesindsigt.com/analyse): Dataanalyser af hvordan AI påvirker studievalg og arbejdsmarkedet (2015-2026).
+- [PEFF Evidens Hub](https://uddannelsesindsigt.com/evidens): Pædagogisk metode og datagrundlag bag AI-robusthedsscorerne.
+- [Uddannelsesdatabase](https://uddannelsesindsigt.com/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og scorer.
+- [Guides til studievalg](https://uddannelsesindsigt.com/guides): Praktiske guides om gennemsnit, sammenligning og AI i uddannelsesvalget.
 
 ## Datakilder & Metode
 

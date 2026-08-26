@@ -1,5 +1,6 @@
 import { getEnrichedScores, isAllAdmitted } from "../lib/domainScoring";
 import { evaluatePreference } from "../lib/preferenceMatching";
+import { buildMatchSharePath, parseMatchShareParams } from "../lib/shareMatch";
 import { z } from "zod";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
@@ -239,7 +240,32 @@ export function runUnitTests() {
   console.assert(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
   console.log("  ✅ TEST-22: Adgangslisten filtrerer korrekt på 'Alle optaget'");
 
-  console.log("🎉 Alle 24 Unit Tests bestået uden fejl!\n");
+  // Test 25: Delbare match-links bevarer alle brugerens aktive valg.
+  const sharePath = buildMatchSharePath({
+    gpa: 8.2,
+    ai: 90,
+    job: 40,
+    salary: 20,
+    mode: "requirements",
+    requirementMatchMode: "any",
+    university: "au",
+    query: "medicin",
+  });
+  const parsedShare = parseMatchShareParams(sharePath.split("?")[1] || "");
+  console.assert(parsedShare.gpa === 8.2, `Test 25 Fejl: Delingslink mistede snit (${parsedShare.gpa})`);
+  console.assert(parsedShare.ai === 90 && parsedShare.job === 40 && parsedShare.salary === 20, "Test 25 Fejl: Delingslink mistede vægte");
+  console.assert(parsedShare.mode === "requirements" && parsedShare.requirementMatchMode === "any", "Test 25 Fejl: Delingslink mistede kravlogik");
+  console.assert(parsedShare.university === "au" && parsedShare.query === "medicin", "Test 25 Fejl: Delingslink mistede uddannelsessted eller søgning");
+  console.log("  ✅ TEST-25: Delbart match-link bevarer snit, vægte, kravlogik, sted og søgning");
+
+  // Test 26: Manipulerede URL-værdier begrænses til sliderkontrakten.
+  const boundedShare = parseMatchShareParams("?gpa=99&wAi=-20&wJob=500&wSal=ikke-et-tal&u=ukendt");
+  console.assert(boundedShare.gpa === 12, `Test 26 Fejl: GPA bør begrænses til 12, fik ${boundedShare.gpa}`);
+  console.assert(boundedShare.ai === 0 && boundedShare.job === 100, "Test 26 Fejl: Vægte bør begrænses til 0–100");
+  console.assert(boundedShare.salary === undefined && boundedShare.university === undefined, "Test 26 Fejl: Ugyldige værdier bør ignoreres");
+  console.log("  ✅ TEST-26: Delingsparametre valideres og begrænses sikkert");
+
+  console.log("🎉 Alle Unit Tests bestået uden fejl!\n");
 }
 
 if (require.main === module) {

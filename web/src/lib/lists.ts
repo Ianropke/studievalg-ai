@@ -31,6 +31,7 @@ export interface ProgramItem {
 export interface ListConfig {
   slug: string;
   title: string;
+  seoTitle?: string;
   badge: string;
   description: string;
   introHedge: string;
@@ -39,12 +40,14 @@ export interface ListConfig {
   getValue: (p: ProgramItem) => { display: string; numeric: number; raw: unknown };
   sortOrder: "asc" | "desc";
   filter?: (p: ProgramItem) => boolean;
+  readerQuestions?: Array<{ question: string; answer: string }>;
 }
 
 export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-mest-ai-robuste-uddannelser": {
     slug: "top-10-mest-ai-robuste-uddannelser",
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
+    seoTitle: "AI-robuste uddannelser i Danmark 2026",
     badge: "AI-modelestimat fra O*NET-opgaver",
     description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore. Scoren er et modelestimat baseret på opgavetaksonomi — ikke observerede uddannelsesudfald.",
     introHedge: `Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. ${DATA_STATUS.scoring.updatedLabel}. Tallene bygger på opgavedata fra O*NET og analyser af studieordninger — se 'Bag om dine scorer' for fuld metode.`,
@@ -56,10 +59,21 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
       return { display: `${val}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
+    readerQuestions: [
+      {
+        question: "Er en høj AI-robusthed en garanti for arbejde?",
+        answer: "Nej. AI-robusthed er et modelestimat for opgavernes karakter og skal læses sammen med jobindikator, fagligt indhold og datakvalitet.",
+      },
+      {
+        question: "Hvordan beregnes AI-robusthed?",
+        answer: "Modellen kombinerer estimeret automatiseringsrisiko og augmentationspotentiale. Se den aktuelle formel, modelversion og kildebegrænsninger på evidenssiden.",
+      },
+    ],
   },
   "top-10-hoejest-loennede-uddannelser": {
     slug: "top-10-hoejest-loennede-uddannelser",
-    title: "Top 10 Bedst Lønnede Uddannelser",
+    title: "Top 10 Uddannelser med Højt Lønpotentiale",
+    seoTitle: "Uddannelser med højt lønpotentiale 2026",
     badge: "Model-/registerafledt indikator",
     description: "De 10 videregående uddannelser med det højeste beregnede lønpotentiale. Scoren er en model-/registerafledt indikator og ikke en garanti for individuel løn.",
     introHedge: "Baseret på data fra Danmarks Statistik og UFM viser denne liste de 10 uddannelser med det højeste vurderede lønpotentiale. Tallene er vores bedste bud ud fra statistik og modeller — ikke en garanti for individuel startløn.",
@@ -71,13 +85,24 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
       return { display: `${val}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
+    readerQuestions: [
+      {
+        question: "Viser listen den faktiske løn for alle dimittender?",
+        answer: "Nej. Lønpotentialet er en model-/registerafledt indikator og ikke en dokumenteret individuel startløn eller løngaranti.",
+      },
+      {
+        question: "Bør jeg vælge uddannelse alene efter lønpotentiale?",
+        answer: "Nej. Sammenlign lønpotentiale med faglig interesse, jobmuligheder, adgangskrav og datakvalitet.",
+      },
+    ],
   },
   "top-10-laveste-ledighed": {
     slug: "top-10-laveste-ledighed",
-    title: "Top 10 Uddannelser med Laveste Ledighed",
+    title: "Top 10 Uddannelser med Gode Jobmuligheder",
+    seoTitle: "Uddannelser med gode jobmuligheder 2026",
     badge: "Historisk arbejdsmarkedsindikator",
     description: "De 10 uddannelser med den højeste beregnede jobmulighedsindikator. Tallet skal læses som en historisk/modelafledt indikator — ikke som en sikker individuel ledighedsprognose.",
-    introHedge: "Registerbaseret oversigt over de 10 uddannelser med stærkest observeret jobefterspørgsel. Tallene afspejler historiske data for dimittendbeskæftigelse.",
+    introHedge: "Oversigten rangerer uddannelser efter den aktuelle jobmulighedsindikator. Indikatoren er model-/registerafledt og må ikke læses som en dokumenteret individuel ledighedsprognose.",
     metricLabel: "Jobmuligheder",
     limit: 10,
     getValue: (p) => {
@@ -86,10 +111,21 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
       return { display: `${val}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
+    readerQuestions: [
+      {
+        question: "Er jobmulighedsscoren det samme som observeret ledighed?",
+        answer: "Nej. Scoren er en model-/registerafledt indikator. Uddannelsesspecifik dokumentation er ikke fuldt etableret for alle programmer.",
+      },
+      {
+        question: "Kan jobmuligheder ændre sig efter studiestart?",
+        answer: "Ja. Arbejdsmarkedet kan ændre sig væsentligt i løbet af en uddannelse, så brug indikatoren som ét signal blandt flere.",
+      },
+    ],
   },
   "top-20-bedste-samlede-match": {
     slug: "top-20-bedste-samlede-match",
     title: "Top 20 Bedste Samlede Match i Danmark",
+    seoTitle: "Bedste samlede uddannelsesmatch i Danmark 2026",
     badge: "Kombineret PEFF Trekant-Score",
     description: "De 20 uddannelser der opnår den højeste vægtede kombination af AI-robusthed, jobmuligheder og lønpotentiale.",
     introHedge: "Denne rangering bygger på det samlede gennemsnit af vores tre kernemål (AI-robusthed, jobmuligheder og lønpotentiale). Listen giver et afbalanceret overblik over uddannelser der klarer sig stærkt over hele linjen.",
@@ -108,6 +144,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-stoerste-ai-omstilling": {
     slug: "top-10-stoerste-ai-omstilling",
     title: "Top 10 Uddannelser i Størst AI-omstilling",
+    seoTitle: "Uddannelser der påvirkes mest af AI i 2026",
     badge: "Strukturel AI-analyse",
     description: "De 10 uddannelser hvor flest kerneopgaver forventes suppleret eller effektiviseret af kunstig intelligens og sprogmodeller.",
     introHedge: "Gennemskuelighed og balance er afgørende. Denne liste fremhæver de 10 uddannelser med lavest beregnede AI-robusthedsscore — det betyder ikke at faget forsvinder, men at opgaverne forventes at ændre sig markant i takt med AI.",
@@ -123,6 +160,7 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   "top-10-svaereste-adgangskvotienter": {
     slug: "top-10-svaereste-adgangskvotienter",
     title: "Top 10 Sværeste Uddannelser at Komme Ind På",
+    seoTitle: "Uddannelser med de højeste adgangskvotienter 2026",
     badge: "Kvote 1 Hovedtal 2026",
     description: "De 10 videregående uddannelser med de højeste Kvote 1 adgangskvotienter i Danmark.",
     introHedge: "Officiel opgørelse over de 10 uddannelser i Danmark med de højeste Kvote 1 adgangskvotienter ifølge seneste optagelsesdata fra UFM.",
@@ -135,10 +173,21 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
       return { display: kvStr || "Alle optaget", numeric: isNum ? num : 0, raw: kvStr };
     },
     sortOrder: "desc",
+    readerQuestions: [
+      {
+        question: "Er en høj adgangskvotient et fast adgangskrav?",
+        answer: "Nej. Kvotienten viser den laveste registrerede Kvote 1-kvotient ved et bestemt optag og kan ændre sig fra år til år.",
+      },
+      {
+        question: "Kan jeg søge gennem Kvote 2?",
+        answer: "Ja, hvis uddannelsen tilbyder Kvote 2 og du opfylder kriterierne. Kontrollér altid frister og krav hos uddannelsesstedet og Optagelse.dk.",
+      },
+    ],
   },
   "top-10-letteste-adgangskvotienter": {
     slug: "top-10-letteste-adgangskvotienter",
     title: "Top 10 Uddannelser Hvor Alle Optages",
+    seoTitle: "Uddannelser hvor alle blev optaget i 2026",
     badge: "Kvote 1 Hovedtal 2026",
     description: "Udvalgte videregående uddannelser med ledige pladser eller hvor alle ansøgere der opfylder adgangskravene optages.",
     introHedge: "Oversigt over 10 populære uddannelser med høj faglig kvalitet, hvor der senest var adgang for alle ansøgere der opfyldte adgangskravene (Kvotient: Alle optaget).",
@@ -150,6 +199,16 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
       return { display: kvStr, numeric: isAlle ? 1 : 99, raw: kvStr };
     },
     sortOrder: "asc",
+    readerQuestions: [
+      {
+        question: "Betyder “Alle optaget”, at der ikke er adgangskrav?",
+        answer: "Nej. Du skal stadig opfylde uddannelsens adgangskrav. Betegnelsen beskriver blot udfaldet blandt kvalificerede ansøgere ved det seneste optag.",
+      },
+      {
+        question: "Vil alle også blive optaget næste år?",
+        answer: "Det kan ikke garanteres. Antal ansøgere og studiepladser ændrer sig, så kontrollér altid de aktuelle oplysninger.",
+      },
+    ],
   },
 };
 
