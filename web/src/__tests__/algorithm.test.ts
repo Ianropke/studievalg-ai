@@ -1,6 +1,7 @@
 import { getEnrichedScores, isAllAdmitted } from "../lib/domainScoring";
 import { evaluatePreference } from "../lib/preferenceMatching";
 import { buildMatchSharePath, parseMatchShareParams } from "../lib/shareMatch";
+import { AI_RESEARCH_INSIGHTS } from "../lib/aiResearch";
 import { z } from "zod";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
@@ -264,6 +265,19 @@ export function runUnitTests() {
   console.assert(boundedShare.ai === 0 && boundedShare.job === 100, "Test 26 Fejl: Vægte bør begrænses til 0–100");
   console.assert(boundedShare.salary === undefined && boundedShare.university === undefined, "Test 26 Fejl: Ugyldige værdier bør ignoreres");
   console.log("  ✅ TEST-26: Delingsparametre valideres og begrænses sikkert");
+
+  // Test 27: Forskningskort har eksplicit kilde, geografi og begrænsning.
+  console.assert(AI_RESEARCH_INSIGHTS.length >= 5, "Test 27 Fejl: AI Insights skal have et kurateret forskningsgrundlag");
+  console.assert(
+    AI_RESEARCH_INSIGHTS.every((insight) =>
+      insight.sourceUrl.startsWith("https://") &&
+      insight.geography.length > 0 &&
+      insight.caution.length > 0 &&
+      insight.meaningForStudents.length > 0
+    ),
+    "Test 27 Fejl: Hvert forskningskort skal have kilde, geografi, begrænsning og elevrelevans"
+  );
+  console.log("  ✅ TEST-27: AI Insights adskiller kilde, geografi, begrænsning og elevrelevans");
 
   console.log("🎉 Alle Unit Tests bestået uden fejl!\n");
 }

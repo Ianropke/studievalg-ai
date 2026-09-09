@@ -2,6 +2,8 @@ import React from "react";
 import { Header } from "@/components/Header";
 import { getProgramCatalog } from "@/lib/programCatalog";
 import { DATA_STATUS } from "@/lib/dataStatus";
+import evidenceRegistry from "@/data/evidence_knowledge_base.json";
+import { AI_RESEARCH_INSIGHTS, STATUS_LABELS } from "@/lib/aiResearch";
 
 export default function EvidensPage() {
   const catalog = getProgramCatalog();
@@ -9,7 +11,7 @@ export default function EvidensPage() {
     total: catalog.length,
     admissions: DATA_STATUS.catalogue.admissionsUpdatedLabel,
     model: DATA_STATUS.scoring.updatedLabel,
-    sources: DATA_STATUS.registeredSourceCount,
+    sources: evidenceRegistry.total_sources,
   };
 
   const faqJsonLd = {
@@ -29,7 +31,7 @@ export default function EvidensPage() {
         "name": "Hvad er datakilderne bag Uddannelsesindsigt?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Kilderegistret indeholder 42 registrerede kilder fra blandt andet Uddannelses- og Forskningsministeriet (KOT), Danmarks Statistik, OECD, ESCO og O*NET. Ikke alle kilder er knyttet til hvert uddannelsesudbud."
+          "text": `Kilderegistret indeholder ${evidenceRegistry.total_sources} registrerede referencer fra blandt andet Uddannelses- og Forskningsministeriet (KOT), Danmarks Statistik, OECD, ESCO og O*NET. En registreret reference er ikke automatisk evidens for hvert uddannelsesudbud.`
         }
       }
     ]
@@ -84,10 +86,29 @@ export default function EvidensPage() {
             <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Optagelsesdata</div><div className="text-lg font-bold">{dataStats.admissions}</div></div>
             <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Scoringsmodel</div><div className="text-lg font-bold">{dataStats.model}</div></div>
           </div>
-          <p className="text-xs text-[#545D71] leading-relaxed">Kataloget læses fra den samme statiske fil, som fortsat ligger i <code>public/data</code>. Det betyder, at den også kan hentes direkte som <code>/data/all_programs_catalog.json</code>, mens serverkoden undgår at importere filen gennem Webpacks modul-graf.</p>
+          <p className="text-xs text-[#545D71] leading-relaxed">Kataloget og kilderegistret publiceres som versionsstyrede datafiler. Kildeantallet ovenfor læses direkte fra det genererede register, så siden ikke viser et separat, håndskrevet tal.</p>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-4 text-xs leading-relaxed text-[#92400E]">
             <p className="font-bold text-[#78350F]">Vigtig dækningsstatus</p>
-            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede kilder, men uddannelsesspecifik dokumentation for job- og lønindikatorerne er <strong>{DATA_STATUS.provenanceCoverageLabel.toLowerCase()}</strong>. Derfor vises de som afledte indikatorer/modelestimater og ikke som sikre udfald.</p>
+            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede referencer, men uddannelsesspecifik dokumentation for job- og lønindikatorerne er <strong>{DATA_STATUS.provenanceCoverageLabel.toLowerCase()}</strong>. En reference i registret tæller derfor ikke som dokumentation for alle uddannelser, og indikatorerne må ikke læses som sikre udfald.</p>
+          </div>
+        </section>
+        <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-5">
+          <div>
+            <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">NYERE FORSKNING OG STATISTIK</span>
+            <h2 className="text-xl font-bold text-[#12172B] font-display">Kilder vist i AI Insights</h2>
+            <p className="mt-2 text-xs leading-relaxed text-[#545D71]">Disse kilder giver baggrund om AI, unge og arbejdsmarkedet. De indgår ikke automatisk i rangeringen, fordi geografi og måleenhed ikke svarer til et dansk uddannelsesudbud.</p>
+          </div>
+          <div className="divide-y divide-[#E7E9EF] rounded-lg border border-[#E7E9EF]">
+            {AI_RESEARCH_INSIGHTS.map((source) => (
+              <div key={source.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-bold text-[#12172B]">{source.sourceLabel}</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-[#545D71]">{STATUS_LABELS[source.status]} · {source.geography} · {source.published}</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-[#7C5A16]">Begrænsning: {source.caution}</p>
+                </div>
+                <a href={source.sourceUrl} target="_blank" rel="noreferrer" className="shrink-0 text-xs font-bold text-[#1D4ED8] hover:underline">Åbn original kilde ↗</a>
+              </div>
+            ))}
           </div>
         </section>
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-4">

@@ -136,6 +136,18 @@ They do **not** constitute:
 
 Programme-level evidence must be attached to concrete claims. `programme_evidence_status = NOT_ESTABLISHED` is valid when such a relationship has not been established.
 
+The public AI Insights page may present current research and official contextual
+statistics when every item records its source URL, publication date, geography,
+epistemic status, student-facing interpretation and material limitation. These
+items are **context only** and must not change programme rankings unless a
+separate, documented programme-level mapping and validation step establishes
+that use.
+
+The generated registry is written to both
+`data/evidence_knowledge_base.json` and
+`web/src/data/evidence_knowledge_base.json`. The web copy is the deployable
+snapshot because root data files are intentionally excluded from Vercel builds.
+
 ---
 
 ## 7. Econometric Validation Status
@@ -191,3 +203,7 @@ This prevents a model-generated score from being visually presented as an observ
 - Salary and employment metrics must not be presented as programme-specific facts unless their underlying population and mapping are documented.
 - Recommendations are decision support, not deterministic predictions or professional career advice.
 - The system must expose uncertainty and missing provenance rather than inventing precision.
+- Newer upstream taxonomy versions do not become score inputs merely by being
+  listed in the registry. The published score currently uses O*NET 28.1; O*NET
+  31.0 and ESCO 1.2.1 require ingestion, crosswalk drift review and score
+  regression validation before activation.
