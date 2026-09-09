@@ -19,7 +19,6 @@ export const DATA_STATUS = {
     methodologyVersion: "2026.5",
     source: "O*NET 28.1 / DISCO-08",
   },
-  methodologyReviewedAt: "2026-08-12",
-  registeredSourceCount: 42,
+  methodologyReviewedAt: "2026-09-09",
   provenanceCoverageLabel: "Ikke fuldt etableret på uddannelsesniveau",
 } as const;

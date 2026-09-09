@@ -23,7 +23,7 @@ export interface GuideConfig {
   questions: Array<{ question: string; answer: string }>;
 }
 
-export const GUIDE_UPDATED_AT = "2026-08-26";
+export const GUIDE_UPDATED_AT = "2026-09-09";
 
 export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
   "hvad-kan-jeg-laese-med-mit-snit": {
@@ -141,6 +141,25 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
           "Vil du trives med at bruge AI som arbejdsredskab i faget?",
         ],
       },
+      {
+        title: "Ny forskning: AI ændrer oftere opgaver end hele job",
+        paragraphs: [
+          "ILO's globale indeks fra 2025 vurderer, at ét ud af fire job er potentielt eksponeret for generativ AI, men at forandring af arbejdsopgaver er mere sandsynlig end fuld erstatning. Danske tal viser samtidig, at 66% af de 16–24-årige brugte AI ugentligt i 2025.",
+          "Det gør evnen til at bruge AI kritisk og fagligt relevant på tværs af mange uddannelser. Tallene er baggrundsviden og ændrer ikke automatisk den enkelte uddannelses score.",
+        ],
+        bullets: [
+          "Se efter uddannelser, der kombinerer stærk faglighed med praktisk brug og kritisk vurdering af AI.",
+          "Undersøg om praktik, projekter og branchesamarbejde hjælper dig ind i dit første job.",
+          "Læs internationale tal som scenarier og forskningssignaler — ikke som sikre danske prognoser.",
+        ],
+      },
+      {
+        title: "Vælg for læring og omstilling — ikke kun for robusthed",
+        paragraphs: [
+          "En høj AI-robusthedsscore er ikke automatisk det rigtige valg for dig. Et stærkt valg passer både til dine interesser, dine reelle adgangsmuligheder og den måde, du gerne vil arbejde på.",
+          "Lav en kortliste i matchværktøjet, sammenlign uddannelsernes indhold, og brug derefter åbent hus, studieordninger og vejledning til at undersøge det, scorerne ikke kan se.",
+        ],
+      },
     ],
     primaryCta: {
       href: "/?wAi=90&wJob=70&wSal=60",
@@ -154,14 +173,14 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
         description: "Se den aktuelle modelbaserede topliste.",
       },
       {
-        href: "/lister/top-10-stoerste-ai-omstilling",
-        label: "Uddannelser i AI-omstilling",
-        description: "Se fag hvor opgaverne forventes at ændre sig mest.",
-      },
-      {
         href: "/evidens",
         label: "Bag om scorerne",
         description: "Læs modelversion, datakilder og kendte begrænsninger.",
+      },
+      {
+        href: "/analyse",
+        label: "Nye AI-tal i kontekst",
+        description: "Se nyere forskning og hvad den betyder for dit uddannelsesvalg.",
       },
     ],
     questions: [

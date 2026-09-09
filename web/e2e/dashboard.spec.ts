@@ -127,4 +127,29 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     }
   });
 
+  test('E2E-10: AI Insights viser nyere forskning som kontekst og ikke som skjult rangering', async ({ page }) => {
+    await page.goto('/analyse');
+
+    await expect(page.getByRole('heading', { name: 'AI Insights til dit uddannelsesvalg' })).toBeVisible();
+    await expect(page.getByText('Hvad betyder det for dig?').first()).toBeVisible();
+    await expect(page.getByText('Begrænsning:', { exact: false }).first()).toBeVisible();
+    await expect(page.getByText('Nye forskningskort ovenfor indgår ikke skjult i rangeringen.')).toBeVisible();
+    const researchSection = page.locator('section[aria-labelledby="latest-research-heading"]');
+    await expect(researchSection.getByRole('link', { name: /Danmarks Statistik/ })).toHaveAttribute('href', /^https:\/\//);
+  });
+
+  test('E2E-11: AI Insights er læsbar på en smal mobilskærm', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/analyse');
+
+    await expect(page.getByRole('heading', { name: 'AI Insights til dit uddannelsesvalg' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Find uddannelser →' })).toBeVisible();
+    await expect(page.locator('section[aria-labelledby="latest-research-heading"] article')).toHaveCount(6);
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+  });
+
 });
