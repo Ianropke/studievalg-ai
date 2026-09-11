@@ -63,6 +63,12 @@ jobs:
       - name: Run Python tests
         run: python -m unittest discover -s tests -p "test_*.py"
 
+      - name: Verify O*NET 31.0 migration outputs
+        run: python etl/migrate_onet31.py --check
+
+      - name: Verify model, SEO and agent discovery metadata
+        run: python etl/check_model_discovery_freshness.py
+
       - name: Run data integrity gate
         run: python etl/verify_all_data_integrity.py
 

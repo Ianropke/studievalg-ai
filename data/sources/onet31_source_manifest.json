@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "dataset": "O*NET 31.0",
+  "release": "August 2026",
+  "retrieved_at": "2026-09-10",
+  "publisher": "U.S. Department of Labor, Employment and Training Administration",
+  "licence": "CC BY 4.0",
+  "database_url": "https://www.onetcenter.org/database.html",
+  "download_url": "https://www.onetcenter.org/dl_files/database/db_31_0_excel.zip",
+  "crosswalk_url": "https://www.onetcenter.org/crosswalks/esco/ESCO_to_ONET-SOC.xlsx",
+  "files": [
+    {
+      "path": "data/sources/raw/onet-31.0/ESCO_to_ONET-SOC.xlsx",
+      "sha256": "bf6c854f7ffc935eba67a296d6d7fa4d40b70fb26bcdb5ecb5621374bca6f35b",
+      "bytes": 213061
+    },
+    {
+      "path": "data/sources/raw/onet-31.0/Occupation Data.xlsx",
+      "sha256": "13b2aa4c08e6c9a3708d5e5ac83e13da5cc184e3798313c8942a266d00593ace",
+      "bytes": 102540
+    },
+    {
+      "path": "data/sources/raw/onet-31.0/Work Activities.xlsx",
+      "sha256": "98b46861507de7217a63b2744cc3e99ce99806a3087bf9e7f70c8e7872033ac9",
+      "bytes": 4294510
+    }
+  ],
+  "model_version": "2026.6",
+  "transformation": "O*NET 31.0 importance ratings normalized from 1-5 to 0-1. Automation pressure = clamp(0.10 + 0.75 * top-four information activity mean - 0.60 * top-four human/physical safeguard mean, 0.05, 0.85). Augmentation potential = clamp(0.15 + 0.65 * top-four cognitive activity mean + 0.25 * information activity mean - 0.20 * top-three physical activity mean, 0.10, 0.95). Occupation scores are aggregated to the DISCO/ISCO group median through the O*NET-ESCO crosswalk.",
+  "limitations": [
+    "O*NET describes occupations in the United States.",
+    "The O*NET-ESCO crosswalk is model-assisted and human-validated, not an official Danish programme mapping.",
+    "Programmes with DEFAULT DISCO mapping retain a legacy baseline and are not labelled O*NET 31.0-derived.",
+    "The scores are model estimates, not observed job-loss probabilities or individual forecasts."
+  ]
+}

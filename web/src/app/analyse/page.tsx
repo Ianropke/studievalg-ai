@@ -154,10 +154,12 @@ export default function AIInsightsPage() {
         </section>
 
         <section className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-5 text-xs leading-relaxed text-[#7C5A16]">
-          <h2 className="font-bold text-[#78350F]">Modelstatus og næste dataopdatering</h2>
+          <h2 className="font-bold text-[#78350F]">Modelstatus: O*NET 31.0 er delvist aktiveret</h2>
           <p className="mt-2">
-            De publicerede AI-scorer bruger fortsat {DATA_STATUS.scoring.source}. O*NET 31.0 er den nyeste tilgængelige version,
-            men den ændrer først scorerne, når crosswalk, genberegning og kvalitetskontrol er gennemført. Nye forskningskort ovenfor indgår ikke skjult i rangeringen.
+            De publicerede AI-scorer bruger nu {DATA_STATUS.scoring.source} for {DATA_STATUS.scoring.mappedProgrammeCount} uddannelser
+            ({Math.round(DATA_STATUS.scoring.mappedProgrammeShare * 100)}%). De resterende {DATA_STATUS.scoring.baselineProgrammeCount} uddannelser mangler en ikke-standard
+            program→DISCO-kobling og beholder derfor en tydeligt markeret legacy-baseline. Det er bedre end at kalde en ukendt mapping for O*NET-data.
+            Nye forskningskort ovenfor indgår ikke skjult i rangeringen.
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
             <Link href="/evidens" className="font-bold text-[#1D4ED8] hover:underline">Se metode og datastatus →</Link>

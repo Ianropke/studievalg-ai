@@ -2,6 +2,32 @@
   "schema_version": "1.0",
   "sources": [
     {
+      "id": "onet_database_31_0",
+      "publisher": "U.S. Department of Labor, Employment and Training Administration",
+      "dataset": "O*NET 31.0 Database",
+      "release": "August 2026",
+      "url": "https://www.onetcenter.org/database.html",
+      "distribution_url": "https://www.onetcenter.org/dl_files/database/db_31_0_excel.zip",
+      "grain": "O*NET-SOC occupation x work activity",
+      "geography": "United States",
+      "definition": "Occupation-level importance ratings for work activities; transformed into explicitly labelled AI model features.",
+      "licence": "CC BY 4.0",
+      "update_frequency": "quarterly",
+      "epistemic_status": "OBSERVED_OCCUPATION_INPUT_TO_MODEL"
+    },
+    {
+      "id": "onet_esco_crosswalk",
+      "publisher": "National Center for O*NET Development and European Commission ESCO",
+      "dataset": "ESCO to O*NET-SOC 2019 crosswalk",
+      "url": "https://www.onetcenter.org/crosswalks.html",
+      "distribution_url": "https://www.onetcenter.org/crosswalks/esco/ESCO_to_ONET-SOC.xlsx",
+      "grain": "ESCO/ISCO occupation x O*NET-SOC occupation",
+      "geography": "European Union and United States",
+      "definition": "Model-assisted and human-validated occupation crosswalk used to aggregate O*NET occupation scores to ISCO/DISCO groups.",
+      "update_frequency": "irregular",
+      "epistemic_status": "CROSSWALK"
+    },
+    {
       "id": "ufm_graduate_employment",
       "publisher": "Uddannelses- og Forskningsstyrelsen",
       "dataset": "Beskæftigelse",

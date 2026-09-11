@@ -14,10 +14,15 @@ export interface CatalogProgramItem {
   disco_titel?: string;
   scores?: {
     automation_risk?: number;
+    augmentation_potential?: number;
     labour_demand?: number;
     salary_growth?: number;
     mobility?: number;
     uncertainty?: number;
+    ai_dataset_version?: string;
+    ai_model_status?: string;
+    ai_mapping_confidence?: "HIGH" | "MEDIUM" | "LOW" | "UNKNOWN";
+    ai_is_baseline_estimate?: boolean;
   };
   skills_hierarchy?: {
     courses?: string[];

@@ -279,6 +279,30 @@ export function runUnitTests() {
   );
   console.log("  ✅ TEST-27: AI Insights adskiller kilde, geografi, begrænsning og elevrelevans");
 
+  // Test 28: O*NET 31.0-kildestatus må ikke smitte af på legacy-baselines.
+  const onet31Scores = getEnrichedScores("Datalogi", {
+    automation_risk: 36,
+    augmentation_potential: 81,
+    ai_dataset_version: "O*NET 31.0",
+    ai_model_status: "CROSSWALK_OR_MODEL",
+    ai_mapping_confidence: "LOW",
+    ai_is_baseline_estimate: false,
+  });
+  console.assert(onet31Scores.provenance.automation_risk.dataset_version === "O*NET 31.0", "Test 28 Fejl: Migreret score skal vise O*NET 31.0");
+  console.assert(onet31Scores.provenance.automation_risk.status === "CROSSWALK", "Test 28 Fejl: O*NET-score skal forblive crosswalk/model");
+  console.assert(onet31Scores.is_baseline_estimate === false, "Test 28 Fejl: Migreret score må ikke markeres som baseline");
+  const legacyScores = getEnrichedScores("Ukendt fag", {
+    automation_risk: 32,
+    augmentation_potential: 70,
+    ai_dataset_version: "Legacy baseline (not O*NET 31.0-derived)",
+    ai_model_status: "PROVENANCE_REQUIRED",
+    ai_mapping_confidence: "LOW",
+    ai_is_baseline_estimate: true,
+  });
+  console.assert(legacyScores.is_baseline_estimate === true, "Test 28b Fejl: Umapppet score skal markeres som baseline");
+  console.assert(legacyScores.provenance.automation_risk.status === "PROVENANCE_REQUIRED", "Test 28c Fejl: Legacy-baseline må ikke kaldes O*NET-crosswalk");
+  console.log("  ✅ TEST-28: O*NET 31.0 og legacy-baseline holdes epistemisk adskilt");
+
   console.log("🎉 Alle Unit Tests bestået uden fejl!\n");
 }
 

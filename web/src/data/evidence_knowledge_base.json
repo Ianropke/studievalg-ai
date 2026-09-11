@@ -1,6 +1,6 @@
 {
   "registry_type": "SOURCE_REGISTRY",
-  "generated_at": "2026-09-09",
+  "generated_at": "2026-09-10",
   "registry_note": "Registry metadata is not programme-level evidence and is not an input to rankings unless an explicit claim relationship is established.",
   "total_sources": 33,
   "levels_count": 7,
@@ -364,10 +364,10 @@
       "decay": 1.0,
       "relevance_dk": 0.85,
       "final_evidence_weight": 0.807,
-      "desc": "Current US occupation task and skill data; not yet the version used by published scores.",
-      "url": "https://www.onetcenter.org/db_releases.html",
+      "desc": "Current US occupation activity data; active as a model input for the disclosed partial programme subset.",
+      "url": "https://www.onetcenter.org/database.html",
       "geography": "United States",
-      "programme_use": "PENDING_VALIDATED_CROSSWALK"
+      "programme_use": "PARTIAL_MODEL_INPUT_569_OF_1413"
     },
     {
       "level": "Niveau 5: Skills-Hierarki & Kompetencedata",

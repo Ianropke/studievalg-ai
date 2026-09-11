@@ -1,5 +1,5 @@
 # Methodological Documentation & Analytics Specifications
-**Studievalg-AI — Analytical Framework & Model Architecture (v2026.5 Methodology Correctness)**
+**Studievalg-AI — Analytical Framework & Model Architecture (v2026.6 O*NET 31.0 partial migration)**
 
 ---
 
@@ -96,6 +96,28 @@ Any such mapping must state:
 - confidence
 
 Where one programme plausibly leads to several occupations, a single occupation should not be presented as the complete career outcome without qualification.
+
+### O*NET 31.0 model input
+
+Model version 2026.6 uses O*NET 31.0 Work Activities importance ratings for
+programmes that already have a non-default DISCO code. Importance ratings are
+normalized from the O*NET 1–5 scale to 0–1. A documented deterministic model
+combines information-processing activities, cognitive activities and
+human/physical safeguards into `automation_risk` and
+`augmentation_potential`. Occupation scores are aggregated to the relevant
+ISCO/DISCO group median through the O*NET-ESCO crosswalk.
+
+The activity groups, coefficients, clipping bounds and input hashes are defined
+in `etl/migrate_onet31.py` and
+`data/sources/onet31_source_manifest.json`. These are owner-selected model
+assumptions. O*NET does not publish an automation probability or approve this
+derived score.
+
+Activation is deliberately partial: 569 of 1,413 programmes have a non-default
+legacy DISCO mapping and receive O*NET 31.0-derived model inputs. The remaining
+844 retain a visibly labelled legacy baseline. Even for migrated programmes,
+the programme-to-DISCO step remains low-confidence until a verified Danish
+education-to-occupation mapping is available.
 
 ---
 
@@ -204,6 +226,6 @@ This prevents a model-generated score from being visually presented as an observ
 - Recommendations are decision support, not deterministic predictions or professional career advice.
 - The system must expose uncertainty and missing provenance rather than inventing precision.
 - Newer upstream taxonomy versions do not become score inputs merely by being
-  listed in the registry. The published score currently uses O*NET 28.1; O*NET
-  31.0 and ESCO 1.2.1 require ingestion, crosswalk drift review and score
-  regression validation before activation.
+  listed in the registry. O*NET 31.0 is active only for the documented 40.3%
+  programme subset; every other programme remains explicitly outside the 31.0
+  coverage until a defensible mapping exists.
