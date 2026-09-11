@@ -5,6 +5,7 @@ import { DATA_STATUS } from "@/lib/dataStatus";
 import { GUIDE_CONFIGS, GUIDE_UPDATED_AT } from "@/lib/guides";
 
 const DATA_LAST_MODIFIED = DATA_STATUS.catalogue.admissionsUpdatedAt;
+const MODEL_LAST_MODIFIED = DATA_STATUS.scoring.updatedAt;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://uddannelsesindsigt.com";
@@ -12,14 +13,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const programUrls = allPrograms.map((prog) => ({
     url: `${baseUrl}/uddannelse/${createProgramSlug(prog)}`,
-    lastModified: DATA_LAST_MODIFIED,
+    lastModified: MODEL_LAST_MODIFIED,
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }));
 
   const listUrls = Object.keys(LIST_CONFIGS).map((slug) => ({
     url: `${baseUrl}/lister/${slug}`,
-    lastModified: DATA_LAST_MODIFIED,
+    lastModified: MODEL_LAST_MODIFIED,
     changeFrequency: "weekly" as const,
     priority: 0.9,
   }));
@@ -34,25 +35,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const mainUrls = [
     {
       url: baseUrl,
-      lastModified: DATA_LAST_MODIFIED,
+      lastModified: MODEL_LAST_MODIFIED,
       changeFrequency: "weekly" as const,
       priority: 1.0,
     },
     {
       url: `${baseUrl}/sammenlign`,
-      lastModified: DATA_LAST_MODIFIED,
+      lastModified: MODEL_LAST_MODIFIED,
       changeFrequency: "weekly" as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/analyse`,
-      lastModified: DATA_LAST_MODIFIED,
+      lastModified: MODEL_LAST_MODIFIED,
       changeFrequency: "weekly" as const,
       priority: 0.9,
     },
     {
       url: `${baseUrl}/evidens`,
-      lastModified: DATA_LAST_MODIFIED,
+      lastModified: MODEL_LAST_MODIFIED,
       changeFrequency: "monthly" as const,
       priority: 0.9,
     },

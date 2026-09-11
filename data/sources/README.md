@@ -2,6 +2,41 @@
 
 The production score pipeline intentionally fails until every required source is present.
 
+## O*NET 31.0 AI model input
+
+The active partial migration uses the official **O*NET 31.0 Database** (August
+2026) and the O*NET-ESCO crosswalk:
+
+- https://www.onetcenter.org/database.html
+- https://www.onetcenter.org/dl_files/database/db_31_0_excel.zip
+- https://www.onetcenter.org/crosswalks/esco/ESCO_to_ONET-SOC.xlsx
+
+The exact input subsets are stored under `data/sources/raw/onet-31.0/`. Their
+SHA-256 hashes, licence, release, transformation and limitations are recorded
+in `data/sources/onet31_source_manifest.json`.
+
+Regenerate and verify the partial migration with:
+
+```bash
+python etl/migrate_onet31.py
+python etl/migrate_onet31.py --check
+```
+
+`automation_risk` and `augmentation_potential` are model outputs derived from
+O*NET work-activity importance ratings. They are not fields published by O*NET
+and are not observed probabilities. O*NET-SOC occupations are aggregated via
+the model-assisted, human-validated O*NET-ESCO crosswalk to ISCO/DISCO groups.
+
+The programme-to-DISCO mapping remains the limiting step. O*NET 31.0 is active
+only for programmes with a non-`DEFAULT` DISCO code. A non-default code in the
+legacy catalogue is still a low-confidence model mapping, not an official
+Danish education-to-occupation crosswalk. Programmes without such a mapping
+retain a labelled legacy baseline and must never be presented as O*NET
+31.0-derived.
+
+Every migration must regenerate `data/ONET31_MIGRATION_REPORT.json` and review
+coverage, score deltas and the largest rank-relevant changes before release.
+
 ## UFM graduate employment
 
 Official source: UFM Datavarehus, **Beskæftigelse**:

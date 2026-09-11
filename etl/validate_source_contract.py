@@ -14,9 +14,9 @@ S = BASE / "data" / "sources"
 FILES = {
     "programme_education_mapping.csv": ["kot_nr", "education_code", "education_title", "mapping_method", "mapping_source", "mapping_period", "mapping_confidence"],
     "labour_market_by_education.csv": ["education_code", "period", "employment_rate", "unemployment_rate", "source", "dataset", "source_url"],
-    "salary_by_education.csv": ["education_code", "period", "salary_median", "source", "dataset", "source_url"],
+    "salary_by_education.csv": ["education_code", "period", "salary_value", "salary_measure", "salary_unit", "source", "dataset", "source_url"],
     "programme_disco_mapping.csv": ["kot_nr", "disco08_code", "mapping_method", "mapping_source", "mapping_period", "mapping_confidence"],
-    "ai_occupation_exposure.csv": ["disco08_code", "automation_risk", "augmentation_potential", "source", "dataset", "period", "source_url"],
+    "ai_occupation_exposure.csv": ["disco08_code", "automation_risk", "augmentation_potential", "source", "dataset", "period", "source_url", "crosswalk_url", "mapping_confidence"],
 }
 
 
@@ -81,13 +81,13 @@ def main() -> None:
                 errors.append(f"labour_market_by_education.csv: {col} must be in [0,1]")
 
     salary = frames.get("salary_by_education.csv")
-    if salary is not None and {"education_code", "period", "salary_median"}.issubset(salary.columns):
+    if salary is not None and {"education_code", "period", "salary_value"}.issubset(salary.columns):
         if salary.duplicated(["education_code", "period"]).any():
             errors.append("salary_by_education.csv: education_code + period must be unique")
-        _numeric(salary, ["salary_median"], "salary_by_education.csv", errors)
-        values = pd.to_numeric(salary["salary_median"], errors="coerce")
+        _numeric(salary, ["salary_value"], "salary_by_education.csv", errors)
+        values = pd.to_numeric(salary["salary_value"], errors="coerce")
         if values.notna().any() and (values.dropna() <= 0).any():
-            errors.append("salary_by_education.csv: salary_median must be positive")
+            errors.append("salary_by_education.csv: salary_value must be positive")
 
     disco = frames.get("programme_disco_mapping.csv")
     if disco is not None and {"kot_nr", "disco08_code", "mapping_method"}.issubset(disco.columns):
@@ -108,6 +108,8 @@ def main() -> None:
             values = pd.to_numeric(ai[col], errors="coerce")
             if values.notna().any() and ((values.dropna() < 0).any() or (values.dropna() > 1).any()):
                 errors.append(f"ai_occupation_exposure.csv: {col} must be in [0,1]")
+        if "dataset" in ai.columns and not ai["dataset"].astype(str).str.contains(r"O\*NET 31\.0", regex=True).all():
+            errors.append("ai_occupation_exposure.csv: every row must identify O*NET 31.0")
 
     legacy = S / "labour_market_by_programme.csv"
     if legacy.exists():

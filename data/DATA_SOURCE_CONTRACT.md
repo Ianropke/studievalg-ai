@@ -112,6 +112,20 @@ Rules:
 - Foreign occupation sources such as O*NET require a documented DISCO crosswalk.
 - `mapping_confidence` describes confidence in the occupation crosswalk, not confidence in the underlying AI study.
 - These values are `CROSSWALK_OR_MODEL`, never observed Danish labour-market measurements.
+- The current model input is O*NET 31.0 Work Activities (August 2026). O*NET
+  publishes the activity ratings, not the platform's automation or augmentation
+  scores.
+- The O*NET 31.0 transformation is defined and executed by
+  `etl/migrate_onet31.py`; raw input hashes live in
+  `data/sources/onet31_source_manifest.json`.
+- O*NET-SOC occupations are connected to ESCO/ISCO with the published
+  O*NET-ESCO crosswalk. The programme-to-DISCO step is a separate mapping and
+  must carry its own method and confidence.
+- Partial activation is permitted only when every programme explicitly states
+  whether it uses O*NET 31.0 or a non-O*NET legacy baseline. Unmapped rows must
+  not inherit the O*NET source label.
+- Each version migration must emit a drift report with mapped/unmapped coverage,
+  score deltas and the largest programme-level changes.
 
 ## 6. Derived scores
 
@@ -140,6 +154,11 @@ The scheduled workflow `.github/workflows/refresh-authoritative-data.yml` refres
 The UFM employment and KOT datasets are obtained through the public Datavejviser CKAN API. The Statistics Denmark education register is obtained from the official education-register page, which publishes current CSV tables and documents the UDD/AUDD relationships. citeturn4search0turn5search0turn1view0
 
 LONS11 schema metadata is fetched from the Statistics Bank API before any salary query is executed. The pipeline deliberately refuses to guess salary dimensions.
+
+The O*NET 31.0 migration stores only the raw files consumed by the model rather
+than the full 46 MB workbook archive. The source manifest records both the
+versioned archive URL and the hashes of the extracted input files. A changed
+hash is a review gate, not an instruction to update scores silently.
 
 ## 9. No synthetic fallback
 

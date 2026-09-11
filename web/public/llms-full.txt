@@ -1,0 +1,71 @@
+# Uddannelsesindsigt — udvidet kontekst til søge- og AI-agenter
+
+Canonical URL: https://uddannelsesindsigt.com/
+Language: Danish
+Audience: Young people comparing Danish higher-education programmes
+Programme count: 1,413
+Admissions source: UFM/KOT
+AI model version: 2026.6
+AI model updated: 2026-09-10
+
+## What the service does
+
+Uddannelsesindsigt is independent decision support. It lets users search,
+filter and compare Danish higher-education programmes by admission threshold,
+AI robustness, job indicator and salary indicator. It does not make admission,
+employment or salary guarantees and does not replace official guidance.
+
+## O*NET 31.0 model coverage
+
+- 569/1,413 programmes (40.27%) have a non-default legacy DISCO mapping and use
+  O*NET 31.0-derived model inputs.
+- 844/1,413 programmes (59.73%) lack that mapping and retain a labelled legacy
+  baseline. These rows are not O*NET 31.0-derived.
+- The O*NET-SOC to ESCO/ISCO mapping uses the published O*NET-ESCO crosswalk.
+- The programme-to-DISCO mapping is still a low-confidence model step, even for
+  migrated programmes. It is not an official Danish education-to-job mapping.
+
+## AI score formula
+
+ai_resilience = clamp(0.75 * (1 - automation_risk) +
+                      0.25 * augmentation_potential,
+                      0.10, 1.00)
+
+O*NET Work Activities importance ratings are normalized from 1–5 to 0–1. The
+model's activity groups and coefficients are documented at:
+https://uddannelsesindsigt.com/evidens
+
+O*NET publishes occupational activity ratings. It does not publish the site's
+automation_risk, augmentation_potential or ai_resilience values. Those are
+Uddannelsesindsigt model estimates.
+
+## Epistemic labels
+
+- OBSERVED: directly measured in a named source.
+- DERIVED: deterministic calculation from observed data.
+- CROSSWALK: transferred between documented classifications.
+- MODEL: explicit model assumption or estimate.
+- PROVENANCE_REQUIRED: a value exists, but programme-level source linkage is incomplete.
+- UNKNOWN: status cannot currently be established.
+
+Never convert MODEL, CROSSWALK or PROVENANCE_REQUIRED values into observed
+Danish outcomes. Never describe the AI score as probability of unemployment or
+job replacement.
+
+## Primary pages
+
+- Match: https://uddannelsesindsigt.com/
+- AI Insights: https://uddannelsesindsigt.com/analyse
+- Evidence and model status: https://uddannelsesindsigt.com/evidens
+- Guides: https://uddannelsesindsigt.com/guides
+- Compare: https://uddannelsesindsigt.com/sammenlign
+- Sitemap: https://uddannelsesindsigt.com/sitemap.xml
+- Machine-readable catalogue: https://uddannelsesindsigt.com/data/all_programs_catalog.json
+
+## Citation guidance
+
+When citing an admission threshold, identify the year and UFM/KOT as source.
+When citing an AI score, include "modelestimat", model version 2026.6 and the
+programme's O*NET coverage status. When discussing job and salary indicators,
+retain the page's provenance warning and do not state them as guaranteed
+programme-level outcomes.

@@ -1,0 +1,28 @@
+name: Model and discovery freshness
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 5 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: O*NET, SEO and agent discovery audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install HTTP dependency
+        run: python -m pip install requests
+
+      - name: Check upstream model and live discovery surfaces
+        run: python etl/check_model_discovery_freshness.py --live

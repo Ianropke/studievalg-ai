@@ -23,7 +23,7 @@ export default function EvidensPage() {
         "name": "Hvordan beregnes AI-robusthedsscorerne?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "AI-robusthed er et crosswalk-/modelestimat: 75% af indekset kommer fra lavere automatiseringsrisiko og 25% fra augmentationspotentiale. Optagelsestal er observerede UFM-data; job og løn er model-/registerafledte indikatorer."
+          "text": `AI-robusthed er et crosswalk-/modelestimat: 75% af indekset kommer fra lavere automatiseringsrisiko og 25% fra augmentationspotentiale. O*NET 31.0 er aktiv for ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser; resten bruger en markeret legacy-baseline.`
         }
       },
       {
@@ -36,10 +36,37 @@ export default function EvidensPage() {
       }
     ]
   };
+  const datasetJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "Uddannelsesindsigt AI-robusthedsmodel 2026.6",
+    "description": "Modelbaserede AI-robusthedsindikatorer for danske videregående uddannelser med eksplicit O*NET 31.0-dækning og provenance.",
+    "url": "https://uddannelsesindsigt.com/evidens",
+    "dateModified": DATA_STATUS.scoring.updatedAt,
+    "version": DATA_STATUS.scoring.methodologyVersion,
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "isBasedOn": [
+      "https://www.onetcenter.org/database.html",
+      "https://www.onetcenter.org/crosswalks.html"
+    ],
+    "spatialCoverage": ["Danmark", "USA", "EU"],
+    "measurementTechnique": "Deterministisk model af O*NET 31.0 Work Activities aggregeret via O*NET-ESCO/ISCO og tilgængelige DISCO-koblinger",
+    "variableMeasured": ["automation_risk", "augmentation_potential", "ai_resilience"],
+    "includedInDataCatalog": {
+      "@type": "DataCatalog",
+      "name": "Uddannelsesindsigt"
+    },
+    "distribution": {
+      "@type": "DataDownload",
+      "encodingFormat": "application/json",
+      "contentUrl": "https://uddannelsesindsigt.com/data/all_programs_catalog.json"
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }} />
       <Header />
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
         <div className="space-y-3 text-center max-w-3xl mx-auto">
@@ -89,7 +116,7 @@ export default function EvidensPage() {
           <p className="text-xs text-[#545D71] leading-relaxed">Kataloget og kilderegistret publiceres som versionsstyrede datafiler. Kildeantallet ovenfor læses direkte fra det genererede register, så siden ikke viser et separat, håndskrevet tal.</p>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-4 text-xs leading-relaxed text-[#92400E]">
             <p className="font-bold text-[#78350F]">Vigtig dækningsstatus</p>
-            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede referencer, men uddannelsesspecifik dokumentation for job- og lønindikatorerne er <strong>{DATA_STATUS.provenanceCoverageLabel.toLowerCase()}</strong>. En reference i registret tæller derfor ikke som dokumentation for alle uddannelser, og indikatorerne må ikke læses som sikre udfald.</p>
+            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede referencer. AI-modeldækning: <strong>{DATA_STATUS.provenanceCoverageLabel}</strong>. Uddannelsesspecifik dokumentation for job- og lønindikatorerne er fortsat ikke fuldt etableret. En reference i registret tæller derfor ikke som dokumentation for alle uddannelser, og indikatorerne må ikke læses som sikre udfald.</p>
           </div>
         </section>
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-5">
@@ -114,8 +141,9 @@ export default function EvidensPage() {
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-4">
           <h2 className="text-xl font-bold text-[#12172B] font-display">Ofte stillede spørgsmål</h2>
           <div className="space-y-3 text-sm text-[#545D71]">
-            <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> AI-robusthed beregnes efter den fælles formel: 75% × (1 − automation_risk) + 25% × augmentation_potential, med værdier begrænset til 10–100. Det er et crosswalk-/modelestimat — ikke en prognose for arbejdsløshed eller jobmuligheder.</p>
-            <p><strong>Hvor kommer dataene fra?</strong> Platformen anvender blandt andet UFM, Danmarks Statistik og internationale arbejdsmarkeds- og opgavedatasæt.</p>
+            <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> AI-robusthed beregnes efter den fælles formel: 75% × (1 − automation_risk) + 25% × augmentation_potential, med værdier begrænset til 10–100. Fra modelversion 2026.6 bygger de migrerede værdier på O*NET 31.0-aktivitetsratings, aggregeret via O*NET-ESCO/ISCO og den tilgængelige DISCO-kobling. Det er stadig et crosswalk-/modelestimat — ikke en prognose for arbejdsløshed eller jobmuligheder.</p>
+            <p><strong>Hvor stor er O*NET 31.0-dækningen?</strong> {DATA_STATUS.scoring.mappedProgrammeCount} af {DATA_STATUS.catalogue.programmeCount} uddannelser ({Math.round(DATA_STATUS.scoring.mappedProgrammeShare * 100)}%) har en ikke-standard DISCO-kobling og anvender den nye model. De resterende {DATA_STATUS.scoring.baselineProgrammeCount} er eksplicit markeret som legacy-baseline og må ikke læses som O*NET 31.0-afledte.</p>
+            <p><strong>Hvor kommer dataene fra?</strong> Platformen anvender blandt andet UFM, Danmarks Statistik og internationale arbejdsmarkeds- og opgavedatasæt. O*NET 31.0-råfiler, source hashes, transformationsformel og migrationsrapport ligger i det offentlige repository.</p>
           </div>
         </section>
       </main>

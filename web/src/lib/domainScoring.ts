@@ -31,6 +31,10 @@ export interface RawProgramScores {
   augmentation_potential?: number;
   labour_demand?: number;
   salary_growth?: number;
+  ai_dataset_version?: string;
+  ai_model_status?: string;
+  ai_mapping_confidence?: "HIGH" | "MEDIUM" | "LOW" | "UNKNOWN";
+  ai_is_baseline_estimate?: boolean;
   [key: string]: unknown;
 }
 
@@ -97,7 +101,19 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
     const labDemand = normalizeMetricValue(rawScores.labour_demand, 72);
     const salGrowth = normalizeMetricValue(rawScores.salary_growth, 70);
     const augPot = normalizeMetricValue(rawScores.augmentation_potential, 80);
-    const crosswalkSource = "O*NET 28.1 / DISCO-08 occupational crosswalk (modelestimat, ikke observeret uddannelsesdata)";
+    const aiDatasetVersion = String(rawScores.ai_dataset_version || "Katalogværdi uden indlejret kildeversion");
+    const isAiBaseline = rawScores.ai_is_baseline_estimate === true;
+    const aiConfidence = rawScores.ai_mapping_confidence || (isAiBaseline ? "LOW" : "UNKNOWN");
+    const aiStatus: EvidenceStatus = rawScores.ai_model_status === "PROVENANCE_REQUIRED"
+      ? "PROVENANCE_REQUIRED"
+      : rawScores.ai_model_status === "MODEL"
+        ? "MODEL"
+        : "CROSSWALK";
+    const crosswalkSource = aiDatasetVersion === "O*NET 31.0"
+      ? "O*NET 31.0 Work Activities via O*NET-ESCO og DISCO-08 (modelestimat)"
+      : isAiBaseline
+        ? "Legacy-baseline uden valideret O*NET 31.0-kobling"
+        : aiDatasetVersion;
 
     return {
       automation_risk: autoRisk,
@@ -106,35 +122,39 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
       labour_demand: labDemand,
       salary_growth: salGrowth,
       ai_resilience: canonicalAiResilience(autoRisk, augPot),
-      data_quality: "MEDIUM",
-      is_baseline_estimate: false,
+      data_quality: isAiBaseline ? "LOW" : "MEDIUM",
+      is_baseline_estimate: isAiBaseline,
       overall_status: "PROVENANCE_REQUIRED",
       provenance: {
         automation_risk: {
           metric: "automation_risk",
           source: crosswalkSource,
-          dataset_version: datasetVersion,
-          methodology: "Task-weighted occupational crosswalk/model estimate",
-          confidence: "MEDIUM",
-          is_baseline_estimate: false,
+          dataset_version: aiDatasetVersion,
+          methodology: aiDatasetVersion === "O*NET 31.0"
+            ? "O*NET-aktivitetsmodel aggregeret via O*NET-ESCO/ISCO og den tilgængelige DISCO-kobling"
+            : "Katalogets modelestimat uden valideret O*NET 31.0-kobling på uddannelsesniveau",
+          confidence: aiConfidence,
+          is_baseline_estimate: isAiBaseline,
           last_updated: lastUpdated,
-          status: "CROSSWALK"
+          status: aiStatus
         },
         augmentation_potential: {
           metric: "augmentation_potential",
           source: crosswalkSource,
-          dataset_version: datasetVersion,
-          methodology: "Task-weighted occupational crosswalk/model estimate",
-          confidence: "MEDIUM",
-          is_baseline_estimate: false,
+          dataset_version: aiDatasetVersion,
+          methodology: aiDatasetVersion === "O*NET 31.0"
+            ? "O*NET-aktivitetsmodel aggregeret via O*NET-ESCO/ISCO og den tilgængelige DISCO-kobling"
+            : "Katalogets modelestimat uden valideret O*NET 31.0-kobling på uddannelsesniveau",
+          confidence: aiConfidence,
+          is_baseline_estimate: isAiBaseline,
           last_updated: lastUpdated,
-          status: "CROSSWALK"
+          status: aiStatus
         },
         labour_demand: {
           metric: "labour_demand",
-          source: "Programme-level source mapping is not established in the client catalog",
+          source: "Uddannelsesspecifik kildekobling er ikke etableret i klientkataloget",
           dataset_version: datasetVersion,
-          methodology: "Raw catalogue value requires documented population, period and transformation",
+          methodology: "Rå katalogværdi kræver dokumenteret population, periode og transformation",
           confidence: "UNKNOWN",
           is_baseline_estimate: false,
           last_updated: lastUpdated,
@@ -142,9 +162,9 @@ export function getEnrichedScores(title?: string, rawScores?: RawProgramScores):
         },
         salary_growth: {
           metric: "salary_growth",
-          source: "Programme-level source mapping is not established in the client catalog",
+          source: "Uddannelsesspecifik kildekobling er ikke etableret i klientkataloget",
           dataset_version: datasetVersion,
-          methodology: "Raw catalogue value requires documented population, period and transformation",
+          methodology: "Rå katalogværdi kræver dokumenteret population, periode og transformation",
           confidence: "UNKNOWN",
           is_baseline_estimate: false,
           last_updated: lastUpdated,

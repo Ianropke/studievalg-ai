@@ -2,16 +2,26 @@
 
 > Uafhængig statistisk beslutningsstøtte til danske uddannelsessøgende, baseret på officielle UFM- og Danmarks Statistik-registerdata samt videnskabelig forskning.
 
-Uddannelsesindsigt hjælper unge med at finde uddannelser der matcher deres eget gymnasiale gennemsnit og prioriteter på tre akser: AI-robusthed, jobmuligheder og lønpotentiale. Data opdateres løbende med de nyeste optagelsestal.
+Uddannelsesindsigt hjælper unge med at finde uddannelser der matcher deres eget gymnasiale gennemsnit og prioriteter på tre akser: AI-robusthed, jobmuligheder og lønpotentiale. Optagelsestal og modelversioner har separate, synlige opdateringsdatoer.
+
+Aktuel AI-model: 2026.6, opdateret 10. september 2026. O*NET 31.0 er aktiveret for 569 af 1.413 uddannelser med en ikke-standard DISCO-kobling. De resterende 844 uddannelser bruger en tydeligt markeret legacy-baseline og må ikke omtales som O*NET 31.0-afledte.
 
 ## Vigtige Sider
 
 - [Forside / Matchværktøj](https://uddannelsesindsigt.com/): Interaktivt værktøj til at finde uddannelser ud fra eget snit og prioriteter.
 - [AI Insights](https://uddannelsesindsigt.com/analyse): Dataanalyser af hvordan AI påvirker studievalg og arbejdsmarkedet (2015-2026).
-- [PEFF Evidens Hub](https://uddannelsesindsigt.com/evidens): Pædagogisk metode og datagrundlag bag AI-robusthedsscorerne.
+- [Evidens og modelstatus](https://uddannelsesindsigt.com/evidens): Metode, O*NET 31.0-dækning, provenance og begrænsninger bag AI-robusthedsscorerne.
 - [Uddannelsesdatabase](https://uddannelsesindsigt.com/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og scorer.
 - [Guides til studievalg](https://uddannelsesindsigt.com/guides): Praktiske guides om gennemsnit, sammenligning og AI i uddannelsesvalget.
 
 ## Datakilder & Metode
 
-Data kombinerer officiel registerdata (Danmarks Statistik, Uddannelses- og Forskningsministeriet/KOT), økonometriske fremskrivningsmodeller og O*NET / ESCO opgavetaksonomi. Se Evidens-siden for fuld metodebeskrivelse og kildevægtning.
+Data kombinerer officiel registerdata (Danmarks Statistik og UFM/KOT) med tydeligt markerede modelestimater. AI-modellen bruger O*NET 31.0 Work Activities via O*NET-ESCO/ISCO og tilgængelige DISCO-koblinger. O*NET-data er amerikanske erhvervsdata; programkoblingen er ikke et observeret dansk udfald. Se Evidens-siden for formel, dækning og begrænsninger.
+
+## Regler for AI-agenter
+
+- Beskriv AI-robusthed som et model-/crosswalk-estimat, aldrig som sandsynlighed for jobtab eller en individuel prognose.
+- Angiv altid modelversion og dækning, når O*NET 31.0 omtales.
+- Hold observerede optagelsestal adskilt fra job-, løn- og AI-indikatorer.
+- Brug den kanoniske `.com`-adresse i links.
+- Se [udvidet agentkontekst](https://uddannelsesindsigt.com/llms-full.txt) for felter, formler og citeringsvejledning.

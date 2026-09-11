@@ -53,7 +53,7 @@ EVIDENCE_SOURCES = {
     ],
     "Niveau 5: Skills-Hierarki & Kompetencedata": [
         {"id": "esco_eu_2025", "name": "EU ESCO Taxonomy v1.2.1 (2025)", "type": "Kompetence-Klassifikation", "weight": 0.96, "decay": 1.0, "relevance_dk": 0.95, "desc": "European skills and occupation taxonomy; current reference version.", "url": "https://esco.ec.europa.eu/en/news/esco-v121-live", "geography": "EU", "programme_use": "REQUIRES_CROSSWALK"},
-        {"id": "onet_2026", "name": "US O*NET Database 31.0 (2026)", "type": "Kompetence-Klassifikation", "weight": 0.95, "decay": 1.0, "relevance_dk": 0.85, "desc": "Current US occupation task and skill data; not yet the version used by published scores.", "url": "https://www.onetcenter.org/db_releases.html", "geography": "United States", "programme_use": "PENDING_VALIDATED_CROSSWALK"},
+        {"id": "onet_2026", "name": "US O*NET Database 31.0 (2026)", "type": "Kompetence-Klassifikation", "weight": 0.95, "decay": 1.0, "relevance_dk": 0.85, "desc": "Current US occupation activity data; active as a model input for the disclosed partial programme subset.", "url": "https://www.onetcenter.org/database.html", "geography": "United States", "programme_use": "PARTIAL_MODEL_INPUT_569_OF_1413"},
         {"id": "disco08_dst", "name": "Danmarks Statistik DISCO-08 Standard", "type": "Kompetence-Klassifikation", "weight": 0.98, "decay": 1.0, "relevance_dk": 1.0, "desc": "Official Danish occupation classification."}
     ],
     "Niveau 6: Real-Time LLM Benchmarks": [
@@ -94,7 +94,7 @@ def build_evidence_engine():
 
     payload = {
         "registry_type": "SOURCE_REGISTRY",
-        "generated_at": "2026-09-09",
+        "generated_at": "2026-09-10",
         "registry_note": "Registry metadata is not programme-level evidence and is not an input to rankings unless an explicit claim relationship is established.",
         "total_sources": len(flattened_sources),
         "levels_count": len(EVIDENCE_SOURCES),

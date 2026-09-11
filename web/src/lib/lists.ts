@@ -15,8 +15,13 @@ export interface ProgramItem {
   latest_kvotient?: string;
   scores?: {
     automation_risk?: number;
+    augmentation_potential?: number;
     labour_demand?: number;
     salary_growth?: number;
+    ai_dataset_version?: string;
+    ai_model_status?: string;
+    ai_mapping_confidence?: "HIGH" | "MEDIUM" | "LOW" | "UNKNOWN";
+    ai_is_baseline_estimate?: boolean;
   };
   skills_hierarchy?: {
     tasks?: string;
@@ -48,9 +53,9 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     slug: "top-10-mest-ai-robuste-uddannelser",
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
     seoTitle: "AI-robuste uddannelser i Danmark 2026",
-    badge: "AI-modelestimat fra O*NET-opgaver",
+    badge: "AI-modelestimat · O*NET 31.0 med oplyst dækning",
     description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore. Scoren er et modelestimat baseret på opgavetaksonomi — ikke observerede uddannelsesudfald.",
-    introHedge: `Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. ${DATA_STATUS.scoring.updatedLabel}. Tallene bygger på opgavedata fra O*NET og analyser af studieordninger — se 'Bag om dine scorer' for fuld metode.`,
+    introHedge: `Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. ${DATA_STATUS.scoring.updatedLabel}. O*NET 31.0 er aktiveret for ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser med en ikke-standard DISCO-kobling; resten vises som legacy-baseline. Se 'Bag om dine scorer' for metode og dækning.`,
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {

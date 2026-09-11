@@ -34,6 +34,8 @@ export const metadata: Metadata = {
     "studievalg",
     "udvikling",
     "AI arbejdsmarked",
+    "O*NET 31.0",
+    "AI robuste uddannelser",
     "KOT optagelse 2026",
     "grænsekvotienter",
     "lønniveau",

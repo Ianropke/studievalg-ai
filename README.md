@@ -1,6 +1,6 @@
 # AI-Studievalgsplatform — Uddannelsesindsigt.dk
 
-En landsdækkende, fremtidssikret platform for AI-informeret studievejledning med deterministisk vægtningsmotor, registerdata fra Danmarks Statistik (DST) og UFM, samt O*NET 28.1 / DISCO-08 opgavetaksonomi.
+En landsdækkende platform for AI-informeret studievejledning med deterministisk vægtningsmotor, registerdata fra Danmarks Statistik (DST) og UFM samt en transparent, delvis migration til O*NET 31.0 / O*NET-ESCO / DISCO-08.
 
 ---
 
@@ -65,3 +65,8 @@ programniveau-observationer, når deres konkrete kilde, population, periode og
 transformation følger med i katalogets provenancefelter. Den strenge provenance-audit
 køres manuelt, indtil hele kataloget opfylder datadækningskravene; den almindelige CI
 genererer i stedet en rapport som artifact.
+
+Modelversion 2026.6 anvender O*NET 31.0-aktivitetsdata for 569 af 1.413
+uddannelser. De resterende 844 har ingen ikke-standard program→DISCO-kobling og
+beholder derfor en tydeligt markeret legacy-baseline. Se
+`data/ONET31_MIGRATION_REPORT.json` for source hashes, dækning og scoredrift.
