@@ -16,10 +16,10 @@ const STATUS_LABELS: Record<EvidenceStatus, string> = {
 };
 
 const METRIC_LABELS: Record<string, string> = {
-  automation_risk: "AI-risiko",
-  augmentation_potential: "Augmentation",
-  labour_demand: "Job",
-  salary_growth: "Løn"
+  automation_risk: "AI-opgaveeksponering",
+  augmentation_potential: "AI-augmentationspotentiale",
+  labour_demand: "Jobindikator",
+  salary_growth: "Lønindikator"
 };
 
 function statusLabel(status?: EvidenceStatus): string {
@@ -27,7 +27,7 @@ function statusLabel(status?: EvidenceStatus): string {
 }
 
 function qualityLabel(scores: NormalizedScores): string {
-  if (scores.is_baseline_estimate) return "Lav";
+  if (!Object.values(scores.ranking_eligible).some(Boolean)) return "Lav / neutraliseret";
   if (scores.data_quality === "HIGH") return "Høj";
   if (scores.data_quality === "MEDIUM") return "Mellem";
   return "Lav";
@@ -38,11 +38,16 @@ function metricStatus(scores: NormalizedScores, metric: string): EvidenceStatus 
 }
 
 function metricStatusNote(status: EvidenceStatus): string {
-  if (status === "PROVENANCE_REQUIRED") return "Uddannelsesspecifik kildekobling mangler";
-  if (status === "CROSSWALK") return "Crosswalk-/modelestimat";
-  if (status === "MODEL") return "Modelbaseret baseline";
+  if (status === "PROVENANCE_REQUIRED") return "Neutral 50-placeholder; ingen relativ rankingfordel";
+  if (status === "CROSSWALK") return "US occupational data via dokumenteret crosswalk/model";
+  if (status === "MODEL") return "Modelbaseret indikator";
+  if (status === "DERIVED") return "Afledt af dokumenterede observationer";
   if (status === "OBSERVED") return "Observeret datakilde";
   return statusLabel(status);
+}
+
+function rankingLabel(scores: NormalizedScores, metric: "ai" | "job" | "salary"): string {
+  return scores.ranking_eligible[metric] ? "Aktivt rankingsignal" : "Neutraliseret i ranking";
 }
 
 export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProps) {
@@ -52,29 +57,30 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
   const metricStatuses = Object.entries(scores.provenance)
     .map(([metric, item]) => (METRIC_LABELS[metric] || metric) + ": " + statusLabel(item.status))
     .join(" · ");
-  const overallStatus = scores.overall_status || (scores.is_baseline_estimate ? "MODEL" : "UNKNOWN");
+  const overallStatus = scores.overall_status || "UNKNOWN";
   const metricRows = [
-    { key: "automation_risk", label: "AI-robusthed" },
-    { key: "labour_demand", label: "Jobmuligheder" },
-    { key: "salary_growth", label: "Lønpotentiale" },
+    { key: "automation_risk", rankingKey: "ai" as const, label: "AI-resiliensindeks" },
+    { key: "labour_demand", rankingKey: "job" as const, label: "Jobindikator" },
+    { key: "salary_growth", rankingKey: "salary" as const, label: "Lønindikator" },
   ];
+  const activeRankingSignals = Object.values(scores.ranking_eligible).filter(Boolean).length;
 
   return (
     <section aria-label="Model- og kilde-status" className="rounded-lg border border-[#D8DBE4] bg-[#F7F8FA] px-3 py-2 text-[11px] text-[#545D71]">
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="rounded-full border border-[#2563EB]/20 bg-[#EFF6FF] px-2 py-0.5 font-bold text-[#1D4ED8]">
-          {scores.is_baseline_estimate ? "Baselineestimat" : statusLabel(overallStatus)}
+          {scores.is_baseline_estimate ? "Manglende/legacy programmevidence" : statusLabel(overallStatus)}
         </span>
         <span className="font-semibold">Datakvalitet: {qualityLabel(scores)}</span>
+        <span className="font-semibold">Aktive rankingsignaler: {activeRankingSignals}/3</span>
         <span className="text-[#8891A3]">Model opdateret: {DATA_STATUS.scoring.updatedLabel}</span>
       </div>
       <p className="mt-1 leading-relaxed">
-        AI-robusthed er et crosswalk-/modelestimat baseret på opgaveeksponering og augmentationspotentiale — ikke en prognose for arbejdsløshed eller en jobgaranti.
-        {scores.provenance.automation_risk.dataset_version === "O*NET 31.0"
-          ? " Denne uddannelse bruger O*NET 31.0-aktivitetsdata via en modelbaseret DISCO-kobling."
-          : " Denne uddannelse har endnu ikke en O*NET 31.0-kobling og bruger en legacy-baseline."}
-        {!compact && " Job- og lønscorer skal læses som model-/registerafledte indikatorer, ikke som sikre udfald for den enkelte."}
-        {!compact && overallStatus === "PROVENANCE_REQUIRED" && " Den aktuelle katalogversion mangler dokumenteret uddannelsesspecifik kildekobling for mindst én metrik."}
+        AI-resiliens er et model-/crosswalkindeks, ikke en sandsynlighed for automatisering eller en prognose for arbejdsløshed.
+        {scores.provenance.automation_risk.dataset_version === "O*NET 31.0" && scores.ranking_eligible.ai
+          ? " Denne uddannelse bruger amerikanske O*NET 31.0 Work Activities via O*NET–ESCO/ISCO/DISCO og en programkobling; det er ikke dansk observeret jobdata."
+          : " Denne uddannelse mangler en defensibel O*NET 31.0-programkobling; AI-dimensionen er derfor neutraliseret til 50 og giver ingen relativ rankingfordel."}
+        {!compact && " Job- og løndimensioner uden dokumenteret uddannelsesspecifik kilde, population, periode og transformation neutraliseres tilsvarende til 50 i klientrangeringen."}
       </p>
       {!compact && (
         <>
@@ -86,6 +92,7 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
                   <span className="block font-semibold text-[#12172B]">{row.label}</span>
                   <span className="block text-[10px]">{statusLabel(status)}</span>
                   <span className="block text-[10px] text-[#8891A3]">{metricStatusNote(status)}</span>
+                  <span className="block text-[10px] font-semibold text-[#545D71]">{rankingLabel(scores, row.rankingKey)}</span>
                 </div>
               );
             })}
