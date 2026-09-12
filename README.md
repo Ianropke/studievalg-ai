@@ -1,72 +1,84 @@
 # AI-Studievalgsplatform — Uddannelsesindsigt.dk
 
-En landsdækkende platform for AI-informeret studievejledning med deterministisk vægtningsmotor, registerdata fra Danmarks Statistik (DST) og UFM samt en transparent, delvis migration til O*NET 31.0 / O*NET-ESCO / DISCO-08.
+En landsdækkende platform for AI-informeret studievejledning med deterministisk vægtningsmotor, KOT/UFM-data, dokumenteret provenance og en delvis O*NET 31.0-migration.
+
+Platformen er beslutningsstøtte. Den må ikke præsentere modelestimerede AI-signaler, occupational crosswalks eller provenance-ufuldstændige job/løn-værdier som observerede danske uddannelsesudfald.
 
 ---
 
-## 🏛️ System- og Produktion-Arkitektur
+## System- og produktionsarkitektur
 
-Platformen er opbygget som et **hybrid Next.js + Python Analytics-system**:
+Platformen er et hybridt **Next.js + Python Analytics-system**:
 
-1. **Klient-side Søgemaskine (Next.js / TypeScript)**:
-   - Forhåndsberegnet kanonisk uddannelseskatalog (`all_programs_catalog.json`) med 1.413 danske videregående uddannelser.
-   - Realtids-filtrering, karakter-slider og vægtningssortering direkte i browseren med 0 ms responstid.
-   - Forbliver 100% funktionel selv hvis serverless Python-miljøet er utilgængeligt.
+1. **Klient-side katalog og ranking (`web/`)**
+   - Forhåndsberegnet katalog med 1.413 danske videregående uddannelsesudbud.
+   - Søgning, filtrering, karakterkontrol og præference-rangering direkte i browseren.
+   - Forbliver brugbart, hvis den separate Python-analysetjeneste er utilgængelig.
+   - Ranking må kun få relative forskelle fra signaler, der har tilstrækkelig programmevidence. Manglende/legacy signaler neutraliseres til 50, så de ikke belønner eller straffer et program relativt til et andet.
 
-2. **Dybdegående Analytics Pipeline (`agents/multi_agent_engine.py`)**:
-   - Kræver lokalt/server-baseret Python-miljø med DuckDB database (`data/kot_data.duckdb`).
-   - Udfører struktureret query-intent parsing, kandidat-specifik evidensfiltrering, deterministisk kildekvalitetsklassificering (`HIGH`, `MEDIUM`, `LOW`) og Monte Carlo scenariesimuleringer.
-   - Hvis Python-miljøet ikke er tilgængeligt (fx under ren serverless Vercel-deployment), returnerer API'et en sikker `HTTP 503 ANALYTICS_ENGINE_UNAVAILABLE` statuskode uden at fabrikere falske anbefalinger.
+2. **Dybdegående analytics (`agents/multi_agent_engine.py`)**
+   - Bruger DuckDB (`data/kot_data.duckdb`) og den strengere `education_profile_scores`-pipeline.
+   - Den tabel bygges kun, når de krævede uddannelses-, arbejdsmarkeds-, løn-, DISCO- og AI-kilder/mappings er til stede.
+   - Hvis analytics-servicen ikke er tilgængelig, returnerer API'et en eksplicit unavailable/503-status frem for fallback-anbefalinger.
+
+Se `docs/PROJECT_STATE.md` for den aktuelle implementerings- og evidensstatus.
 
 ---
 
-## 🚀 Kom i gang (Lokal udvikling & Analytics Engine)
+## Sådan skal scorerne læses
 
-### 1. Opsæt Python-miljø (`venv`)
+| Signal | Evidensstatus | Må ikke læses som |
+| --- | --- | --- |
+| KOT/adgangsdata | Observeret admissionsdata | Arbejdsmarkedsefterspørgsel eller fremtidig succes |
+| AI-opgaveeksponering / augmentation | O*NET-baseret crosswalk/model | Dansk jobtabsrate eller automatiseringssandsynlighed |
+| AI-resiliensindeks | Afledt modelindeks | Jobgaranti eller individuel prognose |
+| Jobindikator i klientkatalog | `PROVENANCE_REQUIRED` indtil programkilde er dokumenteret | Observeret programmefterspørgsel |
+| Lønindikator i klientkatalog | `PROVENANCE_REQUIRED` indtil programkilde er dokumenteret | Observeret programløn |
+| Monte Carlo-percentiler | Simulations-/modelinterval | Empirisk konfidensinterval |
+
+### O*NET 31.0
+
+Modelversion 2026.6 bruger amerikanske O*NET 31.0 Work Activities for 569 af 1.413 uddannelser (40,3%) gennem O*NET–ESCO/ISCO/DISCO og program→occupation-mappings. O*NET publicerer ikke en automatiseringssandsynlighed for danske uddannelser og validerer ikke platformens AI-resiliensformel.
+
+De resterende 844 programmer mangler en defensibel O*NET 31.0-programkobling. Deres legacy/default AI-værdier må derfor ikke skabe relative ranking-forskelle; klienten neutraliserer den dimension.
+
+Job- og lønværdier i det statiske klientkatalog mangler fortsat komplet programniveau-provenance og neutraliseres tilsvarende, indtil kilde, population, periode, transformation og mapping er dokumenteret.
+
+---
+
+## Lokal udvikling
+
+### Python
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-```
-
-### 2. Kør Data Integrity Quality Gate
-```bash
+python3 -m unittest discover -s tests -p "test_*.py"
 python3 etl/verify_all_data_integrity.py
 ```
 
-### 3. Kør Enhedstests (Python & TypeScript)
+### Web
+
 ```bash
-# Python backend tests
-python3 -m unittest discover -s tests -p "test_*.py"
-
-# TypeScript frontend & algoritme tests
-cd web && npx tsx src/__tests__/algorithm.test.ts
-
-# Browsertests for søgning, sliders og navigation
-cd web && npx playwright install chromium && npm run e2e
-```
-
-### 4. Start Next.js Frontend Server
-```bash
-cd web
-npm run dev
+npm install --prefix web --no-audit --no-fund
+npm run --prefix web typecheck
+npm run --prefix web lint
+npm run --prefix web algorithm:test
+npm run --prefix web build
+npm exec --prefix web -- playwright install chromium
+npm run --prefix web e2e
 ```
 
 ---
 
-## 📊 Datakilder & Metoder
+## Centrale dokumenter
 
-- **`data/kot_data.duckdb`**: Lokal DuckDB database med historiske optagelsestal, grænsekvotienter og DISCO-08 erhvervskoder.
-- **`web/public/data/all_programs_catalog.json`**: Eksporteret katalog, som indlæses af den deployed webapp.
-- **`docs/MODEL_METHODOLOGY.md`**: Komplet metodisk dokumentation for formler, Monte Carlo scenarier og datakilder.
+- `docs/PROJECT_STATE.md` — aktuel implementering og evidensstatus.
+- `docs/MODEL_METHODOLOGY.md` — formler, epistemiske lag og simulationsregler.
+- `data/DATA_SOURCE_CONTRACT.md` — krav til kilder, mappings og provenance.
+- `docs/DATA_PROVENANCE_GAPS.md` — kendte programniveau-huller.
+- `data/ONET31_MIGRATION_REPORT.json` — O*NET 31.0-dækning, input-hashes og scoredrift.
+- `.github/workflows/quality.yml` — release quality gates.
 
-AI-robusthed er et crosswalk-/modelestimat. Job- og lønindikatorer må kun kaldes
-programniveau-observationer, når deres konkrete kilde, population, periode og
-transformation følger med i katalogets provenancefelter. Den strenge provenance-audit
-køres manuelt, indtil hele kataloget opfylder datadækningskravene; den almindelige CI
-genererer i stedet en rapport som artifact.
-
-Modelversion 2026.6 anvender O*NET 31.0-aktivitetsdata for 569 af 1.413
-uddannelser. De resterende 844 har ingen ikke-standard program→DISCO-kobling og
-beholder derfor en tydeligt markeret legacy-baseline. Se
-`data/ONET31_MIGRATION_REPORT.json` for source hashes, dækning og scoredrift.
+Generated catalogues og audit-artefakter er output fra pipeline-koden; de skal ikke håndredigeres for at ændre modelresultater.
