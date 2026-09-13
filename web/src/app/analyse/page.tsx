@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
-import { LiveAnalysisPanel } from "@/components/LiveAnalysisPanel";
 import {
   AI_RESEARCH_INSIGHTS,
   AI_RESEARCH_UPDATED_AT,
@@ -43,7 +42,7 @@ export default function AIInsightsPage() {
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
       <Header />
 
-      <main className="mx-auto max-w-5xl space-y-10 px-5 py-10 sm:px-6">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl space-y-10 px-5 py-10 sm:px-6">
         <header className="mx-auto max-w-3xl space-y-4 text-center">
           <span className="inline-flex rounded-full border border-[#2563EB]/20 bg-[#E7EEFE] px-3 py-1 text-xs font-semibold text-[#1D4ED8]">
             Ny forskning · opdateret {AI_RESEARCH_UPDATED_AT}
@@ -65,7 +64,7 @@ export default function AIInsightsPage() {
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             {[
               ["Faglig interesse", "Kan du se dig selv fordybe dig i faget i flere år?"],
-              ["Reelle muligheder", "Se snit, indhold, praktik, jobindikatorer og datakvalitet sammen."],
+              ["Reelle muligheder", "Se snit, indhold, praktik, studiested og datakvalitet sammen."],
               ["Omstillingsevne", "Lær både dit fag og at bruge AI kritisk, sikkert og ansvarligt."],
             ].map(([title, text]) => (
               <div key={title} className="rounded-xl border border-white/15 bg-white/5 p-4">
@@ -142,15 +141,15 @@ export default function AIInsightsPage() {
           </p>
         </section>
 
-        <section aria-labelledby="model-heading" className="space-y-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#545D71]">Uddannelsesanalyse</p>
-            <h2 id="model-heading" className="mt-1 font-display text-2xl font-bold">Gå dybere i en uddannelse</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#545D71]">
-              Analysen nedenfor bruger platformens model og skal læses som inspiration til spørgsmål — ikke som et facit eller en personlig karriereprognose.
-            </p>
-          </div>
-          <LiveAnalysisPanel />
+        <section aria-labelledby="model-heading" className="rounded-xl border border-[#E7E9EF] bg-white p-6 card-shadow sm:p-8">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[#545D71]">Uddannelsesanalyse</p>
+          <h2 id="model-heading" className="mt-1 font-display text-2xl font-bold">Brug AI-perspektivet på en kortliste</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#545D71]">
+            Start med interesse, adgang og studiested. På forsiden kan du derefter aktivere “Inddrag AI-modelestimater”. Kun de {DATA_STATUS.scoring.mappedProgrammeCount} uddannelser med O*NET 31.0-understøttelse indgår i den AI-baserede sortering.
+          </p>
+          <Link href="/?ai=1" className="mt-5 inline-flex rounded-lg bg-[#12172B] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1E293B]">
+            Find uddannelser med AI-perspektiv →
+          </Link>
         </section>
 
         <section className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-5 text-xs leading-relaxed text-[#7C5A16]">
@@ -158,7 +157,7 @@ export default function AIInsightsPage() {
           <p className="mt-2">
             De publicerede AI-scorer bruger nu {DATA_STATUS.scoring.source} for {DATA_STATUS.scoring.mappedProgrammeCount} uddannelser
             ({Math.round(DATA_STATUS.scoring.mappedProgrammeShare * 100)}%). De resterende {DATA_STATUS.scoring.baselineProgrammeCount} uddannelser mangler en ikke-standard
-            program→DISCO-kobling og beholder derfor en tydeligt markeret legacy-baseline. Det er bedre end at kalde en ukendt mapping for O*NET-data.
+            program→DISCO-kobling og udelukkes derfor fra AI-rangering. Det er bedre end at kalde en ukendt mapping for O*NET-data.
             Nye forskningskort ovenfor indgår ikke skjult i rangeringen.
           </p>
           <div className="mt-3 flex flex-wrap gap-3">

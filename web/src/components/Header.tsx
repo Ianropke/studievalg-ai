@@ -17,6 +17,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-[#FFFFFF] border-b border-[#E7E9EF] card-shadow">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-[#12172B] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white">
+        Spring til hovedindhold
+      </a>
       <div className="max-w-5xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link
@@ -30,7 +33,7 @@ export function Header() {
             <Link href="/" className="font-bold text-sm text-[#12172B] tracking-tight hover:underline font-display">
               Uddannelsesindsigt
             </Link>
-            <p className="text-[10px] text-[#545D71]">Statistisk beslutningsstøtte baseret på UFM og Danmarks Statistik</p>
+            <p className="text-[10px] text-[#545D71]">UFM/KOT-optagelsesdata og tydeligt markerede AI-modelestimater</p>
           </div>
         </div>
         <nav aria-label="Hovednavigation" className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto max-w-full pb-1 sm:pb-0">

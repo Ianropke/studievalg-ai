@@ -10,17 +10,18 @@ AI model updated: 2026-09-10
 
 ## What the service does
 
-Uddannelsesindsigt is independent decision support. It lets users search,
-filter and compare Danish higher-education programmes by admission threshold,
-AI robustness, job indicator and salary indicator. It does not make admission,
-employment or salary guarantees and does not replace official guidance.
+Uddannelsesindsigt is independent decision support. It lets users search and
+compare all Danish higher-education programmes by admission threshold, place
+and educational content. AI robustness is an explicit opt-in perspective and
+is disabled by default. The service does not make admission or career guarantees
+and does not replace official guidance.
 
 ## O*NET 31.0 model coverage
 
 - 569/1,413 programmes (40.27%) have a non-default legacy DISCO mapping and use
   O*NET 31.0-derived model inputs.
-- 844/1,413 programmes (59.73%) lack that mapping and retain a labelled legacy
-  baseline. These rows are not O*NET 31.0-derived.
+- 844/1,413 programmes (59.73%) lack that mapping, are excluded from AI ranking
+  and are shown without a programme-specific AI estimate.
 - The O*NET-SOC to ESCO/ISCO mapping uses the published O*NET-ESCO crosswalk.
 - The programme-to-DISCO mapping is still a low-confidence model step, even for
   migrated programmes. It is not an official Danish education-to-job mapping.
@@ -66,6 +67,5 @@ job replacement.
 
 When citing an admission threshold, identify the year and UFM/KOT as source.
 When citing an AI score, include "modelestimat", model version 2026.6 and the
-programme's O*NET coverage status. When discussing job and salary indicators,
-retain the page's provenance warning and do not state them as guaranteed
-programme-level outcomes.
+programme's O*NET coverage status. Do not infer an AI score for an uncovered
+programme, and do not present small score differences as precise forecasts.

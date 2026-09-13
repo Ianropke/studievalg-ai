@@ -37,6 +37,32 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     }
   });
 
+  test("spring-link og delingsdialog kan betjenes med tastatur", async ({ page }) => {
+    await page.goto("/");
+    await page.keyboard.press("Tab");
+    const skipLink = page.getByRole("link", { name: "Spring til hovedindhold" });
+    await expect(skipLink).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#main-content")).toBeFocused();
+
+    await page.getByRole("button", { name: "Del dit match" }).click();
+    const dialog = page.getByRole("dialog", { name: "Del din søgning" });
+    await expect(dialog).toBeVisible();
+    await expect(page.getByRole("button", { name: "Luk deling" })).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test("sammenligning holder AI-estimater fravalgt, indtil brugeren vælger dem", async ({ page }) => {
+    await page.goto("/sammenlign");
+    const toggle = page.getByTestId("compare-ai-toggle");
+    await expect(toggle).not.toBeChecked();
+    await expect(page.getByText("AI-model: fravalgt")).toBeVisible();
+    await expect(page.getByText("O*NET 31.0-modelestimat", { exact: true })).toHaveCount(0);
+    await toggle.check();
+    await expect(page.getByText("O*NET 31.0-modelestimat", { exact: true })).toBeVisible();
+  });
+
   test("SEO- og agent-discoveryflader er komplette og kanoniske", async ({ page, request }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Find uddannelse.*Uddannelsesindsigt/i);

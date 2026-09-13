@@ -1,5 +1,3 @@
-import type { PreferenceMode, RequirementMatchMode } from "./preferenceMatching";
-
 export const SHAREABLE_UNIVERSITIES = [
   "all",
   "ku",
@@ -17,11 +15,7 @@ export type ShareableUniversity = (typeof SHAREABLE_UNIVERSITIES)[number];
 
 export interface MatchShareState {
   gpa: number;
-  ai: number;
-  job: number;
-  salary: number;
-  mode: PreferenceMode;
-  requirementMatchMode: RequirementMatchMode;
+  includeAiModels: boolean;
   university: ShareableUniversity;
   query: string;
 }
@@ -41,20 +35,15 @@ export function parseMatchShareParams(search: string): ParsedMatchShareState {
   const parsed: ParsedMatchShareState = {};
 
   const gpa = readBoundedNumber(params, "gpa", 2, 12);
-  const ai = readBoundedNumber(params, "wAi", 0, 100);
-  const job = readBoundedNumber(params, "wJob", 0, 100);
-  const salary = readBoundedNumber(params, "wSal", 0, 100);
-  const mode = params.get("mode");
-  const match = params.get("match");
+  const includeAi = params.get("ai");
   const university = params.get("u");
   const query = params.get("q");
 
   if (gpa !== undefined) parsed.gpa = gpa;
-  if (ai !== undefined) parsed.ai = ai;
-  if (job !== undefined) parsed.job = job;
-  if (salary !== undefined) parsed.salary = salary;
-  if (mode === "priority" || mode === "requirements") parsed.mode = mode;
-  if (match === "all" || match === "any") parsed.requirementMatchMode = match;
+  if (includeAi === "1" || includeAi === "true") parsed.includeAiModels = true;
+  if (includeAi === "0" || includeAi === "false") parsed.includeAiModels = false;
+  // Shared links from the previous three-slider interface explicitly opted into AI.
+  if (includeAi === null && params.has("wAi")) parsed.includeAiModels = true;
   if (university && SHAREABLE_UNIVERSITIES.includes(university as ShareableUniversity)) {
     parsed.university = university as ShareableUniversity;
   }
@@ -66,11 +55,7 @@ export function parseMatchShareParams(search: string): ParsedMatchShareState {
 export function buildMatchSharePath(state: MatchShareState): string {
   const params = new URLSearchParams({
     gpa: state.gpa.toFixed(1),
-    wAi: String(Math.round(state.ai)),
-    wJob: String(Math.round(state.job)),
-    wSal: String(Math.round(state.salary)),
-    mode: state.mode,
-    match: state.requirementMatchMode,
+    ai: state.includeAiModels ? "1" : "0",
   });
 
   if (state.university !== "all") params.set("u", state.university);

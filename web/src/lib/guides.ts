@@ -34,7 +34,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       "Brug dit gymnasiale gennemsnit til at finde og sammenligne danske uddannelser med de seneste Kvote 1-adgangskvotienter fra UFM.",
     badge: "Kvote 1 og optagelsesdata 2026",
     intro:
-      "Dit gennemsnit er et praktisk filter, men ikke et facit for dit studievalg. Matchværktøjet sammenholder dit snit med den senest registrerede Kvote 1-kvotient og lader dig samtidig prioritere AI-robusthed, jobmuligheder og lønpotentiale.",
+      "Dit gennemsnit er et praktisk filter, men ikke et facit for dit studievalg. Matchværktøjet sammenholder dit snit med den senest registrerede Kvote 1-kvotient. Hvis du selv vælger det, kan et tydeligt markeret AI-modelestimat bruges som et ekstra perspektiv.",
     sections: [
       {
         title: "Start med dit faktiske gennemsnit",
@@ -58,7 +58,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       {
         title: "Vælg mere end bare efter snit",
         paragraphs: [
-          "Brug job-, løn- og AI-indikatorerne som supplerende signaler. De er model- eller registerafledte indikatorer og skal ikke læses som garantier for dit fremtidige arbejdsliv.",
+          "Vælg først efter interesse, indhold, adgangsmuligheder og studiested. Brug kun AI-modelestimatet som et supplerende spørgsmål om, hvordan fagets opgaver kan ændre sig.",
         ],
         bullets: [
           "Sammenlign mindst to uddannelser side om side.",
@@ -107,7 +107,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
     title: "AI og uddannelsesvalg",
     seoTitle: "AI og uddannelsesvalg: Sådan bruger du AI-robusthed",
     description:
-      "Forstå hvad AI-robusthed betyder, hvad modellen ikke kan forudsige, og hvordan du kombinerer AI med job, løn og faglig interesse i dit studievalg.",
+      "Forstå hvad AI-robusthed betyder, hvad modellen ikke kan forudsige, og hvordan du bruger den sammen med faglig interesse og faktiske uddannelsesoplysninger.",
     badge: "Modelguide med tydelige forbehold",
     intro:
       "AI ændrer opgaver forskelligt på tværs af fag. Uddannelsesindsigts AI-robusthed er et crosswalk-/modelestimat baseret på opgaveeksponering og potentialet for menneske-AI-samarbejde — ikke en prognose for arbejdsløshed.",
@@ -120,14 +120,14 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
         ],
       },
       {
-        title: "Brug tre signaler sammen",
+        title: "Brug AI som et eksplicit tilvalg",
         paragraphs: [
-          "Et robust studievalg handler sjældent om ét tal. Matchværktøjet lader dig afveje AI-robusthed, jobmuligheder og lønpotentiale, mens adgangskvotienten behandles som observeret historisk optagelsesdata.",
+          "Et robust studievalg handler ikke om ét tal. Matchværktøjet viser alle uddannelser uden AI-sortering som standard. Når du selv aktiverer AI-perspektivet, afgrænses rangeringen til uddannelser med faktisk O*NET 31.0-understøttelse.",
         ],
         bullets: [
-          "AI-robusthed: modelestimat for opgavernes karakter.",
-          "Jobmuligheder: model-/registerafledt arbejdsmarkedsindikator.",
-          "Lønpotentiale: model-/registerafledt indikator, ikke individuel lønprognose.",
+          "Adgangskvotient: observeret historisk optagelsesdata.",
+          "AI-robusthed: afrundet modelestimat for opgavernes karakter.",
+          "Manglende modeldækning: vises som ikke tilgængeligt og påvirker ikke standardrangeringen.",
         ],
       },
       {
@@ -162,9 +162,9 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       },
     ],
     primaryCta: {
-      href: "/?wAi=90&wJob=70&wSal=60",
+      href: "/?ai=1",
       label: "Prøv et AI-fokuseret match",
-      description: "Åbn matchværktøjet med høj AI-prioritet og justér derefter vægtene.",
+      description: "Åbn matchværktøjet med AI-modelestimater slået til som et eksplicit valg.",
     },
     relatedLinks: [
       {
@@ -185,9 +185,9 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
     ],
     questions: [
       {
-        question: "Er en lav AI-robusthed det samme som dårlige jobmuligheder?",
+        question: "Er en lav AI-robusthed det samme som en dårlig uddannelse?",
         answer:
-          "Nej. AI-robusthed og jobmuligheder er forskellige indikatorer. Et fag kan have stor efterspørgsel og samtidig være i betydelig teknologisk omstilling.",
+          "Nej. Estimatet handler kun om opgavernes mulige møde med AI. Det siger ikke, om uddannelsen er værdifuld, passer til dig eller fører til et bestemt arbejdslivsudfald.",
       },
       {
         question: "Kan modellen forudsige, hvilke job der forsvinder?",
@@ -199,9 +199,9 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
   "saadan-sammenligner-du-uddannelser": {
     slug: "saadan-sammenligner-du-uddannelser",
     title: "Sådan sammenligner du uddannelser",
-    seoTitle: "Sammenlign uddannelser: Snit, job, løn og AI",
+    seoTitle: "Sammenlign uddannelser: Snit, indhold og AI",
     description:
-      "En praktisk guide til at sammenligne danske videregående uddannelser på adgangskvotient, fagligt indhold, jobmuligheder, lønpotentiale og AI-robusthed.",
+      "En praktisk guide til at sammenligne danske videregående uddannelser på adgangskvotient, fagligt indhold, studiested og et valgfrit AI-perspektiv.",
     badge: "Beslutningsguide i fem trin",
     intro:
       "En god sammenligning starter med dine egne kriterier og skelner mellem observerede optagelsestal og modelbaserede fremtidsindikatorer. Brug guiden som en enkel tjekliste før dit endelige valg.",
@@ -224,9 +224,9 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
         ],
       },
       {
-        title: "3. Brug indikatorerne som beslutningsstøtte",
+        title: "3. Brug AI-estimatet som et spørgsmål",
         paragraphs: [
-          "Job-, løn- og AI-scorer kan gøre forskelle synlige, men de kan ikke afgøre dit valg alene. Se efter den samlede profil og læs datakvaliteten, før du konkluderer noget ud fra få point i forskel.",
+          "AI-estimatet kan gøre mulige forskelle i opgavetyper synlige, men det kan ikke afgøre dit valg. Scoren vises i brede kategorier og afrundede trin, fordi små forskelle ikke er meningsfulde.",
         ],
         bullets: [
           "Store forskelle er mere informative end små afrundingsforskelle.",
@@ -267,12 +267,12 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       {
         question: "Hvilke tal bør jeg lægge mest vægt på?",
         answer:
-          "Det afhænger af dine mål. Brug adgangskvotienten til at forstå seneste optag, og brug job-, løn- og AI-indikatorerne som supplerende signaler sammen med fagligt indhold og trivsel.",
+          "Start med fagligt indhold, motivation, studieform og praktiske muligheder. Brug adgangskvotienten til at forstå seneste optag, og brug kun AI-estimatet som et supplerende perspektiv.",
       },
       {
-        question: "Er uddannelsen med den højeste samlede score altid bedst?",
+        question: "Er uddannelsen med den højeste AI-score altid bedst?",
         answer:
-          "Nej. Den samlede score afspejler valgte vægte og modellens datagrundlag. Den bedste uddannelse er den, der passer til dine faglige interesser, muligheder og prioriteter.",
+          "Nej. AI-estimatet beskriver kun én usikker dimension. Den bedste uddannelse er den, der passer til dine faglige interesser, muligheder og prioriteter.",
       },
     ],
   },

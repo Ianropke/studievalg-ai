@@ -23,5 +23,5 @@ export const DATA_STATUS = {
     mappedProgrammeShare: 0.4027,
   },
   methodologyReviewedAt: "2026-09-10",
-  provenanceCoverageLabel: "O*NET 31.0 anvendes for 569 af 1.413 uddannelser; 844 har fortsat en tydeligt markeret legacy-baseline",
+  provenanceCoverageLabel: "O*NET 31.0 anvendes for 569 af 1.413 uddannelser; 844 udelukkes fra AI-rangering",
 } as const;

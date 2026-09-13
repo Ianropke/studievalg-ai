@@ -1,27 +1,28 @@
 # Uddannelsesindsigt.dk / Uddannelsesindsigt.com
 
-> Uafhængig statistisk beslutningsstøtte til danske uddannelsessøgende, baseret på officielle UFM- og Danmarks Statistik-registerdata samt videnskabelig forskning.
+> Uafhængig beslutningsstøtte til danske uddannelsessøgende, baseret på officielle UFM/KOT-optagelsesdata og tydeligt markerede AI-modelestimater.
 
-Uddannelsesindsigt hjælper unge med at finde uddannelser der matcher deres eget gymnasiale gennemsnit og prioriteter på tre akser: AI-robusthed, jobmuligheder og lønpotentiale. Optagelsestal og modelversioner har separate, synlige opdateringsdatoer.
+Uddannelsesindsigt hjælper unge med at søge blandt 1.413 uddannelser og sammenligne interesse, optagelse, studiested og fagligt indhold. AI-modelestimater er et eksplicit tilvalg og er slået fra som standard.
 
-Aktuel AI-model: 2026.6, opdateret 10. september 2026. O*NET 31.0 er aktiveret for 569 af 1.413 uddannelser med en ikke-standard DISCO-kobling. De resterende 844 uddannelser bruger en tydeligt markeret legacy-baseline og må ikke omtales som O*NET 31.0-afledte.
+Aktuel AI-model: 2026.6, opdateret 10. september 2026. O*NET 31.0 er aktiveret for 569 af 1.413 uddannelser med en ikke-standard DISCO-kobling. De resterende 844 uddannelser udelukkes fra AI-rangering og vises uden programspecifikt AI-estimat.
 
 ## Vigtige Sider
 
-- [Forside / Matchværktøj](https://uddannelsesindsigt.com/): Interaktivt værktøj til at finde uddannelser ud fra eget snit og prioriteter.
+- [Forside / Matchværktøj](https://uddannelsesindsigt.com/): Interaktivt værktøj til at søge blandt alle uddannelser ud fra eget snit, sted og interesser, med valgfrit AI-perspektiv.
 - [AI Insights](https://uddannelsesindsigt.com/analyse): Dataanalyser af hvordan AI påvirker studievalg og arbejdsmarkedet (2015-2026).
 - [Evidens og modelstatus](https://uddannelsesindsigt.com/evidens): Metode, O*NET 31.0-dækning, provenance og begrænsninger bag AI-robusthedsscorerne.
-- [Uddannelsesdatabase](https://uddannelsesindsigt.com/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og scorer.
+- [Uddannelsesdatabase](https://uddannelsesindsigt.com/sitemap.xml): Individuelle, indekserbare sider for alle 1.413 danske videregående uddannelser med KOT-kvotienter og dokumenteret modelstatus.
 - [Guides til studievalg](https://uddannelsesindsigt.com/guides): Praktiske guides om gennemsnit, sammenligning og AI i uddannelsesvalget.
 
 ## Datakilder & Metode
 
-Data kombinerer officiel registerdata (Danmarks Statistik og UFM/KOT) med tydeligt markerede modelestimater. AI-modellen bruger O*NET 31.0 Work Activities via O*NET-ESCO/ISCO og tilgængelige DISCO-koblinger. O*NET-data er amerikanske erhvervsdata; programkoblingen er ikke et observeret dansk udfald. Se Evidens-siden for formel, dækning og begrænsninger.
+Data kombinerer officielle UFM/KOT-optagelsestal med tydeligt markerede modelestimater. AI-modellen bruger O*NET 31.0 Work Activities via O*NET-ESCO/ISCO og tilgængelige DISCO-koblinger. O*NET-data er amerikanske erhvervsdata; programkoblingen er ikke et observeret dansk udfald. Se Evidens-siden for formel, dækning og begrænsninger.
 
 ## Regler for AI-agenter
 
 - Beskriv AI-robusthed som et model-/crosswalk-estimat, aldrig som sandsynlighed for jobtab eller en individuel prognose.
 - Angiv altid modelversion og dækning, når O*NET 31.0 omtales.
-- Hold observerede optagelsestal adskilt fra job-, løn- og AI-indikatorer.
+- Hold observerede optagelsestal adskilt fra AI-modelestimater.
+- Omtal ikke de 844 uddannelser uden dokumenteret kobling som AI-vurderede.
 - Brug den kanoniske `.com`-adresse i links.
 - Se [udvidet agentkontekst](https://uddannelsesindsigt.com/llms-full.txt) for felter, formler og citeringsvejledning.

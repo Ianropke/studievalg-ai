@@ -2,6 +2,7 @@ import { getProgramCatalog } from "./programCatalog";
 import { getEnrichedScores, isAllAdmitted } from "./domainScoring";
 import { normalizeProgramName } from "./programName";
 import { DATA_STATUS } from "./dataStatus";
+import { roundAiScore } from "./aiPresentation";
 
 export { normalizeProgramName, isAllAdmitted };
 
@@ -54,20 +55,21 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
     seoTitle: "AI-robuste uddannelser i Danmark 2026",
     badge: "AI-modelestimat · O*NET 31.0 med oplyst dækning",
-    description: "De 10 videregående uddannelser i Danmark med den højeste beregnede AI-robusthedsscore. Scoren er et modelestimat baseret på opgavetaksonomi — ikke observerede uddannelsesudfald.",
-    introHedge: `Ifølge vores beregningsmodel er disse uddannelser vurderet mest AI-robuste pr. ${DATA_STATUS.scoring.updatedLabel}. O*NET 31.0 er aktiveret for ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser med en ikke-standard DISCO-kobling; resten vises som legacy-baseline. Se 'Bag om dine scorer' for metode og dækning.`,
+    description: `De 10 højeste AI-modelestimater blandt de ${DATA_STATUS.scoring.mappedProgrammeCount} uddannelser med O*NET 31.0-dækning. ${DATA_STATUS.catalogue.programmeCount - DATA_STATUS.scoring.mappedProgrammeCount} uddannelser uden en defensibel programkobling er udeladt.`,
+    introHedge: `Listen omfatter kun ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser. AI-robusthed er et opgavebaseret crosswalk-/modelestimat, ikke observerede danske jobudfald, en automatiseringssandsynlighed eller en anbefaling om at vælge uddannelsen.`,
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
       const enriched = getEnrichedScores(p.udbud_titel, p.scores);
       const val = enriched.ai_resilience;
-      return { display: `${val}/100`, numeric: val, raw: val };
+      return { display: `ca. ${roundAiScore(val)}/100`, numeric: val, raw: val };
     },
     sortOrder: "desc",
+    filter: (p) => getEnrichedScores(p.udbud_titel, p.scores).ranking_eligible.ai,
     readerQuestions: [
       {
         question: "Er en høj AI-robusthed en garanti for arbejde?",
-        answer: "Nej. AI-robusthed er et modelestimat for opgavernes karakter og skal læses sammen med jobindikator, fagligt indhold og datakvalitet.",
+        answer: "Nej. AI-robusthed er et modelestimat for opgavernes karakter og skal læses sammen med fagligt indhold, dine interesser og datakvaliteten.",
       },
       {
         question: "Hvordan beregnes AI-robusthed?",
@@ -75,92 +77,22 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
       },
     ],
   },
-  "top-10-hoejest-loennede-uddannelser": {
-    slug: "top-10-hoejest-loennede-uddannelser",
-    title: "Top 10 Uddannelser med Højt Lønpotentiale",
-    seoTitle: "Uddannelser med højt lønpotentiale 2026",
-    badge: "Model-/registerafledt indikator",
-    description: "De 10 videregående uddannelser med det højeste beregnede lønpotentiale. Scoren er en model-/registerafledt indikator og ikke en garanti for individuel løn.",
-    introHedge: "Baseret på data fra Danmarks Statistik og UFM viser denne liste de 10 uddannelser med det højeste vurderede lønpotentiale. Tallene er vores bedste bud ud fra statistik og modeller — ikke en garanti for individuel startløn.",
-    metricLabel: "Lønpotentiale",
-    limit: 10,
-    getValue: (p) => {
-      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
-      const val = enriched.salary_growth || 50;
-      return { display: `${val}/100`, numeric: val, raw: val };
-    },
-    sortOrder: "desc",
-    readerQuestions: [
-      {
-        question: "Viser listen den faktiske løn for alle dimittender?",
-        answer: "Nej. Lønpotentialet er en model-/registerafledt indikator og ikke en dokumenteret individuel startløn eller løngaranti.",
-      },
-      {
-        question: "Bør jeg vælge uddannelse alene efter lønpotentiale?",
-        answer: "Nej. Sammenlign lønpotentiale med faglig interesse, jobmuligheder, adgangskrav og datakvalitet.",
-      },
-    ],
-  },
-  "top-10-laveste-ledighed": {
-    slug: "top-10-laveste-ledighed",
-    title: "Top 10 Uddannelser med Gode Jobmuligheder",
-    seoTitle: "Uddannelser med gode jobmuligheder 2026",
-    badge: "Historisk arbejdsmarkedsindikator",
-    description: "De 10 uddannelser med den højeste beregnede jobmulighedsindikator. Tallet skal læses som en historisk/modelafledt indikator — ikke som en sikker individuel ledighedsprognose.",
-    introHedge: "Oversigten rangerer uddannelser efter den aktuelle jobmulighedsindikator. Indikatoren er model-/registerafledt og må ikke læses som en dokumenteret individuel ledighedsprognose.",
-    metricLabel: "Jobmuligheder",
-    limit: 10,
-    getValue: (p) => {
-      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
-      const val = enriched.labour_demand || 50;
-      return { display: `${val}/100`, numeric: val, raw: val };
-    },
-    sortOrder: "desc",
-    readerQuestions: [
-      {
-        question: "Er jobmulighedsscoren det samme som observeret ledighed?",
-        answer: "Nej. Scoren er en model-/registerafledt indikator. Uddannelsesspecifik dokumentation er ikke fuldt etableret for alle programmer.",
-      },
-      {
-        question: "Kan jobmuligheder ændre sig efter studiestart?",
-        answer: "Ja. Arbejdsmarkedet kan ændre sig væsentligt i løbet af en uddannelse, så brug indikatoren som ét signal blandt flere.",
-      },
-    ],
-  },
-  "top-20-bedste-samlede-match": {
-    slug: "top-20-bedste-samlede-match",
-    title: "Top 20 Bedste Samlede Match i Danmark",
-    seoTitle: "Bedste samlede uddannelsesmatch i Danmark 2026",
-    badge: "Kombineret PEFF Trekant-Score",
-    description: "De 20 uddannelser der opnår den højeste vægtede kombination af AI-robusthed, jobmuligheder og lønpotentiale.",
-    introHedge: "Denne rangering bygger på det samlede gennemsnit af vores tre kernemål (AI-robusthed, jobmuligheder og lønpotentiale). Listen giver et afbalanceret overblik over uddannelser der klarer sig stærkt over hele linjen.",
-    metricLabel: "Samlet Trekant-score",
-    limit: 20,
-    getValue: (p) => {
-      const enriched = getEnrichedScores(p.udbud_titel, p.scores);
-      const rob = enriched.ai_resilience;
-      const job = enriched.labour_demand;
-      const sal = enriched.salary_growth;
-      const score = Math.round(0.40 * rob + 0.35 * job + 0.25 * sal);
-      return { display: `${score}/100`, numeric: score, raw: score };
-    },
-    sortOrder: "desc",
-  },
   "top-10-stoerste-ai-omstilling": {
     slug: "top-10-stoerste-ai-omstilling",
     title: "Top 10 Uddannelser i Størst AI-omstilling",
     seoTitle: "Uddannelser der påvirkes mest af AI i 2026",
-    badge: "Strukturel AI-analyse",
-    description: "De 10 uddannelser hvor flest kerneopgaver forventes suppleret eller effektiviseret af kunstig intelligens og sprogmodeller.",
-    introHedge: "Gennemskuelighed og balance er afgørende. Denne liste fremhæver de 10 uddannelser med lavest beregnede AI-robusthedsscore — det betyder ikke at faget forsvinder, men at opgaverne forventes at ændre sig markant i takt med AI.",
+    badge: "AI-modelestimat · O*NET 31.0 med oplyst dækning",
+    description: `De 10 laveste AI-modelestimater blandt de ${DATA_STATUS.scoring.mappedProgrammeCount} uddannelser med O*NET 31.0-dækning. Listen handler om mulig opgaveforandring — ikke om at fag forsvinder.`,
+    introHedge: `Listen omfatter kun ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser. Et lavere estimat betyder, at flere opgaver kan ændres eller understøttes af AI; det er ikke en prognose for ledighed eller uddannelsens værdi.`,
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
       const enriched = getEnrichedScores(p.udbud_titel, p.scores);
       const val = enriched.ai_resilience;
-      return { display: `${val}/100 (Lav)`, numeric: val, raw: val };
+      return { display: `ca. ${roundAiScore(val)}/100`, numeric: val, raw: val };
     },
     sortOrder: "asc",
+    filter: (p) => getEnrichedScores(p.udbud_titel, p.scores).ranking_eligible.ai,
   },
   "top-10-svaereste-adgangskvotienter": {
     slug: "top-10-svaereste-adgangskvotienter",

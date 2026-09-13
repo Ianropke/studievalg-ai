@@ -1,6 +1,6 @@
 /**
  * Playwright E2E Integration Test Suite
- * End-to-End User Journeys: Slider Interactions, Search, and Navigation
+ * End-to-End User Journeys: Search, explicit AI opt-in, and navigation
  */
 
 import { test, expect } from '@playwright/test';
@@ -28,37 +28,36 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(firstCardTitle).toContainText('Medicin');
   });
 
-  test('E2E-03: Vægtsliderne ændrer rangeringen live og viser alle tre dimensioner', async ({ page }) => {
-    const firstCard = page.locator('[data-testid="program-card"]').first();
+  test('E2E-03: AI er fravalgt som standard og kan tilvælges eksplicit', async ({ page }) => {
     const firstThreeIds = () => page.locator('[data-testid="program-card"]').evaluateAll((cards) =>
       cards.slice(0, 3).map((card) => card.getAttribute('data-program-id'))
     );
 
     const initialIds = await firstThreeIds();
-    await page.locator('#ai-weight-slider').fill('0');
-    await page.locator('#job-weight-slider').fill('0');
-    await page.locator('#salary-weight-slider').fill('100');
-
-    await expect(page.getByTestId('weight-summary')).toContainText('AI 0% · Job 0% · Løn 100%');
+    await expect(page.getByTestId('include-ai-models')).not.toBeChecked();
+    await expect(page.getByTestId('ai-toggle-status')).toContainText('alle 1.413 uddannelser');
+    await expect(page.getByTestId('ai-model-indicator')).toHaveCount(0);
+    await page.getByTestId('include-ai-models').check();
+    await expect(page.getByTestId('ai-toggle-status')).toContainText('569 af 1.413 uddannelser dækket');
     await expect.poll(firstThreeIds).not.toEqual(initialIds);
-
-    // Verificer at progress barer for AI-robusthed, Jobmuligheder og Lønpotentiale eksisterer på kort 1
-    await expect(firstCard.getByTestId('metric-ai')).toBeVisible();
-    await expect(firstCard.getByTestId('metric-job')).toBeVisible();
-    await expect(firstCard.getByTestId('metric-salary')).toBeVisible();
-    await expect(firstCard.locator('text=Trekant-profil')).toBeVisible();
+    await expect(page.locator('[data-testid="program-card"]').first().getByTestId('ai-model-indicator')).toBeVisible();
   });
 
-  test('E2E-04: Prioritering og minimumskrav kan skelnes tydeligt i interfacet', async ({ page }) => {
-    await expect(page.getByTestId('preference-help')).toContainText('Sliderne bestemmer');
-    await page.locator('#preference-mode').selectOption('requirements');
-    await expect(page.getByTestId('preference-help')).toContainText('minimumsniveauer');
-    await expect(page.getByTestId('weight-summary')).toContainText('Minimumskrav');
-    await expect(page.locator('#requirement-match-mode')).toBeVisible();
+  test('E2E-04: Job- og lønkontroller er fjernet fra beslutningsoplevelsen', async ({ page }) => {
+    await expect(page.locator('#job-weight-slider')).toHaveCount(0);
+    await expect(page.locator('#salary-weight-slider')).toHaveCount(0);
+    await expect(page.locator('#preference-mode')).toHaveCount(0);
+    await expect(page.getByText('Jobmuligheder', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Lønpotentiale', { exact: true })).toHaveCount(0);
+  });
 
-    await page.locator('#requirement-match-mode').selectOption('any');
-    await expect(page.getByTestId('weight-summary')).toContainText('mindst ét aktivt krav');
-    await expect(page.locator('#ai-weight-slider')).toHaveAttribute('aria-label', /minimum/);
+  test('E2E-04b: AI-tilvalget kan betjenes med tastaturet', async ({ page }) => {
+    const toggle = page.getByTestId('include-ai-models');
+    await toggle.focus();
+    await expect(toggle).toBeFocused();
+    await page.keyboard.press('Space');
+    await expect(toggle).toBeChecked();
+    await expect(page.getByTestId('ai-toggle-status')).toContainText('569 af 1.413 uddannelser dækket');
   });
 
   test('E2E-05: Søgning opdaterer resultater uden manuel genindlæsning', async ({ page }) => {
@@ -69,26 +68,21 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.getByText(/matchede uddannelser/)).toBeVisible();
   });
 
-  test('E2E-06: Navigering til AI Insights og PEFF Evidens undersider', async ({ page }) => {
-    const navigation = page.getByRole('navigation', { name: 'Hovednavigation' });
-    await navigation.getByRole('link', { name: 'AI Insights' }).click();
+  test('E2E-06: Navigering til AI Insights og Evidens undersider', async ({ page }) => {
+    await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'AI Insights' }).click();
     await expect(page).toHaveURL(/.*analyse/);
     await expect(page.locator('h1')).toContainText('AI Insights');
 
-    await navigation.getByRole('link', { name: 'Evidens' }).click();
+    await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'Evidens' }).click();
     await expect(page).toHaveURL(/.*evidens/);
     await expect(page.locator('h1')).toContainText('Bag om dine scorer');
   });
 
-  test('E2E-07: Et delt match gendanner snit, vægte, kravlogik, uddannelsessted og søgning', async ({ page }) => {
-    await page.goto('/?gpa=8.2&wAi=90&wJob=40&wSal=20&mode=requirements&match=any&u=au&q=medicin');
+  test('E2E-07: Et delt link gendanner snit, AI-tilvalg, uddannelsessted og søgning', async ({ page }) => {
+    await page.goto('/?gpa=8.2&ai=1&u=au&q=medicin');
 
     await expect(page.locator('#gpa-slider')).toHaveValue('8.2');
-    await expect(page.locator('#ai-weight-slider')).toHaveValue('90');
-    await expect(page.locator('#job-weight-slider')).toHaveValue('40');
-    await expect(page.locator('#salary-weight-slider')).toHaveValue('20');
-    await expect(page.locator('#preference-mode')).toHaveValue('requirements');
-    await expect(page.locator('#requirement-match-mode')).toHaveValue('any');
+    await expect(page.getByTestId('include-ai-models')).toBeChecked();
     await expect(page.locator('#university-select')).toHaveValue('au');
     await expect(page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' })).toHaveValue('medicin');
   });
@@ -99,8 +93,8 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page).toHaveURL(/.*guides$/);
     await expect(page.locator('h1')).toContainText('Guides til at vælge uddannelse');
 
-    await page.getByRole('link', { name: /Læs guiden/ }).first().click();
-    await expect(page).toHaveURL(/.*guides\/hvad-kan-jeg-laese-med-mit-snit/);
+    await page.locator('a[href="/guides/hvad-kan-jeg-laese-med-mit-snit"]').click();
+    await expect(page).toHaveURL(/.*guides\/hvad-kan-jeg-laese-med-mit-snit/, { timeout: 15_000 });
     await expect(page.locator('h1')).toContainText('Hvad kan jeg læse med mit snit');
   });
 

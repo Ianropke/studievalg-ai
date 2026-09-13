@@ -26,9 +26,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://uddannelsesindsigt.com"),
-  title: "Find uddannelse efter snit, job og AI | Uddannelsesindsigt",
+  title: "Find uddannelse efter snit og AI | Uddannelsesindsigt",
   description:
-    "Sammenlign 1.413 danske videregående uddannelser efter adgangskvotient, jobmuligheder, lønpotentiale og tydeligt markerede AI-modelestimater.",
+    "Søg blandt 1.413 danske videregående uddannelser med officielle optagelsestal og et valgfrit, tydeligt markeret AI-perspektiv.",
   keywords: [
     "uddannelsesindsigt",
     "studievalg",
@@ -38,15 +38,15 @@ export const metadata: Metadata = {
     "AI robuste uddannelser",
     "KOT optagelse 2026",
     "grænsekvotienter",
-    "lønniveau",
-    "jobmuligheder",
+    "uddannelsessøgning",
+    "videregående uddannelser",
   ],
   authors: [{ name: "Uddannelsesindsigt Danmark" }],
   creator: "Uddannelsesindsigt",
   publisher: "Uddannelsesindsigt",
   openGraph: {
     title: "Hvilken uddannelse passer til dit snit og dine prioriteter?",
-    description: "Sammenlign 1.413 danske videregående uddannelser på AI-robusthed, jobmuligheder og lønpotentiale med dit eget snit.",
+    description: "Søg blandt 1.413 danske videregående uddannelser med optagelsestal og et valgfrit AI-perspektiv.",
     url: "https://uddannelsesindsigt.com",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Find uddannelse efter snit, job og AI",
+    title: "Find uddannelse efter snit og AI",
     description: "Sammenlign danske uddannelser med officielle optagelsestal og tydeligt markerede modelestimater.",
     images: [DEFAULT_SOCIAL_IMAGE_URL],
   },

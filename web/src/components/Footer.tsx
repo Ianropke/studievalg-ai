@@ -18,10 +18,10 @@ export function Footer() {
               <span className="font-bold text-sm text-[#12172B] font-display">Uddannelsesindsigt</span>
             </div>
             <p className="leading-relaxed">
-              Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Vi viser dig, hvordan kunstig intelligens forventes at påvirke forskellige fag og job i fremtiden, så du kan tage det med i dit valg.
+              Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Du kan søge i hele kataloget og selv vælge et modelbaseret perspektiv på, hvordan AI kan ændre opgaver i forskellige fag.
             </p>
             <p className="leading-relaxed">
-              Denne platform vurderer ikke mennesker eller deres fremtidige jobmuligheder. Den analyserer udelukkende statistiske mønstre på uddannelses- og arbejdsmarkedsniveau baseret på offentlig forskning og tilgængelige data. Alle beregninger udføres deterministisk ud fra dokumenterede modeller og datakilder.
+              Platformen vurderer ikke mennesker eller deres fremtid. AI-perspektivet er et opgavebaseret modelestimat for de uddannelser, der har en dokumenteret modelkobling. Det er slået fra som standard og bygger på en offentlig, deterministisk metode.
             </p>
             <p className="leading-relaxed text-[#667085]">
               Tallene her er vores bedste bud, baseret på statistik og modeller — ikke en garanti for, hvad der kommer til at ske for dig, dit optag eller din karriere. Officiel ansøgning sker altid via Optagelse.dk.

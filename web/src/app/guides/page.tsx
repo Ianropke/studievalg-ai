@@ -6,9 +6,9 @@ import { LIST_CONFIGS } from "@/lib/lists";
 import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = {
-  title: "Guides til studievalg 2026 | Snit, job og AI",
+  title: "Guides til studievalg 2026 | Snit, indhold og AI",
   description:
-    "Praktiske guides til uddannelsesvalg: find uddannelser med dit snit, forstå AI-robusthed, sammenlign job- og lønindikatorer og brug officielle optagelsesdata.",
+    "Praktiske guides til uddannelsesvalg: find uddannelser med dit snit, sammenlign fagligt indhold og forstå tydeligt markerede AI-modelestimater.",
   alternates: {
     canonical: "https://uddannelsesindsigt.com/guides",
   },
@@ -28,7 +28,7 @@ export default function GuidesPage() {
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B]">
       <Header />
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-6 py-10 space-y-10">
         <nav aria-label="Brødkrummer" className="flex items-center gap-2 text-xs text-[#545D71]">
           <Link href="/" className="hover:underline">Forside</Link>
           <span>/</span>

@@ -23,7 +23,7 @@ export default function EvidensPage() {
         "name": "Hvordan beregnes AI-robusthedsscorerne?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `AI-robusthed er et crosswalk-/modelestimat: 75% af indekset kommer fra lavere automatiseringsrisiko og 25% fra augmentationspotentiale. O*NET 31.0 er aktiv for ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser; resten bruger en markeret legacy-baseline.`
+          "text": `AI-robusthed er et crosswalk-/modelestimat: 75% af indekset kommer fra lavere automatiseringsrisiko og 25% fra augmentationspotentiale. O*NET 31.0 er aktiv for ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser; resten udelukkes fra AI-rangering.`
         }
       },
       {
@@ -68,7 +68,7 @@ export default function EvidensPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetJsonLd) }} />
       <Header />
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-6 py-10 space-y-10">
         <div className="space-y-3 text-center max-w-3xl mx-auto">
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/20">Sådan regner vi</span>
           <h1 className="text-4xl font-bold tracking-tight text-[#12172B] font-display">Bag om dine scorer</h1>
@@ -89,10 +89,10 @@ export default function EvidensPage() {
             </div>
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#2563EB] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 2: MODEL- OG ARBEJDSMARKEDSDATA</h3>
+                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 2: OPGAVE- OG MODELDATA</h3>
                 <span className="font-mono-data text-[10px] text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded font-bold border border-[#2563EB]/20">Modelleret</span>
               </div>
-              <p className="text-xs text-[#545D71] leading-relaxed">Arbejdsmarkeds- og opgavedata anvendes til at estimere efterspørgsel, lønpotentiale og AI-robusthed. Disse mål er model- eller registerafledte indikatorer og skal læses som beslutningsstøtte — ikke som garantier for den enkelte.</p>
+              <p className="text-xs text-[#545D71] leading-relaxed">O*NET-opgavedata og dokumenterede crosswalks bruges til at estimere AI-robusthed. Estimatet er et valgfrit perspektiv på opgavernes mulige forandring — ikke en prognose for uddannelsens værdi eller den enkeltes fremtid.</p>
             </div>
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#7C3AED] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
@@ -116,7 +116,7 @@ export default function EvidensPage() {
           <p className="text-xs text-[#545D71] leading-relaxed">Kataloget og kilderegistret publiceres som versionsstyrede datafiler. Kildeantallet ovenfor læses direkte fra det genererede register, så siden ikke viser et separat, håndskrevet tal.</p>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-4 text-xs leading-relaxed text-[#92400E]">
             <p className="font-bold text-[#78350F]">Vigtig dækningsstatus</p>
-            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede referencer. AI-modeldækning: <strong>{DATA_STATUS.provenanceCoverageLabel}</strong>. Uddannelsesspecifik dokumentation for job- og lønindikatorerne er fortsat ikke fuldt etableret. En reference i registret tæller derfor ikke som dokumentation for alle uddannelser, og indikatorerne må ikke læses som sikre udfald.</p>
+            <p className="mt-1">Kilderegistret har {dataStats.sources} registrerede referencer. AI-modeldækning: <strong>{DATA_STATUS.scoring.mappedProgrammeCount} af {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser</strong>. De øvrige {DATA_STATUS.scoring.baselineProgrammeCount} udelukkes fra AI-rangering og vises uden programspecifikt AI-estimat. En registreret reference tæller ikke automatisk som evidens for hvert uddannelsesudbud.</p>
           </div>
         </section>
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-5">
@@ -142,7 +142,7 @@ export default function EvidensPage() {
           <h2 className="text-xl font-bold text-[#12172B] font-display">Ofte stillede spørgsmål</h2>
           <div className="space-y-3 text-sm text-[#545D71]">
             <p><strong>Hvordan beregnes AI-robusthedsscorerne?</strong> AI-robusthed beregnes efter den fælles formel: 75% × (1 − automation_risk) + 25% × augmentation_potential, med værdier begrænset til 10–100. Fra modelversion 2026.6 bygger de migrerede værdier på O*NET 31.0-aktivitetsratings, aggregeret via O*NET-ESCO/ISCO og den tilgængelige DISCO-kobling. Det er stadig et crosswalk-/modelestimat — ikke en prognose for arbejdsløshed eller jobmuligheder.</p>
-            <p><strong>Hvor stor er O*NET 31.0-dækningen?</strong> {DATA_STATUS.scoring.mappedProgrammeCount} af {DATA_STATUS.catalogue.programmeCount} uddannelser ({Math.round(DATA_STATUS.scoring.mappedProgrammeShare * 100)}%) har en ikke-standard DISCO-kobling og anvender den nye model. De resterende {DATA_STATUS.scoring.baselineProgrammeCount} er eksplicit markeret som legacy-baseline og må ikke læses som O*NET 31.0-afledte.</p>
+            <p><strong>Hvor stor er O*NET 31.0-dækningen?</strong> {DATA_STATUS.scoring.mappedProgrammeCount} af {DATA_STATUS.catalogue.programmeCount} uddannelser ({Math.round(DATA_STATUS.scoring.mappedProgrammeShare * 100)}%) har en ikke-standard DISCO-kobling og kan indgå i AI-rangering. De resterende {DATA_STATUS.scoring.baselineProgrammeCount} vises uden programspecifikt AI-estimat.</p>
             <p><strong>Hvor kommer dataene fra?</strong> Platformen anvender blandt andet UFM, Danmarks Statistik og internationale arbejdsmarkeds- og opgavedatasæt. O*NET 31.0-råfiler, source hashes, transformationsformel og migrationsrapport ligger i det offentlige repository.</p>
           </div>
         </section>

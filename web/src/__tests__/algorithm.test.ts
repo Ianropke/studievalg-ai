@@ -1,14 +1,10 @@
 import { getEnrichedScores, isAllAdmitted } from "../lib/domainScoring";
-import { evaluatePreference } from "../lib/preferenceMatching";
 import { buildMatchSharePath, parseMatchShareParams } from "../lib/shareMatch";
 import { AI_RESEARCH_INSIGHTS } from "../lib/aiResearch";
+import { aiBand, roundAiScore } from "../lib/aiPresentation";
+import initialProgramsCatalog from "../../public/data/all_programs_catalog.json";
 import { z } from "zod";
 import assert from "node:assert/strict";
-
-function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
-  const totalWeight = Math.max(1, wAi + wJob + wSal);
-  return (robust * wAi + job * wJob + sal * wSal) / totalWeight;
-}
 
 function checkKvote1Adgang(gpa: number, kvotient: number | null): { meetsGpa: boolean; isKvote2Recommended: boolean } {
   if (kvotient === null) {
@@ -42,12 +38,15 @@ function normalizeSearchText(text: string): string {
 
 // Simple test runner execution for CI/CD pipeline
 export function runUnitTests() {
-  console.log("🧪 Kører Unit Tests for Vægtningsalgoritme & Søgning...");
+  console.log("🧪 Kører Unit Tests for uddannelsessøgning, optagelse og AI-kontrakt...");
 
-  // Test 1: Vægtningsformel
-  const score1 = computeCompositeScore(88, 95, 78, 80, 70, 60);
-  assert.ok(Math.abs(score1 - 87.42) < 0.1, `Test 1 Fejl: Forventet ~87.42, fik ${score1}`);
-  console.log("  ✅ TEST-01: Vægtningsberegning korrekt (Score: " + score1.toFixed(2) + ")");
+  // Test 1: Offentlig AI-præsentation bruger brede bånd og afrunding i trin på fem.
+  assert.equal(aiBand(84), "Højere");
+  assert.equal(aiBand(64), "Mellem");
+  assert.equal(aiBand(42), "Lavere");
+  assert.equal(roundAiScore(84), 85);
+  assert.equal(roundAiScore(82), 80);
+  console.log("  ✅ TEST-01: AI-værdier vises i brede bånd og afrundede fempointstrin");
 
   // Test 2: Kvote 1 Opfyldelse
   const kvoteCheck1 = checkKvote1Adgang(9.5, 7.3);
@@ -87,34 +86,19 @@ export function runUnitTests() {
   assert.ok(highGpaState.meets === true && highGpaState.score === 95, "Test 6 Fejl: GPA 10.5 bør opfylde 10.2 krav og få +15 bonus");
   console.log("  ✅ TEST-06: Dynamisk GPA Slider-tjek godkendt (Karakter-ændring opdaterer automatisk Kvote-status og rangering)");
 
-  // Test 7: Realtids Vægtnings-Slider Sortering (AI vs Job vs Løn)
-  const progA = { title: "ProgA", robust: 90, job: 40, sal: 40 };
-  const progB = { title: "ProgB", robust: 40, job: 90, sal: 40 };
-  
-  const scoreA_AiFocus = computeCompositeScore(progA.robust, progA.job, progA.sal, 100, 0, 0);
-  const scoreB_AiFocus = computeCompositeScore(progB.robust, progB.job, progB.sal, 100, 0, 0);
-  assert.ok(scoreA_AiFocus > scoreB_AiFocus, "Test 7 Fejl: ProgA bør være #1 ved AI=100%, Job=0%");
-
-  const scoreA_JobFocus = computeCompositeScore(progA.robust, progA.job, progA.sal, 0, 100, 0);
-  const scoreB_JobFocus = computeCompositeScore(progB.robust, progB.job, progB.sal, 0, 100, 0);
-  assert.ok(scoreB_JobFocus > scoreA_JobFocus, "Test 7 Fejl: ProgB bør være #1 ved AI=0%, Job=100%");
-  // Test 23: Minimumskrav kræver som standard, at alle aktive kriterier er opfyldt.
-  const allRequirements = evaluatePreference(
-    { ai: 90, job: 65, salary: 80 },
-    { mode: "requirements", requirementMatchMode: "all", ai: 80, job: 70, salary: 60 }
-  );
-  assert.ok(allRequirements.meetsRequirements === false, "Test 23 Fejl: Alle aktive minimumskrav skal være opfyldt i all-tilstand");
-  assert.ok(allRequirements.requirementsMet === 2 && allRequirements.activeRequirementCount === 3, "Test 23 Fejl: Kravoptællingen er forkert");
-  console.log("  ✅ TEST-23: Minimumskrav med all-logik godkendt (2 af 3 krav opfyldt giver intet match)");
-
-  // Test 24: Mindst ét krav kan vælges som alternativ kravlogik.
-  const anyRequirements = evaluatePreference(
-    { ai: 90, job: 65, salary: 80 },
-    { mode: "requirements", requirementMatchMode: "any", ai: 80, job: 70, salary: 60 }
-  );
-  assert.ok(anyRequirements.meetsRequirements === true, "Test 24 Fejl: Ét opfyldt minimumskrav skal give match i any-tilstand");
-  assert.ok(Math.abs(anyRequirements.composite - 78.33) < 0.1, `Test 24 Fejl: Kravtilstandens profilgennemsnit er forkert: ${anyRequirements.composite}`);
-  console.log("  ✅ TEST-24: Mindst ét krav-logik godkendt (2 af 3 krav opfyldt giver match)");
+  // Test 7: Kun programmer med eksplicit O*NET-metadata er AI-egnede.
+  const mapped = getEnrichedScores("Datalogi", {
+    automation_risk: 36,
+    augmentation_potential: 81,
+    ai_dataset_version: "O*NET 31.0",
+    ai_model_status: "CROSSWALK_OR_MODEL",
+    ai_mapping_confidence: "LOW",
+    ai_is_baseline_estimate: false,
+  });
+  const unmapped = getEnrichedScores("Ukendt uddannelse");
+  assert.equal(mapped.ranking_eligible.ai, true);
+  assert.equal(unmapped.ranking_eligible.ai, false);
+  console.log("  ✅ TEST-07: AI-rangering kræver eksplicit O*NET-understøttelse");
 
   // Test 8: SSG Slug Generering for alle 1.413 uddannelser
   const testSample = { kot_nr: "10140", udbud_titel: "Veterinærmedicin", institution: "Københavns Universitet", by: "Frederiksberg C" };
@@ -123,25 +107,21 @@ export function runUnitTests() {
   assert.ok(sampleSlug === "10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c", `Test 8 Fejl: Forventede 10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c, fik: ${sampleSlug}`);
   console.log("  ✅ TEST-08: SSG Slug-generering godkendt (Unikke URL-slugs genereres og verificeres for alle 1.413 uddannelser)");
 
-  // Test 9: v2.6 Top 10/20 Listekonfigurationer & Sorteringsvalidering
+  // Test 9: Den offentlige listeflade er reduceret til AI- og optagelseslister.
   const listSlugs = [
     "top-10-mest-ai-robuste-uddannelser",
-    "top-10-hoejest-loennede-uddannelser",
-    "top-10-laveste-ledighed",
-    "top-20-bedste-samlede-match",
     "top-10-stoerste-ai-omstilling",
     "top-10-svaereste-adgangskvotienter",
     "top-10-letteste-adgangskvotienter"
   ];
-  assert.ok(listSlugs.length === 7, "Test 9 Fejl: Der skal være nøjagtig 7 liste-ruter i v2.6");
-  console.log("  ✅ TEST-09: v2.6 Top 10/20 Listekonfigurationer godkendt (7 statiske ruter verificeret)");
+  assert.equal(listSlugs.length, 4);
+  assert.ok(!listSlugs.some((slug) => slug.includes("loen") || slug.includes("ledighed") || slug.includes("samlede-match")));
+  console.log("  ✅ TEST-09: Offentlige job-, løn- og samlet-scorelister er fjernet");
 
-  // Test 10: v2.6 Side-om-Side Sammenligningsmatrix & Multi-polygon Delta
-  const prog1 = { robust: 92, job: 85, sal: 80 };
-  const prog2 = { robust: 78, job: 90, sal: 75 };
-  const deltaRob = prog1.robust - prog2.robust;
-  assert.ok(deltaRob === 14, `Test 10 Fejl: Delta-beregning bør være 14, fik ${deltaRob}`);
-  console.log("  ✅ TEST-10: v2.6 Side-om-side Sammenligningsmatrix godkendt (Delta-beregning: +14% AI-robusthed)");
+  // Test 10: Små modeludsving præsenteres ikke som falsk præcision.
+  assert.equal(roundAiScore(81), roundAiScore(82));
+  assert.equal(aiBand(81), aiBand(82));
+  console.log("  ✅ TEST-10: Små modeludsving kollapser til samme offentlige præsentation");
 
   // Test 11: Defensiv Type-Normalisering af Raw Number Kvotienter
   const numKvotient: unknown = 10.2;
@@ -248,29 +228,35 @@ export function runUnitTests() {
   assert.ok(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
   console.log("  ✅ TEST-22: Adgangslisten filtrerer korrekt på 'Alle optaget'");
 
-  // Test 25: Delbare match-links bevarer alle brugerens aktive valg.
+  // Test 23: Den publicerede katalogdækning er den dokumenterede 569/1.413.
+  const catalogue = initialProgramsCatalog as Array<{ udbud_titel: string; scores?: Parameters<typeof getEnrichedScores>[1] }>;
+  const mappedCount = catalogue.filter((program) => getEnrichedScores(program.udbud_titel, program.scores).ranking_eligible.ai).length;
+  assert.equal(catalogue.length, 1413);
+  assert.equal(mappedCount, 569);
+  console.log("  ✅ TEST-23: AI-dækning verificeret til 569 af 1.413 programmer");
+
+  // Test 24: Fravær af AI-parameter betyder, at AI ikke er tilvalgt.
+  const defaultShare = parseMatchShareParams("?gpa=8.0&q=medicin");
+  assert.equal(defaultShare.includeAiModels, undefined);
+  console.log("  ✅ TEST-24: AI er fravalgt som standard i delte og nye søgninger");
+
+  // Test 25: Delbare søgelinks bevarer brugerens aktive, evidensbærende valg.
   const sharePath = buildMatchSharePath({
     gpa: 8.2,
-    ai: 90,
-    job: 40,
-    salary: 20,
-    mode: "requirements",
-    requirementMatchMode: "any",
+    includeAiModels: true,
     university: "au",
     query: "medicin",
   });
   const parsedShare = parseMatchShareParams(sharePath.split("?")[1] || "");
   assert.ok(parsedShare.gpa === 8.2, `Test 25 Fejl: Delingslink mistede snit (${parsedShare.gpa})`);
-  assert.ok(parsedShare.ai === 90 && parsedShare.job === 40 && parsedShare.salary === 20, "Test 25 Fejl: Delingslink mistede vægte");
-  assert.ok(parsedShare.mode === "requirements" && parsedShare.requirementMatchMode === "any", "Test 25 Fejl: Delingslink mistede kravlogik");
+  assert.ok(parsedShare.includeAiModels === true, "Test 25 Fejl: Delingslink mistede aktivt AI-tilvalg");
   assert.ok(parsedShare.university === "au" && parsedShare.query === "medicin", "Test 25 Fejl: Delingslink mistede uddannelsessted eller søgning");
-  console.log("  ✅ TEST-25: Delbart match-link bevarer snit, vægte, kravlogik, sted og søgning");
+  console.log("  ✅ TEST-25: Delbart søgelink bevarer snit, AI-tilvalg, sted og søgning");
 
-  // Test 26: Manipulerede URL-værdier begrænses til sliderkontrakten.
-  const boundedShare = parseMatchShareParams("?gpa=99&wAi=-20&wJob=500&wSal=ikke-et-tal&u=ukendt");
+  // Test 26: Manipulerede URL-værdier begrænses til den nye, enkle kontrakt.
+  const boundedShare = parseMatchShareParams("?gpa=99&ai=maybe&u=ukendt");
   assert.ok(boundedShare.gpa === 12, `Test 26 Fejl: GPA bør begrænses til 12, fik ${boundedShare.gpa}`);
-  assert.ok(boundedShare.ai === 0 && boundedShare.job === 100, "Test 26 Fejl: Vægte bør begrænses til 0–100");
-  assert.ok(boundedShare.salary === undefined && boundedShare.university === undefined, "Test 26 Fejl: Ugyldige værdier bør ignoreres");
+  assert.ok(boundedShare.includeAiModels === undefined && boundedShare.university === undefined, "Test 26 Fejl: Ugyldige værdier bør ignoreres");
   console.log("  ✅ TEST-26: Delingsparametre valideres og begrænses sikkert");
 
   // Test 27: Forskningskort har eksplicit kilde, geografi og begrænsning.

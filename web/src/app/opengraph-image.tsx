@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Uddannelsesindsigt — find uddannelse efter snit, job og AI";
+export const alt = "Uddannelsesindsigt — find uddannelse efter snit og AI";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -44,7 +44,7 @@ export default function OpenGraphImage() {
 
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 940 }}>
           <span style={{ fontSize: 66, lineHeight: 1.05, fontWeight: 800, letterSpacing: -2 }}>
-            Find uddannelse efter snit, job og AI
+            Find uddannelse efter snit og AI
           </span>
           <span style={{ marginTop: 26, fontSize: 25, lineHeight: 1.4, color: "#E6EEF7" }}>
             Sammenlign 1.413 danske videregående uddannelser med officielle optagelsestal og tydeligt markerede modelestimater.
@@ -52,7 +52,7 @@ export default function OpenGraphImage() {
         </div>
 
         <div style={{ display: "flex", gap: 14, fontSize: 18, fontWeight: 700 }}>
-          {['Adgangskvotient', 'Jobmuligheder', 'Lønpotentiale', 'AI-robusthed'].map((label) => (
+          {['1.413 uddannelser', 'Adgangskvotient', 'Fagligt indhold', 'Valgfrit AI-perspektiv'].map((label) => (
             <span key={label} style={{ padding: "10px 16px", borderRadius: 999, background: "rgba(255,255,255,0.14)" }}>
               {label}
             </span>

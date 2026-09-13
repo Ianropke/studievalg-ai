@@ -68,7 +68,7 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-6 py-10 space-y-8">
         <nav className="flex items-center gap-2 text-xs text-[#545D71]" aria-label="Brødkrummer">
           <Link href="/" className="hover:underline">
             Forside
@@ -87,17 +87,17 @@ export default function AboutPage() {
           <p className="max-w-2xl text-base leading-relaxed text-[#545D71]">
             Uddannelsesindsigt er et uafhængigt beslutningsstøtteværktøj, der
             hjælper kommende studerende med at sammenligne danske videregående
-            uddannelser på optagelse, arbejdsmarked og AI-relaterede indikatorer.
+            uddannelser på optagelse, fagligt indhold og et valgfrit AI-perspektiv.
           </p>
         </header>
 
         <section className="space-y-3">
           <h2 className="text-xl font-bold">Hvad bygger siden på?</h2>
           <p className="leading-relaxed text-[#545D71]">
-            Optagelsesoplysninger kommer fra offentlige UFM/KOT-data. Arbejdsmarkeds-
-            og lønindikatorer bygger på register- og modelafledte data, mens
+            Optagelsesoplysninger kommer fra offentlige UFM/KOT-data.
             AI-robusthed er et crosswalk-estimat baseret på opgaveeksponering og
-            augmentationspotentiale.
+            augmentationspotentiale. Estimatet er slået fra som standard og er kun
+            tilgængeligt for uddannelser med O*NET 31.0-understøttelse.
           </p>
           <p className="leading-relaxed text-[#545D71]">
             Se den fulde forklaring på{" "}
@@ -112,7 +112,7 @@ export default function AboutPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-bold">Sådan skal tallene læses</h2>
           <ul className="list-disc space-y-2 pl-5 leading-relaxed text-[#545D71]">
-            <li>En score er en indikator og ikke en garanti for optagelse, job eller løn.</li>
+            <li>En score er en indikator og ikke en garanti for optagelse eller din fremtid.</li>
             <li>Modelestimater må ikke læses som observerede udfald for den enkelte studerende.</li>
             <li>Optagelsesdata ændrer sig fra år til år og bør kontrolleres hos de officielle kilder.</li>
             <li>Personlig studievejledning er stadig vigtig ved konkrete uddannelsesvalg.</li>

@@ -67,7 +67,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Header />
 
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-6 py-10 space-y-8">
         <nav aria-label="Brødkrummer" className="flex flex-wrap items-center gap-2 text-xs text-[#545D71]">
           <Link href="/" className="hover:underline">Forside</Link>
           <span>/</span>

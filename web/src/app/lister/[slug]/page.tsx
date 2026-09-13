@@ -1,12 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { LIST_CONFIGS, getListData } from "@/lib/lists";
 import { createProgramSlug } from "@/lib/slugs";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { DATA_STATUS } from "@/lib/dataStatus";
+import { roundAiScore } from "@/lib/aiPresentation";
 
 export async function generateStaticParams() {
   return Object.keys(LIST_CONFIGS).map((slug) => ({
@@ -16,6 +17,9 @@ export async function generateStaticParams() {
 
 export default async function ListPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (["top-10-hoejest-loennede-uddannelser", "top-10-laveste-ledighed", "top-20-bedste-samlede-match"].includes(slug)) {
+    redirect("/evidens");
+  }
   const listData = getListData(slug);
 
   if (!listData) {
@@ -73,7 +77,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
       <Header />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-10 space-y-8">
+      <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-6 py-10 space-y-8">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-[#545D71]">
           <Link href="/" className="hover:underline">Forside</Link>
@@ -112,6 +116,11 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
           <p className="text-xs text-[#12172B] leading-relaxed">
             {config.introHedge}
           </p>
+          {slug.includes("ai-") && (
+            <p className="pt-2 text-xs font-semibold text-[#1D4ED8]" data-testid="ai-list-coverage">
+              Dækning: {DATA_STATUS.scoring.mappedProgrammeCount.toLocaleString("da-DK")} af {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser. Uddannelser uden O*NET 31.0-programkobling indgår ikke i rangeringen.
+            </p>
+          )}
         </div>
 
         {/* Numbered List of Programs */}
@@ -151,10 +160,9 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
 
                     <div className="flex items-center gap-3 text-xs text-[#545D71] pt-1">
                       <span>Kvote 1: <strong className="font-mono-data text-[#12172B]">{kv}</strong></span>
-                      <span>•</span>
-                      <span>AI-robusthed: <strong className="font-mono-data text-[#0B7A57]">{rob}/100</strong></span>
-                      <ScoreDisclosure scores={scoreDetails} compact />
+                      {slug.includes("ai-") && <><span>•</span><span>AI-modelestimat: <strong className="font-mono-data text-[#0B7A57]">ca. {roundAiScore(rob)}/100</strong></span></>}
                     </div>
+                    {slug.includes("ai-") && <ScoreDisclosure scores={scoreDetails} compact />}
                   </div>
                 </div>
 
@@ -190,7 +198,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
             <p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Brug listen som startpunkt</p>
             <h2 className="mt-1 text-lg font-bold font-display">Sådan får du et mere personligt resultat</h2>
             <p className="mt-2 text-xs leading-relaxed text-[#545D71]">
-              En topliste bruger samme prioritering for alle. I matchværktøjet kan du kombinere dit gennemsnit, uddannelsessted og dine egne vægte for AI, job og løn.
+              En topliste bruger samme sortering for alle. I søgeværktøjet kan du undersøge samtlige uddannelser ud fra dit gennemsnit og uddannelsessted og selv vælge, om AI-modelestimater skal indgå.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
