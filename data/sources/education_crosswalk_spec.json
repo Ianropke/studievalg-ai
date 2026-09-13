@@ -11,7 +11,15 @@
     "Each production mapping must contain kot_code, udd_code, mapping_method, mapping_source, mapping_period, and mapping_confidence.",
     "Unmapped programmes remain UNMAPPED and cannot receive labour/salary scores."
   ],
-  "allowed_mapping_methods": ["OFFICIAL_SOURCE", "VERIFIED_CROSSWALK"],
-  "required_provenance": ["source_url", "dataset", "period"],
+  "allowed_mapping_methods": [
+    "OFFICIAL",
+    "DOCUMENTED_CROSSWALK",
+    "EXPERT_REVIEW"
+  ],
+  "required_provenance": [
+    "source_url",
+    "dataset",
+    "period"
+  ],
   "note": "The ingestion pipeline creates the contract and raw source snapshots; it does not manufacture the KOT-to-UDD relationship."
 }

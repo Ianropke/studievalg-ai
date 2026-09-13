@@ -1,0 +1,651 @@
+{
+  "id": "LONS11",
+  "text": "Løn",
+  "description": "Løn efter uddannelse, sektor, aflønningsform, lønmodtagergruppe, lønkomponenter, køn og tid",
+  "unit": "Kr.",
+  "suppressedDataValue": "0",
+  "updated": "2025-09-29T08:00:00",
+  "active": true,
+  "contacts": [
+    {
+      "name": "Bao Chau Do",
+      "phone": "+4530625074",
+      "mail": "bcd@dst.dk"
+    }
+  ],
+  "documentation": {
+    "id": "39350029-3a77-4daa-b3b1-eb41b3ef963a",
+    "url": "https://www.dst.dk/statistikdokumentation/39350029-3a77-4daa-b3b1-eb41b3ef963a"
+  },
+  "footnote": null,
+  "variables": [
+    {
+      "id": "UDDANNELSE",
+      "text": "uddannelse",
+      "elimination": true,
+      "time": false,
+      "values": [
+        {
+          "id": "TOT",
+          "text": "I alt"
+        },
+        {
+          "id": "H10",
+          "text": "H10 Grundskole"
+        },
+        {
+          "id": "H1001",
+          "text": "H1001 Ingen uddannelse"
+        },
+        {
+          "id": "H1010",
+          "text": "H1010 Grundskole til og med 6. klasse"
+        },
+        {
+          "id": "H1020",
+          "text": "H1020 Grundskole 7.-9. klasse"
+        },
+        {
+          "id": "H1030",
+          "text": "H1030 Grundskole 10. klasse"
+        },
+        {
+          "id": "H20",
+          "text": "H20 Gymnasiale uddannelser"
+        },
+        {
+          "id": "H2010",
+          "text": "H2010 Alment gymnasiale uddannelser"
+        },
+        {
+          "id": "H2020",
+          "text": "H2020 Erhvervsrettede gymnasiale uddannelser"
+        },
+        {
+          "id": "H2030",
+          "text": "H2030 Internationale gymnasiale uddannelser"
+        },
+        {
+          "id": "H30",
+          "text": "H30 Erhvervsfaglige uddannelser"
+        },
+        {
+          "id": "H3010",
+          "text": "H3010 Omsorg, sundhed og pædagogik (OSP)"
+        },
+        {
+          "id": "H3015",
+          "text": "H3015 Kontor, handel og forretningsservice (KHF)"
+        },
+        {
+          "id": "H3020",
+          "text": "H3020 Fødevarer mv. (FJO)"
+        },
+        {
+          "id": "H3025",
+          "text": "H3025 Jordbrug og natur (FJO)"
+        },
+        {
+          "id": "H3030",
+          "text": "H3030 Oplevelsesområdet (FJO)"
+        },
+        {
+          "id": "H3035",
+          "text": "H3035 Byggeriområdet (TBT)"
+        },
+        {
+          "id": "H3040",
+          "text": "H3040 Teknologiområdet, strøm og elektronik mv. (TBT)"
+        },
+        {
+          "id": "H3045",
+          "text": "H3045 Teknologiområdet, grafisk teknik og medieproduktion (TBT)"
+        },
+        {
+          "id": "H3050",
+          "text": "H3050 Teknologiområdet, cykel-, auto- og skibsmekanik mv. (TBT)"
+        },
+        {
+          "id": "H3055",
+          "text": "H3055 Teknologiområdet, maskinteknik og produktion (TBT)"
+        },
+        {
+          "id": "H3060",
+          "text": "H3060 Teknik- og industriuddannelser i øvrigt (TBT)"
+        },
+        {
+          "id": "H3065",
+          "text": "H3065 Transport og logistikområdet (TBT)"
+        },
+        {
+          "id": "H3090",
+          "text": "H3090 Andre erhvervsfaglige uddannelser"
+        },
+        {
+          "id": "H35",
+          "text": "H35 Adgangsgivende uddannelsesforløb"
+        },
+        {
+          "id": "H3510",
+          "text": "H3510 Adgangskurser - videregående udd."
+        },
+        {
+          "id": "H3520",
+          "text": "H3520 Adgangseksamen - ingeniøruddannelse"
+        },
+        {
+          "id": "H40",
+          "text": "H40 Korte videregående uddannelser, KVU"
+        },
+        {
+          "id": "H4020",
+          "text": "H4020 Pædagogisk, KVU"
+        },
+        {
+          "id": "H4024",
+          "text": "H4024 Medier og kommunikation, KVU"
+        },
+        {
+          "id": "H4025",
+          "text": "H4025 Humanistisk og teologisk, KVU"
+        },
+        {
+          "id": "H4030",
+          "text": "H4030 Kunstnerisk, KVU"
+        },
+        {
+          "id": "H4038",
+          "text": "H4038 Samfundsfaglig, Økonomisk-Merkantil, KVU"
+        },
+        {
+          "id": "H4058",
+          "text": "H4058 Teknisk, KVU"
+        },
+        {
+          "id": "H4075",
+          "text": "H4075 Fødevarer, bio- og laboratorieteknik, KVU"
+        },
+        {
+          "id": "H4080",
+          "text": "H4080 Jordbrug, natur og miljø, KVU"
+        },
+        {
+          "id": "H4085",
+          "text": "H4085 Maritimt, KVU"
+        },
+        {
+          "id": "H4089",
+          "text": "H4089 Sundhedsfaglig, KVU"
+        },
+        {
+          "id": "H4095",
+          "text": "H4095 Politi og forsvar mv., KVU"
+        },
+        {
+          "id": "H50",
+          "text": "H50 Mellemlange videregående uddannelser, MVU"
+        },
+        {
+          "id": "H5020",
+          "text": "H5020 Pædagogisk, MVU"
+        },
+        {
+          "id": "H5024",
+          "text": "H5024 Medier og kommunikation, MVU"
+        },
+        {
+          "id": "H5025",
+          "text": "H5025 Humanistisk og teologisk, MVU"
+        },
+        {
+          "id": "H5030",
+          "text": "H5030 Kunstnerisk, MVU"
+        },
+        {
+          "id": "H5038",
+          "text": "H5038 Samfundsfaglig, Økonomisk-Merkantil, MVU"
+        },
+        {
+          "id": "H5039",
+          "text": "H5039 Samfundsvidenskab, MVU"
+        },
+        {
+          "id": "H5058",
+          "text": "H5058 Teknisk, MVU"
+        },
+        {
+          "id": "H5059",
+          "text": "H5059 Teknisk videnskab, MVU"
+        },
+        {
+          "id": "H5075",
+          "text": "H5075 Fødevarer, Bio- og laboratorieteknik, MVU"
+        },
+        {
+          "id": "H5080",
+          "text": "H5080 Jordbrug, natur og miljø, MVU"
+        },
+        {
+          "id": "H5085",
+          "text": "H5085 Maritimt, MVU"
+        },
+        {
+          "id": "H5089",
+          "text": "H5089 Sundhedsfaglig, MVU"
+        },
+        {
+          "id": "H5095",
+          "text": "H5095 Politi og forsvar mv., MVU"
+        },
+        {
+          "id": "H5097",
+          "text": "H5097 Videregående uddannelser uden nærmere angivelse, MVU"
+        },
+        {
+          "id": "H60",
+          "text": "H60 Bacheloruddannelser, BACH"
+        },
+        {
+          "id": "H6020",
+          "text": "H6020 Pædagogisk, BACH"
+        },
+        {
+          "id": "H6025",
+          "text": "H6025 Humanistisk og teologisk, BACH"
+        },
+        {
+          "id": "H6030",
+          "text": "H6030 Kunstnerisk, BACH"
+        },
+        {
+          "id": "H6035",
+          "text": "H6035 Naturvidenskab, BACH"
+        },
+        {
+          "id": "H6039",
+          "text": "H6039 Samfundsvidenskab, BACH"
+        },
+        {
+          "id": "H6059",
+          "text": "H6059 Teknisk videnskab, BACH"
+        },
+        {
+          "id": "H6075",
+          "text": "H6075 Fødevarer, Bio- og laboratorieteknik, BACH"
+        },
+        {
+          "id": "H6080",
+          "text": "H6080 Jordbrug, natur og miljø, BACH"
+        },
+        {
+          "id": "H6090",
+          "text": "H6090 Sundhedsvidenskab, BACH"
+        },
+        {
+          "id": "H6097",
+          "text": "H6097 Videregående uddannelser uden nærmere angivelse, BACH"
+        },
+        {
+          "id": "H70",
+          "text": "H70 Lange videregående uddannelser, LVU"
+        },
+        {
+          "id": "H7020",
+          "text": "H7020 Pædagogisk, LVU"
+        },
+        {
+          "id": "H7025",
+          "text": "H7025 Humanistisk og teologisk, LVU"
+        },
+        {
+          "id": "H7030",
+          "text": "H7030 Kunstnerisk, LVU"
+        },
+        {
+          "id": "H7035",
+          "text": "H7035 Naturvidenskab, LVU"
+        },
+        {
+          "id": "H7039",
+          "text": "H7039 Samfundsvidenskab, LVU"
+        },
+        {
+          "id": "H7059",
+          "text": "H7059 Teknisk videnskab, LVU"
+        },
+        {
+          "id": "H7075",
+          "text": "H7075 Fødevarer, Bio- og laboratorieteknik, LVU"
+        },
+        {
+          "id": "H7080",
+          "text": "H7080 Jordbrug, natur og miljø, LVU"
+        },
+        {
+          "id": "H7090",
+          "text": "H7090 Sundhedsvidenskab, LVU"
+        },
+        {
+          "id": "H7095",
+          "text": "H7095 Politi og forsvar mv., LVU"
+        },
+        {
+          "id": "H7097",
+          "text": "H7097 Videregående uddannelser uden nærmere angivelse, LVU"
+        },
+        {
+          "id": "H80",
+          "text": "H80 Ph.d. og forskeruddannelser"
+        },
+        {
+          "id": "H8020",
+          "text": "H8020 Pædagogisk, Ph.d."
+        },
+        {
+          "id": "H8025",
+          "text": "H8025 Humanistisk og teologisk, Ph.d."
+        },
+        {
+          "id": "H8030",
+          "text": "H8030 Kunstnerisk, Ph.d."
+        },
+        {
+          "id": "H8035",
+          "text": "H8035 Naturvidenskab, Ph.d."
+        },
+        {
+          "id": "H8039",
+          "text": "H8039 Samfundsvidenskab, Ph.d."
+        },
+        {
+          "id": "H8059",
+          "text": "H8059 Teknisk videnskab, Ph.d."
+        },
+        {
+          "id": "H8080",
+          "text": "H8080 Jordbrug, natur og miljø, Ph.d."
+        },
+        {
+          "id": "H8090",
+          "text": "H8090 Sundhedsvidenskab, Ph.d."
+        },
+        {
+          "id": "H8097",
+          "text": "H8097 Videregående uddannelser uden nærmere angivelse, Ph.d."
+        },
+        {
+          "id": "H90",
+          "text": "H90 Uoplyst mv."
+        },
+        {
+          "id": "H9099",
+          "text": "H9099 Uoplyst mv."
+        }
+      ]
+    },
+    {
+      "id": "SEKTOR",
+      "text": "sektor",
+      "elimination": true,
+      "time": false,
+      "values": [
+        {
+          "id": "1000",
+          "text": "Sektorer i alt"
+        },
+        {
+          "id": "1032",
+          "text": "Offentlig forvaltning og service"
+        },
+        {
+          "id": "1016",
+          "text": "Stat (inklusiv sociale kasser og fonde)"
+        },
+        {
+          "id": "1018",
+          "text": "Kommuner og regioner i alt"
+        },
+        {
+          "id": "1020",
+          "text": "Regioner"
+        },
+        {
+          "id": "1025",
+          "text": "Kommuner"
+        },
+        {
+          "id": "1046",
+          "text": "Virksomheder og organisationer"
+        }
+      ]
+    },
+    {
+      "id": "AFLOEN",
+      "text": "aflønningsform",
+      "elimination": true,
+      "time": false,
+      "values": [
+        {
+          "id": "TIFA",
+          "text": "Time- og fastlønnede i alt"
+        },
+        {
+          "id": "TIME",
+          "text": "Timelønnede"
+        },
+        {
+          "id": "FAST",
+          "text": "Fastlønnede"
+        }
+      ]
+    },
+    {
+      "id": "LONGRP",
+      "text": "lønmodtagergruppe",
+      "elimination": true,
+      "time": false,
+      "values": [
+        {
+          "id": "LTOT",
+          "text": "Lønmodtagergrupper i alt"
+        },
+        {
+          "id": "LED",
+          "text": "Ledere"
+        },
+        {
+          "id": "VOK",
+          "text": "Lønmodtagergrupper (eksklusiv unge og elever)"
+        },
+        {
+          "id": "MED",
+          "text": "Lønmodtagere uden ledelsesansvar"
+        },
+        {
+          "id": "UNG",
+          "text": "Unge, 13-17 år"
+        },
+        {
+          "id": "ELE",
+          "text": "Elever"
+        }
+      ]
+    },
+    {
+      "id": "LØNMÅL",
+      "text": "lønkomponenter",
+      "elimination": false,
+      "time": false,
+      "values": [
+        {
+          "id": "FORINKL",
+          "text": "FORTJENESTE PR. PRÆSTERET TIME"
+        },
+        {
+          "id": "OVERB",
+          "text": "Overtidstillæg pr. præsteret time"
+        },
+        {
+          "id": "SYGDOM",
+          "text": "Fraværsbetalinger pr. præsteret time"
+        },
+        {
+          "id": "GENE",
+          "text": "Genetillæg pr. præsteret time"
+        },
+        {
+          "id": "GODE",
+          "text": "Personalegoder pr. præsteret time"
+        },
+        {
+          "id": "UREGEL",
+          "text": "Uregelmæssige betalinger pr. præsteret time"
+        },
+        {
+          "id": "PENS",
+          "text": "Pension inkl. ATP pr. præsteret time"
+        },
+        {
+          "id": "BASIS",
+          "text": "Basisfortjenesten pr. præsteret time"
+        },
+        {
+          "id": "SFERIE",
+          "text": "..Særlig feriegodtgørelse pr. præsteret time (kun fastlønnede)"
+        },
+        {
+          "id": "FERIE",
+          "text": "..Feriebetalinger pr. præsteret time"
+        },
+        {
+          "id": "NEDRE",
+          "text": "Nedre kvartil, fortjeneste pr. præsteret time"
+        },
+        {
+          "id": "MEDIAN",
+          "text": "Median, fortjeneste pr. præsteret time"
+        },
+        {
+          "id": "OVRE",
+          "text": "Øvre kvartil, fortjeneste pr. præsteret time"
+        },
+        {
+          "id": "STAND",
+          "text": "STANDARDBEREGNET TIMEFORTJENESTE"
+        },
+        {
+          "id": "GENEST",
+          "text": "Genetillæg pr. standard time"
+        },
+        {
+          "id": "GODEST",
+          "text": "Personalegoder pr. standard time"
+        },
+        {
+          "id": "UREGELST",
+          "text": "Uregelmæssige betalinger pr. standard time"
+        },
+        {
+          "id": "PENSST",
+          "text": "Pension inkl. ATP pr. standard time"
+        },
+        {
+          "id": "BASISST",
+          "text": "Basisfortjenesten pr. standard time"
+        },
+        {
+          "id": "SFERIEST",
+          "text": "..Særlig feriegodtgørelse pr. standard time (kun fastlønnede)"
+        },
+        {
+          "id": "NEDREST",
+          "text": "Nedre kvartil, standardberegnet timefortjeneste"
+        },
+        {
+          "id": "MEDIANST",
+          "text": "Median, standardberegnet timefortjeneste"
+        },
+        {
+          "id": "OVREST",
+          "text": "Øvre kvartil, standardberegnet timefortjeneste"
+        },
+        {
+          "id": "MDRSNIT",
+          "text": "STANDARDBEREGNET MÅNEDSFORTJENESTE"
+        },
+        {
+          "id": "ANTAL",
+          "text": "Antal fuldtidsbeskæftigede i lønstatistikken"
+        }
+      ]
+    },
+    {
+      "id": "KØN",
+      "text": "køn",
+      "elimination": true,
+      "time": false,
+      "values": [
+        {
+          "id": "MOK",
+          "text": "Mænd og kvinder i alt"
+        },
+        {
+          "id": "M",
+          "text": "Mænd"
+        },
+        {
+          "id": "K",
+          "text": "Kvinder"
+        }
+      ]
+    },
+    {
+      "id": "Tid",
+      "text": "tid",
+      "elimination": false,
+      "time": true,
+      "values": [
+        {
+          "id": "2015",
+          "text": "2015"
+        },
+        {
+          "id": "2016",
+          "text": "2016"
+        },
+        {
+          "id": "2017",
+          "text": "2017"
+        },
+        {
+          "id": "2018",
+          "text": "2018"
+        },
+        {
+          "id": "2019",
+          "text": "2019"
+        },
+        {
+          "id": "2020",
+          "text": "2020"
+        },
+        {
+          "id": "2021",
+          "text": "2021"
+        },
+        {
+          "id": "2022",
+          "text": "2022"
+        },
+        {
+          "id": "2023",
+          "text": "2023"
+        },
+        {
+          "id": "2024",
+          "text": "2024"
+        }
+      ]
+    }
+  ]
+}

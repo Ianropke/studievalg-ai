@@ -53,7 +53,7 @@ export function EvidenceList({ evidence = [], compact = false }: EvidenceListPro
             {item.page && <span>Side: {item.page}</span>}
           </div>
           {item.quote && <p className="italic leading-relaxed text-[#12172B]">&quot;{item.quote}&quot;</p>}
-          <dl className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[10px] text-[#8891A3]">
+          <dl className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[10px] text-[#667085]">
             {item.dataset && <div><dt className="inline font-semibold">Datasæt: </dt><dd className="inline">{item.dataset}</dd></div>}
             {item.period && <div><dt className="inline font-semibold">Periode: </dt><dd className="inline">{item.period}</dd></div>}
             {item.method && <div><dt className="inline font-semibold">Metode: </dt><dd className="inline">{item.method}</dd></div>}

@@ -92,6 +92,14 @@ The activity groups, coefficients, clipping bounds and input hashes are defined 
 
 Activation is deliberately partial: 569 of 1,413 programmes have a non-default legacy DISCO mapping and receive O*NET 31.0-derived model inputs. The remaining 844 do not have defensible O*NET 31.0 programme-level coverage. Even for migrated programmes, programme-to-DISCO remains a crosswalk whose confidence must remain visible.
 
+### Sensitivity and rank stability
+
+`etl/validate_model_stability.py` evaluates the mapped cohort under automation-resilience weights of 60%, 70%, 75%, 80% and 90%, with the remainder assigned to augmentation. It uses average ranks for ties and reports rank correlation, top-20 overlap and rank shifts against the canonical 75/25 formula.
+
+The current deterministic report shows that 70/30 and 80/20 are very close to 75/25, while 60/40 and 90/10 cause materially larger movement outside the top group. Large shifts must be interpreted alongside the model's coarse occupation groups and many tied programme scores. The report deliberately excludes all 844 legacy/default programmes.
+
+This analysis answers only whether the published ordering is sensitive to formula weights. It is not an empirical test of employment outcomes, causal AI effects or individual predictions. A representative human/domain review remains an external validation requirement.
+
 ### Legacy/default programmes
 
 Legacy/default AI values may be retained in historical/generated artefacts for traceability, but they must not create programme-to-programme ranking differences as though they were programme-specific evidence. In the deployed client ranking, unsupported AI dimensions are neutralised to 50. This value is a **ranking placeholder**, not an estimate of the true AI score.

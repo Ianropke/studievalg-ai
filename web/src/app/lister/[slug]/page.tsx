@@ -89,7 +89,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
             <span className="bg-[#E6F4ED] text-[#0B7A57] text-[11px] font-bold px-3 py-1 rounded-full border border-[#0F9D6E]/20">
               {config.badge}
             </span>
-            <span className="text-[11px] text-[#8891A3]">
+            <span className="text-[11px] text-[#667085]">
               Optagelsesdata: <strong className="text-[#12172B]">{DATA_STATUS.catalogue.admissionsUpdatedLabel}</strong> · model: <strong className="text-[#12172B]">{DATA_STATUS.scoring.updatedLabel}</strong>
             </span>
           </div>
@@ -139,7 +139,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
                       <span className="font-semibold text-[#2563EB]">{inst}</span>
                       {program.by && <span>• {program.by}</span>}
                       <span>•</span>
-                      <span className="font-mono-data text-[#8891A3]">KOT {program.kot_nr || "–"}</span>
+                      <span className="font-mono-data text-[#667085]">KOT {program.kot_nr || "–"}</span>
                     </div>
 
                     <Link
@@ -161,7 +161,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
                 {/* Metric Display & Action Links */}
                 <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-3 sm:pt-0 border-[#E7E9EF] shrink-0">
                   <div className="text-left sm:text-right">
-                    <span className="text-[10px] text-[#8891A3] block">{config.metricLabel}</span>
+                    <span className="text-[10px] text-[#667085] block">{config.metricLabel}</span>
                     <span className="text-xl font-bold font-mono-data text-[#12172B]">{valueDisplay}</span>
                   </div>
 
@@ -235,7 +235,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
                   className="p-3 bg-[#F7F8FA] hover:bg-[#EFF6FF] border border-[#E7E9EF] hover:border-[#2563EB]/30 rounded-lg font-semibold text-[#12172B] hover:text-[#2563EB] transition flex items-center justify-between"
                 >
                   <span>{c.title}</span>
-                  <span className="text-[#8891A3]">→</span>
+                  <span className="text-[#667085]">→</span>
                 </Link>
               ))}
           </div>

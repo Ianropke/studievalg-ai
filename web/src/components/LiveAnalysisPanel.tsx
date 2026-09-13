@@ -131,7 +131,7 @@ export function LiveAnalysisPanel() {
               onChange={(event) => setRiskTolerance(Number(event.target.value))}
               className="w-full accent-[#0F9D6E]"
             />
-            <span className="block text-[10px] text-[#8891A3]">Lavere betyder mere vægt på AI-robusthed.</span>
+            <span className="block text-[10px] text-[#667085]">Lavere betyder mere vægt på AI-robusthed.</span>
           </label>
 
           <label className="space-y-1">
@@ -147,7 +147,7 @@ export function LiveAnalysisPanel() {
               onChange={(event) => setSalaryPriority(Number(event.target.value))}
               className="w-full accent-[#7C3AED]"
             />
-            <span className="block text-[10px] text-[#8891A3]">Balanceres med interesse, job og AI.</span>
+            <span className="block text-[10px] text-[#667085]">Balanceres med interesse, job og AI.</span>
           </label>
 
           <label className="space-y-1">
@@ -159,7 +159,7 @@ export function LiveAnalysisPanel() {
               placeholder="Valgfrit, fx Aarhus"
               className="w-full rounded-lg border border-[#D8DBE4] bg-[#FFFFFF] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
             />
-            <span className="block text-[10px] text-[#8891A3]">Bruges kun som et eksplicit matchkriterium.</span>
+            <span className="block text-[10px] text-[#667085]">Bruges kun som et eksplicit matchkriterium.</span>
           </label>
         </div>
 
@@ -201,17 +201,17 @@ export function LiveAnalysisPanel() {
             {programs.slice(0, 3).map((program) => (
               <article key={program.kot_nr} className="rounded-lg border border-[#E7E9EF] bg-[#FFFFFF] p-4 space-y-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8891A3]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#667085]">
                     Match {asPercent(program.match_score)}%
                   </p>
                   <h3 className="font-bold text-[#12172B]">{program.udbud_titel}</h3>
                 </div>
 
                 <dl className="grid grid-cols-2 gap-2 text-xs">
-                  <div><dt className="text-[#8891A3]">AI-robusthed</dt><dd className="font-bold text-[#0B7A57]">{asPercent(program.ai_resilience)}/100</dd></div>
-                  <div><dt className="text-[#8891A3]">Jobindikator</dt><dd className="font-bold text-[#1D4ED8]">{asPercent(program.labour_demand)}/100</dd></div>
-                  <div><dt className="text-[#8891A3]">Lønindikator</dt><dd className="font-bold text-[#6D28D9]">{asPercent(program.salary_growth)}/100</dd></div>
-                  <div><dt className="text-[#8891A3]">Kildekvalitet</dt><dd className="font-bold">{program.evidence_quality || "ukendt"}</dd></div>
+                  <div><dt className="text-[#667085]">AI-robusthed</dt><dd className="font-bold text-[#0B7A57]">{asPercent(program.ai_resilience)}/100</dd></div>
+                  <div><dt className="text-[#667085]">Jobindikator</dt><dd className="font-bold text-[#1D4ED8]">{asPercent(program.labour_demand)}/100</dd></div>
+                  <div><dt className="text-[#667085]">Lønindikator</dt><dd className="font-bold text-[#6D28D9]">{asPercent(program.salary_growth)}/100</dd></div>
+                  <div><dt className="text-[#667085]">Kildekvalitet</dt><dd className="font-bold">{program.evidence_quality || "ukendt"}</dd></div>
                 </dl>
 
                 <div className="space-y-1 text-xs">
@@ -240,7 +240,7 @@ export function LiveAnalysisPanel() {
                   <li key={citation.url || citation.source || index}>
                     {citation.url ? <a href={citation.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#2563EB] hover:underline">{citation.source || "Kilde"} ↗</a> : (citation.source || "Kilde")}
                     {citation.source_authority ? ` (${citation.source_authority})` : ""}
-                    {citation.quote && <blockquote className="mt-1 border-l-2 border-[#D8DBE4] pl-2 text-[#8891A3]">&quot;{citation.quote}&quot;</blockquote>}
+                    {citation.quote && <blockquote className="mt-1 border-l-2 border-[#D8DBE4] pl-2 text-[#667085]">&quot;{citation.quote}&quot;</blockquote>}
                   </li>
                 ))}
               </ul>

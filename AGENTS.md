@@ -68,6 +68,8 @@ npm run --prefix web lint
 npm run --prefix web algorithm:test
 npm run --prefix web build
 python -m unittest discover -s tests -p "test_*.py"
+python etl/validate_model_stability.py
+python etl/build_evidence_readiness_report.py
 python etl/verify_all_data_integrity.py
 ```
 

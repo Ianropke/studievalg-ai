@@ -35,3 +35,8 @@ __pycache__/
 
 # Generated audit output (recreated by the provenance workflow)
 /data/DATA_PROVENANCE_REPORT.json
+/data/SITE_QUALITY_REPORT.json
+
+# Playwright run artefacts
+/web/test-results/
+/web/playwright-report/

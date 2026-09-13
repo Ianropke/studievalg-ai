@@ -109,9 +109,9 @@ export default function EvidensPage() {
             <h2 className="text-xl font-bold text-[#12172B] font-display">Datagrundlag og opdatering</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Uddannelsesudbud</div><div className="text-2xl font-bold font-mono-data">{dataStats.total.toLocaleString("da-DK")}</div></div>
-            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Optagelsesdata</div><div className="text-lg font-bold">{dataStats.admissions}</div></div>
-            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#8891A3]">Scoringsmodel</div><div className="text-lg font-bold">{dataStats.model}</div></div>
+            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#667085]">Uddannelsesudbud</div><div className="text-2xl font-bold font-mono-data">{dataStats.total.toLocaleString("da-DK")}</div></div>
+            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#667085]">Optagelsesdata</div><div className="text-lg font-bold">{dataStats.admissions}</div></div>
+            <div className="rounded-lg border border-[#E7E9EF] p-4"><div className="text-xs text-[#667085]">Scoringsmodel</div><div className="text-lg font-bold">{dataStats.model}</div></div>
           </div>
           <p className="text-xs text-[#545D71] leading-relaxed">Kataloget og kilderegistret publiceres som versionsstyrede datafiler. Kildeantallet ovenfor læses direkte fra det genererede register, så siden ikke viser et separat, håndskrevet tal.</p>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] p-4 text-xs leading-relaxed text-[#92400E]">

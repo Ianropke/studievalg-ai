@@ -1,0 +1,126 @@
+{
+  "retrieved_at": "2026-09-13",
+  "sources": [
+    {
+      "provider": "Uddannelses- og Forskningsstyrelsen",
+      "dataset": "Beskæftigelse",
+      "source_url": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+      "distribution_url": null,
+      "retrieved_file": null,
+      "status": "BLOCKED_NO_VERIFIED_MACHINE_DISTRIBUTION",
+      "definition": "Beskæftigelsesgrad målt 12.-23. måned efter fuldførelse."
+    },
+    {
+      "provider": "Danmarks Statistik",
+      "table": "LONS11",
+      "name": "Løn efter uddannelse",
+      "source_url": "https://www.statistikbanken.dk/LONS11",
+      "purpose": "Observed salary statistics by education group.",
+      "status": "AVAILABLE_FOR_EDUCATION_GROUP_ANALYSIS_NOT_PROGRAMME_MAPPED",
+      "retrieved_file": "data/sources/raw/LONS11.csv",
+      "sha256": "4876184905f08c0abab9e44b9a8cb9b474f857910eba56e03fe9d77927cee739",
+      "bytes": 103082,
+      "shape": {
+        "columns": 8,
+        "rows": 534
+      },
+      "query": {
+        "table": "LONS11",
+        "format": "CSV",
+        "lang": "da",
+        "variables": [
+          {
+            "code": "UDDANNELSE",
+            "values": [
+              "*"
+            ]
+          },
+          {
+            "code": "SEKTOR",
+            "values": [
+              "1000"
+            ]
+          },
+          {
+            "code": "AFLOEN",
+            "values": [
+              "TIFA"
+            ]
+          },
+          {
+            "code": "LONGRP",
+            "values": [
+              "VOK"
+            ]
+          },
+          {
+            "code": "LØNMÅL",
+            "values": [
+              "FORINKL"
+            ]
+          },
+          {
+            "code": "KØN",
+            "values": [
+              "MOK"
+            ]
+          },
+          {
+            "code": "Tid",
+            "values": [
+              "2019",
+              "2020",
+              "2021",
+              "2022",
+              "2023",
+              "2024"
+            ]
+          }
+        ]
+      },
+      "tableinfo": {
+        "text": "Løn",
+        "updated": "2025-09-29T08:00:00",
+        "unit": "Kr.",
+        "variables": [
+          {
+            "id": "UDDANNELSE",
+            "text": "uddannelse",
+            "values": 89
+          },
+          {
+            "id": "SEKTOR",
+            "text": "sektor",
+            "values": 7
+          },
+          {
+            "id": "AFLOEN",
+            "text": "aflønningsform",
+            "values": 3
+          },
+          {
+            "id": "LONGRP",
+            "text": "lønmodtagergruppe",
+            "values": 6
+          },
+          {
+            "id": "LØNMÅL",
+            "text": "lønkomponenter",
+            "values": 25
+          },
+          {
+            "id": "KØN",
+            "text": "køn",
+            "values": 3
+          },
+          {
+            "id": "Tid",
+            "text": "tid",
+            "values": 10
+          }
+        ]
+      }
+    }
+  ],
+  "methodological_note": "UFM graduate outcomes are the preferred source for post-graduation employment. Statbank salary data are supporting observations. Neither source is automatically mapped to KOT programmes here."
+}

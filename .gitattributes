@@ -1,0 +1,3 @@
+# Preserve byte-exact official source snapshots and avoid newline normalization.
+data/sources/raw/*.csv binary
+data/sources/raw/**/*.csv binary

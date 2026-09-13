@@ -533,21 +533,21 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#0B7A57]">{preferenceMode === "priority" ? "AI-resiliensindeks" : "AI-resiliens minimum"}<span className="block text-[10px] font-normal text-[#8891A3]">O*NET/crosswalk når programkobling findes</span></span>
+                  <span className="text-[#0B7A57]">{preferenceMode === "priority" ? "AI-resiliensindeks" : "AI-resiliens minimum"}<span className="block text-[10px] font-normal text-[#667085]">O*NET/crosswalk når programkobling findes</span></span>
                   <span className="text-[#0B7A57] font-mono-data font-bold">{formatPreferenceValue(aiRobustnessWeight)}</span>
                 </div>
                 <input id="ai-weight-slider" type="range" min="0" max="100" value={aiRobustnessWeight} onChange={(e) => updateWeight(setAiRobustnessWeight, e.currentTarget.value)} aria-label={`${preferenceMode === "priority" ? "AI-resiliens vægt" : "AI-resiliens minimum"}: ${formatPreferenceValue(aiRobustnessWeight)}`} className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#0F9D6E] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:ring-offset-2" />
               </div>
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#1D4ED8]">{preferenceMode === "priority" ? "Jobindikator" : "Jobindikator minimum"}<span className="block text-[10px] font-normal text-[#8891A3]">Neutral uden program-specifik provenance</span></span>
+                  <span className="text-[#1D4ED8]">{preferenceMode === "priority" ? "Jobindikator" : "Jobindikator minimum"}<span className="block text-[10px] font-normal text-[#667085]">Neutral uden program-specifik provenance</span></span>
                   <span className="text-[#1D4ED8] font-mono-data font-bold">{formatPreferenceValue(jobOpportunitiesWeight)}</span>
                 </div>
                 <input id="job-weight-slider" type="range" min="0" max="100" value={jobOpportunitiesWeight} onChange={(e) => updateWeight(setJobOpportunitiesWeight, e.currentTarget.value)} aria-label={`${preferenceMode === "priority" ? "Jobindikator vægt" : "Jobindikator minimum"}: ${formatPreferenceValue(jobOpportunitiesWeight)}`} className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" />
               </div>
               <div className="p-3.5 rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] space-y-2">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-[#6D28D9]">{preferenceMode === "priority" ? "Lønindikator" : "Lønindikator minimum"}<span className="block text-[10px] font-normal text-[#8891A3]">Neutral uden program-specifik provenance</span></span>
+                  <span className="text-[#6D28D9]">{preferenceMode === "priority" ? "Lønindikator" : "Lønindikator minimum"}<span className="block text-[10px] font-normal text-[#667085]">Neutral uden program-specifik provenance</span></span>
                   <span className="text-[#6D28D9] font-mono-data font-bold">{formatPreferenceValue(salaryWeight)}</span>
                 </div>
                 <input id="salary-weight-slider" type="range" min="0" max="100" value={salaryWeight} onChange={(e) => updateWeight(setSalaryWeight, e.currentTarget.value)} aria-label={`${preferenceMode === "priority" ? "Lønindikator vægt" : "Lønindikator minimum"}: ${formatPreferenceValue(salaryWeight)}`} className="w-full h-2 bg-[#D8DBE4] rounded-lg appearance-none cursor-pointer accent-[#7C3AED] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] focus:ring-offset-2" />
@@ -556,7 +556,7 @@ export default function Dashboard() {
           </div>
           <div className="pt-2 border-t border-[#E7E9EF] relative">
             <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none pt-2"><SearchIcon /></div>
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#8891A3] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
           </div>
           <div className="flex flex-wrap gap-2 pt-2 border-t border-[#E7E9EF] text-xs">
             <span className="text-[#545D71] self-center font-medium">Filtrer:</span>
@@ -573,7 +573,7 @@ export default function Dashboard() {
             <div>
               <h2 className="text-xl font-bold text-[#12172B] font-display">Dine anbefalinger</h2>
               <p className="text-xs text-[#545D71] font-mono-data">{preferenceMode === "priority" ? `Vægtet sortering (${preferenceSummary})` : `Minimumskrav (${requirementMatchMode === "all" ? "alle" : "mindst ét"}) · sorteret efter gennemsnit`}</p>
-              <p className="text-[11px] text-[#8891A3] mt-1">Neutraliserede 50-værdier er placeholders for manglende programmevidence og skal ikke læses som målte 50/100-resultater.</p>
+              <p className="text-[11px] text-[#667085] mt-1">Neutraliserede 50-værdier er placeholders for manglende programmevidence og skal ikke læses som målte 50/100-resultater.</p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setShowShareModal(true)} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><span>✨</span><span>Del dit match</span></button>
@@ -599,9 +599,9 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-[#0B7A57]">#{index + 1} Modelscore ({prog.matchScore}%)</span>
-                            <span className="font-mono-data text-[#8891A3]">{preferenceMode === "priority" ? "Vægtet" : "Profilgennemsnit"}: {prog.weightedComposite.toFixed(1)}</span><span>•</span><span>{prog.institution}</span><span>•</span><span className="font-mono-data text-[#8891A3]">KOT {prog.kot_nr}</span>
+                            <span className="font-mono-data text-[#667085]">{preferenceMode === "priority" ? "Vægtet" : "Profilgennemsnit"}: {prog.weightedComposite.toFixed(1)}</span><span>•</span><span>{prog.institution}</span><span>•</span><span className="font-mono-data text-[#667085]">KOT {prog.kot_nr}</span>
                           </div>
-                          <button onClick={(e) => { e.stopPropagation(); setShowShareModal(true); }} title="Del dette match" className="p-1.5 text-[#8891A3] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition flex items-center gap-1">
+                          <button onClick={(e) => { e.stopPropagation(); setShowShareModal(true); }} title="Del dette match" className="p-1.5 text-[#667085] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition flex items-center gap-1">
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.999 3 3 0 000 5.999zm0 11.998a3 3 0 100-5.999 3 3 0 000 5.999" /></svg>
                             <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
                           </button>
@@ -612,7 +612,7 @@ export default function Dashboard() {
                         ) : null}
                       </div>
                       <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
-                        <span className="text-[11px] text-[#8891A3] block">Kvote 1 adgangskvotient (seneste KOT-data)</span>
+                        <span className="text-[11px] text-[#667085] block">Kvote 1 adgangskvotient (seneste KOT-data)</span>
                         {prog.kvNum !== null ? (
                           <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.latest_kvotient}</span><span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${prog.meetsGpa ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20" : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"}`}>{prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}{prog.meetsGpa ? "Kvote 1 opfyldt" : `Under seneste Kvote 1 (${prog.kvNum})`}</span></div>
                         ) : (
@@ -625,15 +625,15 @@ export default function Dashboard() {
                       <div className="bg-[#F7F8FA] p-3 rounded-lg border border-[#E7E9EF] flex flex-col items-center justify-center shrink-0 w-36"><CompactTriangleRadar robust={prog.robustScore} job={prog.jobScore} salary={prog.salScore} /></div>
                       <div className="flex-1 space-y-2.5 w-full">
                         <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold"><span data-testid="metric-ai" className="flex items-center gap-1.5 text-[#12172B]"><span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-resiliensindeks <span className="text-[10px] font-normal text-[#8891A3]">({prog.scoreDetails?.ranking_eligible.ai ? "model/crosswalk" : "neutral placeholder"})</span></span><span className="font-mono-data font-bold text-[#0F9D6E]">{prog.robustScore}/100</span></div>
+                          <div className="flex justify-between text-xs font-semibold"><span data-testid="metric-ai" className="flex items-center gap-1.5 text-[#12172B]"><span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-resiliensindeks <span className="text-[10px] font-normal text-[#667085]">({prog.scoreDetails?.ranking_eligible.ai ? "model/crosswalk" : "neutral placeholder"})</span></span><span className="font-mono-data font-bold text-[#087454]">{prog.robustScore}/100</span></div>
                           <div className="h-2 bg-[#E7E9EF] rounded-full overflow-hidden"><div className="h-full bg-[#0F9D6E] rounded-full" style={{ width: `${prog.robustScore}%` }}></div></div>
                         </div>
                         <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold"><span data-testid="metric-job" className="flex items-center gap-1.5 text-[#12172B]"><span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span> Jobindikator <span className="text-[10px] font-normal text-[#8891A3]">({prog.scoreDetails?.ranking_eligible.job ? "evidensunderstøttet" : "neutral placeholder"})</span></span><span className="font-mono-data font-bold text-[#2563EB]">{prog.jobScore}/100</span></div>
+                          <div className="flex justify-between text-xs font-semibold"><span data-testid="metric-job" className="flex items-center gap-1.5 text-[#12172B]"><span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]"></span> Jobindikator <span className="text-[10px] font-normal text-[#667085]">({prog.scoreDetails?.ranking_eligible.job ? "evidensunderstøttet" : "neutral placeholder"})</span></span><span className="font-mono-data font-bold text-[#2563EB]">{prog.jobScore}/100</span></div>
                           <div className="h-2 bg-[#E7E9EF] rounded-full overflow-hidden"><div className="h-full bg-[#2563EB] rounded-full" style={{ width: `${prog.jobScore}%` }}></div></div>
                         </div>
                         <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold"><span data-testid="metric-salary" className="flex items-center gap-1.5 text-[#12172B]"><span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span> Lønindikator <span className="text-[10px] font-normal text-[#8891A3]">({prog.scoreDetails?.ranking_eligible.salary ? "evidensunderstøttet" : "neutral placeholder"})</span></span><span className="font-mono-data font-bold text-[#7C3AED]">{prog.salScore}/100</span></div>
+                          <div className="flex justify-between text-xs font-semibold"><span data-testid="metric-salary" className="flex items-center gap-1.5 text-[#12172B]"><span className="w-2.5 h-2.5 rounded-full bg-[#7C3AED]"></span> Lønindikator <span className="text-[10px] font-normal text-[#667085]">({prog.scoreDetails?.ranking_eligible.salary ? "evidensunderstøttet" : "neutral placeholder"})</span></span><span className="font-mono-data font-bold text-[#7C3AED]">{prog.salScore}/100</span></div>
                           <div className="h-2 bg-[#E7E9EF] rounded-full overflow-hidden"><div className="h-full bg-[#7C3AED] rounded-full" style={{ width: `${prog.salScore}%` }}></div></div>
                         </div>
                       </div>
