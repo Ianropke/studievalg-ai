@@ -66,6 +66,11 @@ jobs:
       - name: Verify O*NET 31.0 migration outputs
         run: python etl/migrate_onet31.py --check
 
+      - name: Verify AI model sensitivity report is reproducible
+        run: |
+          python etl/validate_model_stability.py
+          git diff --exit-code -- data/MODEL_STABILITY_REPORT.json
+
       - name: Verify model, SEO and agent discovery metadata
         run: python etl/check_model_discovery_freshness.py
 
@@ -74,6 +79,11 @@ jobs:
 
       - name: Build provenance audit report
         run: python etl/build_data_provenance_report.py
+
+      - name: Verify evidence readiness report is reproducible
+        run: |
+          python etl/build_evidence_readiness_report.py
+          git diff --exit-code -- data/EVIDENCE_READINESS_REPORT.json
 
       - name: Upload provenance audit report
         if: always()

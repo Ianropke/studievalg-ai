@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "status": "PARTIAL_BLOCKED",
+  "programme_count": 1413,
+  "client_metric_coverage": {
+    "onet31_model_crosswalk": {
+      "complete_count": 569,
+      "share": 0.4027
+    },
+    "legacy_or_unmapped_ai": {
+      "count": 844,
+      "share": 0.5973
+    },
+    "labour_demand_complete_provenance": {
+      "complete_count": 0,
+      "share": 0.0
+    },
+    "salary_growth_complete_provenance": {
+      "complete_count": 0,
+      "share": 0.0
+    }
+  },
+  "strict_source_readiness": {
+    "education_mapping_artifact": "kot_udd_crosswalk.csv",
+    "programme_education_mapping_rows": 0,
+    "valid_unique_programme_education_mappings": 0,
+    "programme_disco_mapping_rows": 0,
+    "valid_unique_programme_disco_mappings": 0,
+    "labour_observation_rows": 0,
+    "salary_observation_rows": 522,
+    "ai_observation_rows": 13,
+    "programme_labour_chains": 0,
+    "programme_salary_chains": 0,
+    "programme_ai_chains": 0
+  },
+  "blockers": [
+    "Documented KOT-to-education mappings cover 0/1413 programmes.",
+    "Verified programme-to-DISCO-to-AI chains cover 0/1413 programmes; current catalogue links remain model crosswalks.",
+    "Verified programme-to-labour-observation chains cover 0/1413 programmes.",
+    "Verified programme-to-salary-observation chains cover 0/1413 programmes.",
+    "Client job/salary metrics remain neutral until programme-level source chains are complete."
+  ],
+  "policy": {
+    "no_fuzzy_authoritative_mapping": true,
+    "no_source_label_without_programme_relationship": true,
+    "unsupported_client_dimensions_remain_neutral": true,
+    "coverage_may_only_increase_from_reviewed_mapping_inputs": true
+  }
+}

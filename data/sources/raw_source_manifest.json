@@ -1,0 +1,127 @@
+{
+  "schema_version": "2.0",
+  "retrieved_at": "2026-09-13T05:02:39.227443+00:00",
+  "sources": [
+    {
+      "source": "Uddannelses- og Forskningsstyrelsen",
+      "dataset": "Beskæftigelse",
+      "dataset_id": "c7f294fe-bf49-4f1d-98c2-61f0573bcb67",
+      "distribution": "DCAT JSON-LD metadata",
+      "catalog_url": "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/c7f294fe-bf49-4f1d-98c2-61f0573bcb67",
+      "source_url": "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/c7f294fe-bf49-4f1d-98c2-61f0573bcb67.jsonld",
+      "declared_csv_access_url": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+      "retrieved_at": "2026-09-13T05:02:38.312459+00:00",
+      "license": "CC BY 4.0",
+      "status": "METADATA_ONLY",
+      "note": "The declared CSV access URL currently resolves to the rendered UFM report page, not a verified CSV distribution. It is not ingested as programme-level evidence.",
+      "distributions": [
+        {
+          "format": "CSV",
+          "access_url": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+          "title": "Kommasepareret Fil"
+        },
+        {
+          "format": "XLSX",
+          "access_url": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+          "title": "Excel-ark"
+        },
+        {
+          "format": "HTML",
+          "access_url": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+          "title": "Websidevisning"
+        }
+      ],
+      "path": "data/sources/raw/ufm_beskaeftigelse_catalog.jsonld",
+      "sha256": "13ac3ab40b1ad88858865845165a357d3fbd94e9bfcec29691a2de7066673615",
+      "bytes": 8097
+    },
+    {
+      "source": "Uddannelses- og Forskningsstyrelsen",
+      "dataset": "Søgning og optagelse via KOT",
+      "dataset_id": "f13d335a-d4e5-456d-b176-2af0ba1d82c2",
+      "distribution": "DCAT JSON-LD metadata",
+      "catalog_url": "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/f13d335a-d4e5-456d-b176-2af0ba1d82c2",
+      "source_url": "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/f13d335a-d4e5-456d-b176-2af0ba1d82c2.jsonld",
+      "declared_csv_access_url": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
+      "retrieved_at": "2026-09-13T05:02:38.398294+00:00",
+      "license": "CC BY 4.0",
+      "status": "METADATA_ONLY",
+      "note": "The declared CSV access URL currently resolves to the rendered UFM report page, not a verified CSV distribution. It is not ingested as programme-level evidence.",
+      "distributions": [
+        {
+          "format": "XLSX",
+          "access_url": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
+          "title": "Excel-ark"
+        },
+        {
+          "format": "CSV",
+          "access_url": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
+          "title": "Kommasepareret Fil"
+        },
+        {
+          "format": "HTML",
+          "access_url": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
+          "title": "Websidevisning"
+        }
+      ],
+      "path": "data/sources/raw/ufm_kot_catalog.jsonld",
+      "sha256": "2c5c6122a978f5f832c63bbb46ba3a8e1d812f9eee82684617d13d25603206ca",
+      "bytes": 7508
+    },
+    {
+      "source": "Danmarks Statistik",
+      "dataset": "Uddannelsesregistret",
+      "distribution": "CSV",
+      "source_url": "https://www.dst.dk/extranet/uddannelsesregister/Udd_klassifikation.csv",
+      "catalog_url": "https://www.dst.dk/da/Statistik/dokumentation/metode/uddannelsesregistret",
+      "retrieved_at": "2026-09-13T05:02:38.699545+00:00",
+      "classification_note": "UDD/AUDD are authoritative Danish education identifiers; programme-to-observation mapping must be explicit.",
+      "path": "data/sources/raw/dst_education_register/Udd_klassifikation.csv",
+      "sha256": "c47789b2e3efee250aac6ce94796eb9444a2fd2f4b9723676687c74f6b3c7cd5",
+      "bytes": 235900
+    },
+    {
+      "source": "Danmarks Statistik",
+      "dataset": "Uddannelsesregistret",
+      "distribution": "CSV",
+      "source_url": "https://www.dst.dk/extranet/uddannelsesregister/Audd_klassifikation.csv",
+      "catalog_url": "https://www.dst.dk/da/Statistik/dokumentation/metode/uddannelsesregistret",
+      "retrieved_at": "2026-09-13T05:02:38.808511+00:00",
+      "classification_note": "UDD/AUDD are authoritative Danish education identifiers; programme-to-observation mapping must be explicit.",
+      "path": "data/sources/raw/dst_education_register/Audd_klassifikation.csv",
+      "sha256": "30dd7f931f10209af91a994c78031415abf2feee0395f6f73901d0738fbfc6b5",
+      "bytes": 249913
+    },
+    {
+      "source": "Danmarks Statistik",
+      "dataset": "Uddannelsesregistret",
+      "distribution": "CSV",
+      "source_url": "https://www.dst.dk/extranet/uddannelsesregister/Uddvej.csv",
+      "catalog_url": "https://www.dst.dk/da/Statistik/dokumentation/metode/uddannelsesregistret",
+      "retrieved_at": "2026-09-13T05:02:38.908199+00:00",
+      "classification_note": "UDD/AUDD are authoritative Danish education identifiers; programme-to-observation mapping must be explicit.",
+      "path": "data/sources/raw/dst_education_register/Uddvej.csv",
+      "sha256": "631cb57274ceeff6c6b0bb59a413d5bc4566dc01d48dea2de733c3f26315e4cf",
+      "bytes": 136984
+    },
+    {
+      "source": "Danmarks Statistik",
+      "dataset": "LONS11",
+      "distribution": "Statbank API",
+      "source_url": "https://api.statbank.dk/v1/tableinfo/LONS11?lang=da",
+      "retrieved_at": "2026-09-13T05:02:39.212151+00:00",
+      "status": "SCHEMA_ONLY",
+      "education_variable": "UDDANNELSE",
+      "note": "Salary dimensions are deliberately not guessed. A reviewed query is required before downloading salary observations.",
+      "path": "data/sources/raw/dst_lons11_tableinfo.json",
+      "sha256": "4f805673a368de1d9da2a7701086b59aade9dfcce22ec10ce3dd2b1f78ba2c1e",
+      "bytes": 15521
+    }
+  ],
+  "status_counts": {
+    "AVAILABLE": 3,
+    "METADATA_ONLY": 2,
+    "SCHEMA_ONLY": 1
+  },
+  "scoring_readiness": "BLOCKED_PENDING_VERIFIED_UFM_DISTRIBUTION_AND_PROGRAMME_MAPPINGS"
+}

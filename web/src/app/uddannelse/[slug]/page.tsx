@@ -224,7 +224,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
                 <span className="font-semibold text-[#2563EB]">{inst}</span>
                 {city && <span>• {city}</span>}
                 <span>•</span>
-                <span className="font-mono-data text-[#8891A3]">KOT {kot}</span>
+                <span className="font-mono-data text-[#667085]">KOT {kot}</span>
               </div>
               <h1 className="text-2xl lg:text-3xl font-bold text-[#12172B] tracking-tight font-display">
                 {title}
@@ -232,7 +232,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             </div>
 
             <div className="bg-[#F7F8FA] p-4 rounded-xl border border-[#E7E9EF] text-left md:text-right shrink-0 w-full md:w-auto">
-              <span className="text-[11px] text-[#8891A3] block">Kvote 1 adgangskvotient (2026)</span>
+              <span className="text-[11px] text-[#667085] block">Kvote 1 adgangskvotient (2026)</span>
               <span className="text-2xl font-bold text-[#12172B] font-mono-data">{kv}</span>
               <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E6F4ED] text-[#0B7A57] border border-[#0F9D6E]/20 mt-1 block">
                 Officiel UFM-registerdata
@@ -268,7 +268,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
                   <span className="flex items-center gap-1.5 text-[#12172B]">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#0F9D6E]"></span> AI-robusthed
                   </span>
-                  <span className="font-mono-data font-bold text-[#0F9D6E]">{robustScore}/100</span>
+                  <span className="font-mono-data font-bold text-[#087454]">{robustScore}/100</span>
                 </div>
                 <div className="h-2.5 bg-[#E7E9EF] rounded-full overflow-hidden">
                   <div className="h-full bg-[#0F9D6E] rounded-full" style={{ width: `${robustScore}%` }}></div>
@@ -308,19 +308,19 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             <h3 className="text-xs font-bold text-[#12172B] uppercase tracking-wider">Dataoverblik & Nøgletal</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
               <div>
-                <span className="text-[#8891A3] block text-[11px]">KOT-nummer</span>
+                <span className="text-[#667085] block text-[11px]">KOT-nummer</span>
                 <span className="font-mono-data font-bold text-[#12172B]">{kot}</span>
               </div>
               <div>
-                <span className="text-[#8891A3] block text-[11px]">Adgangskvotient</span>
+                <span className="text-[#667085] block text-[11px]">Adgangskvotient</span>
                 <span className="font-mono-data font-bold text-[#12172B]">{kv}</span>
               </div>
               <div>
-                <span className="text-[#8891A3] block text-[11px]">Institution</span>
+                <span className="text-[#667085] block text-[11px]">Institution</span>
                 <span className="font-semibold text-[#12172B] truncate block">{inst}</span>
               </div>
               <div>
-                <span className="text-[#8891A3] block text-[11px]">Dataopdatering</span>
+                <span className="text-[#667085] block text-[11px]">Dataopdatering</span>
                 <span className="font-mono-data text-[#0B7A57] font-semibold">Optagelse {DATA_STATUS.catalogue.admissionsUpdatedLabel} · model {DATA_STATUS.scoring.updatedLabel}</span>
               </div>
             </div>

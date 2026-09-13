@@ -26,3 +26,14 @@ jobs:
 
       - name: Check upstream model and live discovery surfaces
         run: python etl/check_model_discovery_freshness.py --live
+
+      - name: Check production SEO, representative routes and source availability
+        run: python etl/check_public_site_quality.py
+
+      - name: Upload production quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-site-quality
+          path: data/SITE_QUALITY_REPORT.json
+          if-no-files-found: error

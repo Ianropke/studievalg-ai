@@ -1,0 +1,8 @@
+{
+  "status": "BLOCKED",
+  "reason": "No authoritative KOT-to-UDD mapping source was found in raw sources.",
+  "mapped": 0,
+  "unmapped": 0,
+  "ambiguous": 0,
+  "source_files": []
+}

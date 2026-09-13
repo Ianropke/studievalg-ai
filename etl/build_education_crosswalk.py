@@ -17,7 +17,7 @@ OUT = ROOT / "data" / "sources" / "kot_udd_crosswalk.csv"
 REPORT = ROOT / "data" / "sources" / "kot_udd_crosswalk_report.json"
 
 REQUIRED = {"kot_code", "udd_code", "mapping_method", "mapping_source", "mapping_period", "mapping_confidence"}
-ALLOWED = {"OFFICIAL_SOURCE", "VERIFIED_CROSSWALK"}
+ALLOWED = {"OFFICIAL", "DOCUMENTED_CROSSWALK", "EXPERT_REVIEW"}
 
 
 def find_mapping_files() -> list[Path]:

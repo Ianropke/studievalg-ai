@@ -107,7 +107,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                 <ul className="mt-4 space-y-2 text-sm text-[#545D71]">
                   {section.bullets.map((bullet) => (
                     <li key={bullet} className="flex gap-2">
-                      <span aria-hidden="true" className="font-bold text-[#0F9D6E]">✓</span>
+                      <span aria-hidden="true" className="font-bold text-[#087454]">✓</span>
                       <span>{bullet}</span>
                     </li>
                   ))}
@@ -142,7 +142,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </div>
           </section>
 
-          <p className="text-[11px] leading-relaxed text-[#8891A3]">
+          <p className="text-[11px] leading-relaxed text-[#667085]">
             Uddannelsesindsigt er beslutningsstøtte og ikke en officiel optagelsesmyndighed. Kontrollér altid aktuelle adgangskrav, frister og studieordninger hos uddannelsesstedet og Optagelse.dk.
           </p>
         </article>

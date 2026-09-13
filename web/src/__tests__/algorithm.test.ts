@@ -3,6 +3,7 @@ import { evaluatePreference } from "../lib/preferenceMatching";
 import { buildMatchSharePath, parseMatchShareParams } from "../lib/shareMatch";
 import { AI_RESEARCH_INSIGHTS } from "../lib/aiResearch";
 import { z } from "zod";
+import assert from "node:assert/strict";
 
 function computeCompositeScore(robust: number, job: number, sal: number, wAi: number, wJob: number, wSal: number): number {
   const totalWeight = Math.max(1, wAi + wJob + wSal);
@@ -45,22 +46,22 @@ export function runUnitTests() {
 
   // Test 1: Vægtningsformel
   const score1 = computeCompositeScore(88, 95, 78, 80, 70, 60);
-  console.assert(Math.abs(score1 - 87.42) < 0.1, `Test 1 Fejl: Forventet ~87.42, fik ${score1}`);
+  assert.ok(Math.abs(score1 - 87.42) < 0.1, `Test 1 Fejl: Forventet ~87.42, fik ${score1}`);
   console.log("  ✅ TEST-01: Vægtningsberegning korrekt (Score: " + score1.toFixed(2) + ")");
 
   // Test 2: Kvote 1 Opfyldelse
   const kvoteCheck1 = checkKvote1Adgang(9.5, 7.3);
-  console.assert(kvoteCheck1.meetsGpa === true, "Test 2 Fejl: GPA 9.5 bør opfylde krav på 7.3");
+  assert.ok(kvoteCheck1.meetsGpa === true, "Test 2 Fejl: GPA 9.5 bør opfylde krav på 7.3");
   console.log("  ✅ TEST-02: Kvote 1 opfyldelse godkendt (9.5 >= 7.3)");
 
   // Test 3: Kvote 2 Anbefaling
   const kvoteCheck2 = checkKvote1Adgang(9.5, 10.2);
-  console.assert(kvoteCheck2.isKvote2Recommended === true, "Test 3 Fejl: GPA 9.5 bør udløse Kvote 2 anbefaling ved krav 10.2");
+  assert.ok(kvoteCheck2.isKvote2Recommended === true, "Test 3 Fejl: GPA 9.5 bør udløse Kvote 2 anbefaling ved krav 10.2");
   console.log("  ✅ TEST-03: Kvote 2 anbefaling udløst ved for lavt snit (9.5 < 10.2)");
 
   // Test 4: Suffix Stemming & Normalisering
   const norm1 = normalizeSearchText("sygeplejersker");
-  console.assert(norm1.includes("sygeplejersk"), `Test 4 Fejl: Fik ${norm1}`);
+  assert.ok(norm1.includes("sygeplejersk"), `Test 4 Fejl: Fik ${norm1}`);
   console.log("  ✅ TEST-04: Dansk stammafskæring godkendt ('sygeplejersker' -> '" + norm1 + "')");
 
   // Test 5: CBS Universitetsfilter Isolering (Data QA)
@@ -70,8 +71,8 @@ export function runUnitTests() {
   }
   const vetMedIsCbs = matchesCbs("10140", "Veterinærmedicin", "Veterinærmedicin, Frederiksberg C");
   const haIsCbs = matchesCbs("13030", "Erhvervsøkonomi", "Erhvervsøkonomi-filosofi, HA (fil.), Frederiksberg");
-  console.assert(vetMedIsCbs === false, "Test 5 Fejl: Veterinærmedicin (KU 10140) må IKKE matche CBS filter!");
-  console.assert(haIsCbs === true, "Test 5 Fejl: HA (CBS 13030) SKAL matche CBS filter!");
+  assert.ok(vetMedIsCbs === false, "Test 5 Fejl: Veterinærmedicin (KU 10140) må IKKE matche CBS filter!");
+  assert.ok(haIsCbs === true, "Test 5 Fejl: HA (CBS 13030) SKAL matche CBS filter!");
   console.log("  ✅ TEST-05: CBS Datatjek godkendt (KU 10140 ekskluderet, CBS 13030 inkluderet)");
 
   // Test 6: Dynamisk GPA Slider Opdatering & Rangering
@@ -82,8 +83,8 @@ export function runUnitTests() {
   }
   const lowGpaState = computeSortScore(80, 8.0, 10.2);
   const highGpaState = computeSortScore(80, 10.5, 10.2);
-  console.assert(lowGpaState.meets === false && lowGpaState.score === 80, "Test 6 Fejl: GPA 8.0 bør ikke opfylde 10.2 krav");
-  console.assert(highGpaState.meets === true && highGpaState.score === 95, "Test 6 Fejl: GPA 10.5 bør opfylde 10.2 krav og få +15 bonus");
+  assert.ok(lowGpaState.meets === false && lowGpaState.score === 80, "Test 6 Fejl: GPA 8.0 bør ikke opfylde 10.2 krav");
+  assert.ok(highGpaState.meets === true && highGpaState.score === 95, "Test 6 Fejl: GPA 10.5 bør opfylde 10.2 krav og få +15 bonus");
   console.log("  ✅ TEST-06: Dynamisk GPA Slider-tjek godkendt (Karakter-ændring opdaterer automatisk Kvote-status og rangering)");
 
   // Test 7: Realtids Vægtnings-Slider Sortering (AI vs Job vs Løn)
@@ -92,18 +93,18 @@ export function runUnitTests() {
   
   const scoreA_AiFocus = computeCompositeScore(progA.robust, progA.job, progA.sal, 100, 0, 0);
   const scoreB_AiFocus = computeCompositeScore(progB.robust, progB.job, progB.sal, 100, 0, 0);
-  console.assert(scoreA_AiFocus > scoreB_AiFocus, "Test 7 Fejl: ProgA bør være #1 ved AI=100%, Job=0%");
+  assert.ok(scoreA_AiFocus > scoreB_AiFocus, "Test 7 Fejl: ProgA bør være #1 ved AI=100%, Job=0%");
 
   const scoreA_JobFocus = computeCompositeScore(progA.robust, progA.job, progA.sal, 0, 100, 0);
   const scoreB_JobFocus = computeCompositeScore(progB.robust, progB.job, progB.sal, 0, 100, 0);
-  console.assert(scoreB_JobFocus > scoreA_JobFocus, "Test 7 Fejl: ProgB bør være #1 ved AI=0%, Job=100%");
+  assert.ok(scoreB_JobFocus > scoreA_JobFocus, "Test 7 Fejl: ProgB bør være #1 ved AI=0%, Job=100%");
   // Test 23: Minimumskrav kræver som standard, at alle aktive kriterier er opfyldt.
   const allRequirements = evaluatePreference(
     { ai: 90, job: 65, salary: 80 },
     { mode: "requirements", requirementMatchMode: "all", ai: 80, job: 70, salary: 60 }
   );
-  console.assert(allRequirements.meetsRequirements === false, "Test 23 Fejl: Alle aktive minimumskrav skal være opfyldt i all-tilstand");
-  console.assert(allRequirements.requirementsMet === 2 && allRequirements.activeRequirementCount === 3, "Test 23 Fejl: Kravoptællingen er forkert");
+  assert.ok(allRequirements.meetsRequirements === false, "Test 23 Fejl: Alle aktive minimumskrav skal være opfyldt i all-tilstand");
+  assert.ok(allRequirements.requirementsMet === 2 && allRequirements.activeRequirementCount === 3, "Test 23 Fejl: Kravoptællingen er forkert");
   console.log("  ✅ TEST-23: Minimumskrav med all-logik godkendt (2 af 3 krav opfyldt giver intet match)");
 
   // Test 24: Mindst ét krav kan vælges som alternativ kravlogik.
@@ -111,15 +112,15 @@ export function runUnitTests() {
     { ai: 90, job: 65, salary: 80 },
     { mode: "requirements", requirementMatchMode: "any", ai: 80, job: 70, salary: 60 }
   );
-  console.assert(anyRequirements.meetsRequirements === true, "Test 24 Fejl: Ét opfyldt minimumskrav skal give match i any-tilstand");
-  console.assert(Math.abs(anyRequirements.composite - 78.33) < 0.1, `Test 24 Fejl: Kravtilstandens profilgennemsnit er forkert: ${anyRequirements.composite}`);
+  assert.ok(anyRequirements.meetsRequirements === true, "Test 24 Fejl: Ét opfyldt minimumskrav skal give match i any-tilstand");
+  assert.ok(Math.abs(anyRequirements.composite - 78.33) < 0.1, `Test 24 Fejl: Kravtilstandens profilgennemsnit er forkert: ${anyRequirements.composite}`);
   console.log("  ✅ TEST-24: Mindst ét krav-logik godkendt (2 af 3 krav opfyldt giver match)");
 
   // Test 8: SSG Slug Generering for alle 1.413 uddannelser
   const testSample = { kot_nr: "10140", udbud_titel: "Veterinærmedicin", institution: "Københavns Universitet", by: "Frederiksberg C" };
   const sampleSlug = `${testSample.kot_nr}-${testSample.udbud_titel}-${testSample.institution}-${testSample.by}`
     .toLowerCase().replace(/æ/g, "ae").replace(/ø/g, "oe").replace(/å/g, "aa").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  console.assert(sampleSlug === "10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c", `Test 8 Fejl: Forventede 10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c, fik: ${sampleSlug}`);
+  assert.ok(sampleSlug === "10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c", `Test 8 Fejl: Forventede 10140-veterinaermedicin-koebenhavns-universitet-frederiksberg-c, fik: ${sampleSlug}`);
   console.log("  ✅ TEST-08: SSG Slug-generering godkendt (Unikke URL-slugs genereres og verificeres for alle 1.413 uddannelser)");
 
   // Test 9: v2.6 Top 10/20 Listekonfigurationer & Sorteringsvalidering
@@ -132,28 +133,28 @@ export function runUnitTests() {
     "top-10-svaereste-adgangskvotienter",
     "top-10-letteste-adgangskvotienter"
   ];
-  console.assert(listSlugs.length === 7, "Test 9 Fejl: Der skal være nøjagtig 7 liste-ruter i v2.6");
+  assert.ok(listSlugs.length === 7, "Test 9 Fejl: Der skal være nøjagtig 7 liste-ruter i v2.6");
   console.log("  ✅ TEST-09: v2.6 Top 10/20 Listekonfigurationer godkendt (7 statiske ruter verificeret)");
 
   // Test 10: v2.6 Side-om-Side Sammenligningsmatrix & Multi-polygon Delta
   const prog1 = { robust: 92, job: 85, sal: 80 };
   const prog2 = { robust: 78, job: 90, sal: 75 };
   const deltaRob = prog1.robust - prog2.robust;
-  console.assert(deltaRob === 14, `Test 10 Fejl: Delta-beregning bør være 14, fik ${deltaRob}`);
+  assert.ok(deltaRob === 14, `Test 10 Fejl: Delta-beregning bør være 14, fik ${deltaRob}`);
   console.log("  ✅ TEST-10: v2.6 Side-om-side Sammenligningsmatrix godkendt (Delta-beregning: +14% AI-robusthed)");
 
   // Test 11: Defensiv Type-Normalisering af Raw Number Kvotienter
   const numKvotient: unknown = 10.2;
   const kvSafe = String(numKvotient || "Alle optaget");
   const kvNumSafe = parseFloat(kvSafe.replace(",", "."));
-  console.assert(kvNumSafe === 10.2, `Test 11 Fejl: Forventede 10.2, fik ${kvNumSafe}`);
+  assert.ok(kvNumSafe === 10.2, `Test 11 Fejl: Forventede 10.2, fik ${kvNumSafe}`);
   console.log("  ✅ TEST-11: Defensiv Type-Normalisering af Raw Number Kvotienter godkendt (10.2 tal-sikker .replace)");
 
   // Test 12: Ren URL Slug-generering (Ingen titel-duplikering)
   const sampleProg = { kot_nr: "10160", udbud_titel: "Professionsbachelor, tandplejer, København N, Studiestart: sommerstart", institution: "Københavns Professionshøjskole", by: "København N" };
   const rawCleanSlug = `${sampleProg.kot_nr}-${sampleProg.udbud_titel}`
     .toLowerCase().replace(/æ/g, "ae").replace(/ø/g, "oe").replace(/å/g, "aa").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  console.assert(rawCleanSlug === "10160-professionsbachelor-tandplejer-koebenhavn-n-studiestart-sommerstart", `Test 12 Fejl: Forventede ren slug, fik: ${rawCleanSlug}`);
+  assert.ok(rawCleanSlug === "10160-professionsbachelor-tandplejer-koebenhavn-n-studiestart-sommerstart", `Test 12 Fejl: Forventede ren slug, fik: ${rawCleanSlug}`);
   console.log("  ✅ TEST-12: Ren URL Slug-generering godkendt ('10160-professionsbachelor-tandplejer-koebenhavn-n-studiestart-sommerstart')");
 
   // Test 13: Dansk Bynavn & Titel Normalisering
@@ -168,8 +169,8 @@ export function runUnitTests() {
   }
   const c1 = testFormatCity("aarhus c");
   const c2 = testFormatCity("københavn n");
-  console.assert(c1 === "Aarhus C", `Test 13 Fejl: Forventede Aarhus C, fik ${c1}`);
-  console.assert(c2 === "København N", `Test 13 Fejl: Forventede København N, fik ${c2}`);
+  assert.ok(c1 === "Aarhus C", `Test 13 Fejl: Forventede Aarhus C, fik ${c1}`);
+  assert.ok(c2 === "København N", `Test 13 Fejl: Forventede København N, fik ${c2}`);
   console.log("  ✅ TEST-13: Dansk bynavn- og titel-normalisering godkendt ('aarhus c' -> 'Aarhus C', 'københavn n' -> 'København N')");
 
   // Test 14: Mangfoldigheds-deduplikering af uddannelsestyper
@@ -180,17 +181,17 @@ export function runUnitTests() {
   }
   const progVejle = "Professionsbachelor, sygeplejerske, Vejle, Studiestart: sommerstart";
   const progSlagelse = "Professionsbachelor, sygeplejerske, Slagelse, Studiestart: sommerstart";
-  console.assert(normKey(progVejle) === normKey(progSlagelse), "Test 14 Fejl: Sygeplejerske i Vejle og Slagelse bør have samme kanoniske nøgle");
+  assert.ok(normKey(progVejle) === normKey(progSlagelse), "Test 14 Fejl: Sygeplejerske i Vejle og Slagelse bør have samme kanoniske nøgle");
   console.log("  ✅ TEST-14: Mangfoldigheds-deduplikering godkendt (Sygeplejerske i Vejle og Slagelse samles under én kanonisk nøgle)");
 
-  // Test 15: Kanonisk Databasemodel vs Title-Heuristik
+  // Test 15: Rå katalogtal uden programprovenance neutraliseres.
   const dbScores = { automation_risk: 0.15, labour_demand: 0.95, salary_growth: 0.90 };
   const enrichedDb = getEnrichedScores("Medicin", dbScores);
-  console.assert(enrichedDb.automation_risk === 15, `Test 15 Fejl: Database score bør bevares (15), fik ${enrichedDb.automation_risk}`);
-  console.log("  ✅ TEST-15: Kanonisk databasemodel godkendt (Empiriske databasetal overskrives ikke af title-heuristikker)");
-  console.assert(enrichedDb.overall_status === "PROVENANCE_REQUIRED", "Test 15b Fejl: Raw katalogtal skal kræve eksplicit provenance");
-  console.assert(enrichedDb.provenance.automation_risk.status === "CROSSWALK", "Test 15c Fejl: AI-risiko skal markeres som crosswalk-estimat");
-  console.assert(enrichedDb.provenance.labour_demand.status === "PROVENANCE_REQUIRED", "Test 15d Fejl: Jobscore skal markeres som provenance required");
+  assert.ok(enrichedDb.automation_risk === 50, `Test 15 Fejl: Udokumenteret AI-tal skal neutraliseres til 50, fik ${enrichedDb.automation_risk}`);
+  console.log("  ✅ TEST-15: Udokumenterede katalogtal neutraliseres i rangeringen");
+  assert.ok(enrichedDb.overall_status === "PROVENANCE_REQUIRED", "Test 15b Fejl: Raw katalogtal skal kræve eksplicit provenance");
+  assert.ok(enrichedDb.provenance.automation_risk.status === "PROVENANCE_REQUIRED", "Test 15c Fejl: AI-risiko uden kildestatus skal kræve provenance");
+  assert.ok(enrichedDb.provenance.labour_demand.status === "PROVENANCE_REQUIRED", "Test 15d Fejl: Jobscore skal markeres som provenance required");
   console.log("  ✅ TEST-15b: Epistemisk status på rå katalogtal godkendt");
 
   // Test 17: Zod Schema Input Validering & Grænsekontrol
@@ -202,15 +203,15 @@ export function runUnitTests() {
   const validParse = PipelineInputSchema.safeParse({ query: "Datalogi", riskTolerance: 0.2, salaryPriority: 0.8 });
   const invalidRisk = PipelineInputSchema.safeParse({ query: "Datalogi", riskTolerance: 1.5 });
   const invalidQuery = PipelineInputSchema.safeParse({ query: "" });
-  console.assert(validParse.success === true, "Test 17 Fejl: Gyldigt payload bør accepteres");
-  console.assert(invalidRisk.success === false, "Test 17 Fejl: riskTolerance 1.5 bør afvises");
-  console.assert(invalidQuery.success === false, "Test 17 Fejl: Tom query bør afvises");
+  assert.ok(validParse.success === true, "Test 17 Fejl: Gyldigt payload bør accepteres");
+  assert.ok(invalidRisk.success === false, "Test 17 Fejl: riskTolerance 1.5 bør afvises");
+  assert.ok(invalidQuery.success === false, "Test 17 Fejl: Tom query bør afvises");
   console.log("  ✅ TEST-17: Zod Schema validering godkendt (Ugyldige grænseværdier og tomme felter afvises)");
 
   // Test 18: Eksplicit Baseline-Skøn Markering (is_baseline_estimate)
   const baselineScores = getEnrichedScores("Ukendt Fag");
-  console.assert(baselineScores.is_baseline_estimate === true, "Test 18 Fejl: Manglende databasetal skal markeres som baseline estimate");
-  console.assert(baselineScores.data_quality === "LOW", "Test 18 Fejl: Baseline skøn skal have data_quality = LOW");
+  assert.ok(baselineScores.is_baseline_estimate === true, "Test 18 Fejl: Manglende databasetal skal markeres som baseline estimate");
+  assert.ok(baselineScores.data_quality === "LOW", "Test 18 Fejl: Baseline skøn skal have data_quality = LOW");
   console.log("  ✅ TEST-18: Baseline-skøn markering godkendt (is_baseline_estimate: true & data_quality: 'LOW')");
 
   // Test 19: Ingen Hardcoded Faldback Anbefalinger i API Response
@@ -219,26 +220,32 @@ export function runUnitTests() {
     error_code: "ANALYTICS_ENGINE_UNAVAILABLE",
     message: "Studievalgsanalysen er midlertidigt utilgængelig."
   };
-  console.assert(safe503Response.status === "unavailable", "Test 19 Fejl: Safe 503 response skal have status 'unavailable'");
-  console.assert(!("recommended_programs" in safe503Response), "Test 19 Fejl: Safe 503 response må IKKE indeholde anbefalede kort!");
+  assert.ok(safe503Response.status === "unavailable", "Test 19 Fejl: Safe 503 response skal have status 'unavailable'");
+  assert.ok(!("recommended_programs" in safe503Response), "Test 19 Fejl: Safe 503 response må IKKE indeholde anbefalede kort!");
   console.log("  ✅ TEST-19: Safe HTTP 503 response godkendt (Ingen fabrikerede faldback-anbefalinger i API'et)");
 
   // Test 20: Kanonisk Afledt AI Resilience Indeks Semantik
-  const sampleResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15 });
-  console.assert(sampleResilienceProg.ai_resilience === 84, `Test 20 Fejl: ai_resilience bør følge den vægtede formel og være 84, fik ${sampleResilienceProg.ai_resilience}`);
-  const riskierProg = getEnrichedScores("Andet fag", { automation_risk: 0.35, augmentation_potential: 0.2 });
-  console.assert(sampleResilienceProg.ai_resilience > riskierProg.ai_resilience, "Test 20 Fejl: AI-robusthed skal være differentieret mellem programmer");
+  const mappedAiMetadata = {
+    ai_dataset_version: "O*NET 31.0",
+    ai_model_status: "CROSSWALK_OR_MODEL",
+    ai_mapping_confidence: "LOW" as const,
+    ai_is_baseline_estimate: false,
+  };
+  const sampleResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15, augmentation_potential: 0.8, ...mappedAiMetadata });
+  assert.ok(sampleResilienceProg.ai_resilience === 84, `Test 20 Fejl: ai_resilience bør følge den vægtede formel og være 84, fik ${sampleResilienceProg.ai_resilience}`);
+  const riskierProg = getEnrichedScores("Andet fag", { automation_risk: 0.35, augmentation_potential: 0.2, ...mappedAiMetadata });
+  assert.ok(sampleResilienceProg.ai_resilience > riskierProg.ai_resilience, "Test 20 Fejl: AI-robusthed skal være differentieret mellem programmer");
   console.log("  ✅ TEST-20: Differentieret AI-resilience-indeks godkendt (75% risikoresiliens + 25% augmentation)");
 
   // Test 21: Frontend-kontrakten bruger samme AI-formel for eksplicit risiko og augmentation.
-  const explicitResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15, augmentation_potential: 0.8 });
-  console.assert(explicitResilienceProg.ai_resilience === 84, `Test 21 Fejl: 75/25-formlen bør give 84, fik ${explicitResilienceProg.ai_resilience}`);
+  const explicitResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15, augmentation_potential: 0.8, ...mappedAiMetadata });
+  assert.ok(explicitResilienceProg.ai_resilience === 84, `Test 21 Fejl: 75/25-formlen bør give 84, fik ${explicitResilienceProg.ai_resilience}`);
   console.log("  ✅ TEST-21: Frontendkontrakt for 75/25 AI-resiliens godkendt");
 
   // Test 22: “Alle optaget”-listen må ikke inkludere numeriske adgangskvotienter.
-  console.assert(isAllAdmitted("Alle optaget") === true, "Test 22 Fejl: 'Alle optaget' skal genkendes");
-  console.assert(isAllAdmitted("") === true, "Test 22 Fejl: Tom kvotient skal behandles som alle optaget");
-  console.assert(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
+  assert.ok(isAllAdmitted("Alle optaget") === true, "Test 22 Fejl: 'Alle optaget' skal genkendes");
+  assert.ok(isAllAdmitted("") === true, "Test 22 Fejl: Tom kvotient skal behandles som alle optaget");
+  assert.ok(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
   console.log("  ✅ TEST-22: Adgangslisten filtrerer korrekt på 'Alle optaget'");
 
   // Test 25: Delbare match-links bevarer alle brugerens aktive valg.
@@ -253,22 +260,22 @@ export function runUnitTests() {
     query: "medicin",
   });
   const parsedShare = parseMatchShareParams(sharePath.split("?")[1] || "");
-  console.assert(parsedShare.gpa === 8.2, `Test 25 Fejl: Delingslink mistede snit (${parsedShare.gpa})`);
-  console.assert(parsedShare.ai === 90 && parsedShare.job === 40 && parsedShare.salary === 20, "Test 25 Fejl: Delingslink mistede vægte");
-  console.assert(parsedShare.mode === "requirements" && parsedShare.requirementMatchMode === "any", "Test 25 Fejl: Delingslink mistede kravlogik");
-  console.assert(parsedShare.university === "au" && parsedShare.query === "medicin", "Test 25 Fejl: Delingslink mistede uddannelsessted eller søgning");
+  assert.ok(parsedShare.gpa === 8.2, `Test 25 Fejl: Delingslink mistede snit (${parsedShare.gpa})`);
+  assert.ok(parsedShare.ai === 90 && parsedShare.job === 40 && parsedShare.salary === 20, "Test 25 Fejl: Delingslink mistede vægte");
+  assert.ok(parsedShare.mode === "requirements" && parsedShare.requirementMatchMode === "any", "Test 25 Fejl: Delingslink mistede kravlogik");
+  assert.ok(parsedShare.university === "au" && parsedShare.query === "medicin", "Test 25 Fejl: Delingslink mistede uddannelsessted eller søgning");
   console.log("  ✅ TEST-25: Delbart match-link bevarer snit, vægte, kravlogik, sted og søgning");
 
   // Test 26: Manipulerede URL-værdier begrænses til sliderkontrakten.
   const boundedShare = parseMatchShareParams("?gpa=99&wAi=-20&wJob=500&wSal=ikke-et-tal&u=ukendt");
-  console.assert(boundedShare.gpa === 12, `Test 26 Fejl: GPA bør begrænses til 12, fik ${boundedShare.gpa}`);
-  console.assert(boundedShare.ai === 0 && boundedShare.job === 100, "Test 26 Fejl: Vægte bør begrænses til 0–100");
-  console.assert(boundedShare.salary === undefined && boundedShare.university === undefined, "Test 26 Fejl: Ugyldige værdier bør ignoreres");
+  assert.ok(boundedShare.gpa === 12, `Test 26 Fejl: GPA bør begrænses til 12, fik ${boundedShare.gpa}`);
+  assert.ok(boundedShare.ai === 0 && boundedShare.job === 100, "Test 26 Fejl: Vægte bør begrænses til 0–100");
+  assert.ok(boundedShare.salary === undefined && boundedShare.university === undefined, "Test 26 Fejl: Ugyldige værdier bør ignoreres");
   console.log("  ✅ TEST-26: Delingsparametre valideres og begrænses sikkert");
 
   // Test 27: Forskningskort har eksplicit kilde, geografi og begrænsning.
-  console.assert(AI_RESEARCH_INSIGHTS.length >= 5, "Test 27 Fejl: AI Insights skal have et kurateret forskningsgrundlag");
-  console.assert(
+  assert.ok(AI_RESEARCH_INSIGHTS.length >= 5, "Test 27 Fejl: AI Insights skal have et kurateret forskningsgrundlag");
+  assert.ok(
     AI_RESEARCH_INSIGHTS.every((insight) =>
       insight.sourceUrl.startsWith("https://") &&
       insight.geography.length > 0 &&
@@ -288,9 +295,9 @@ export function runUnitTests() {
     ai_mapping_confidence: "LOW",
     ai_is_baseline_estimate: false,
   });
-  console.assert(onet31Scores.provenance.automation_risk.dataset_version === "O*NET 31.0", "Test 28 Fejl: Migreret score skal vise O*NET 31.0");
-  console.assert(onet31Scores.provenance.automation_risk.status === "CROSSWALK", "Test 28 Fejl: O*NET-score skal forblive crosswalk/model");
-  console.assert(onet31Scores.is_baseline_estimate === false, "Test 28 Fejl: Migreret score må ikke markeres som baseline");
+  assert.ok(onet31Scores.provenance.automation_risk.dataset_version === "O*NET 31.0", "Test 28 Fejl: Migreret score skal vise O*NET 31.0");
+  assert.ok(onet31Scores.provenance.automation_risk.status === "CROSSWALK", "Test 28 Fejl: O*NET-score skal forblive crosswalk/model");
+  assert.ok(onet31Scores.is_baseline_estimate === false, "Test 28 Fejl: Migreret score må ikke markeres som baseline");
   const legacyScores = getEnrichedScores("Ukendt fag", {
     automation_risk: 32,
     augmentation_potential: 70,
@@ -299,8 +306,8 @@ export function runUnitTests() {
     ai_mapping_confidence: "LOW",
     ai_is_baseline_estimate: true,
   });
-  console.assert(legacyScores.is_baseline_estimate === true, "Test 28b Fejl: Umapppet score skal markeres som baseline");
-  console.assert(legacyScores.provenance.automation_risk.status === "PROVENANCE_REQUIRED", "Test 28c Fejl: Legacy-baseline må ikke kaldes O*NET-crosswalk");
+  assert.ok(legacyScores.is_baseline_estimate === true, "Test 28b Fejl: Umapppet score skal markeres som baseline");
+  assert.ok(legacyScores.provenance.automation_risk.status === "PROVENANCE_REQUIRED", "Test 28c Fejl: Legacy-baseline må ikke kaldes O*NET-crosswalk");
   console.log("  ✅ TEST-28: O*NET 31.0 og legacy-baseline holdes epistemisk adskilt");
 
   console.log("🎉 Alle Unit Tests bestået uden fejl!\n");

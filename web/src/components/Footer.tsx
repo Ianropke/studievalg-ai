@@ -23,10 +23,10 @@ export function Footer() {
             <p className="leading-relaxed">
               Denne platform vurderer ikke mennesker eller deres fremtidige jobmuligheder. Den analyserer udelukkende statistiske mønstre på uddannelses- og arbejdsmarkedsniveau baseret på offentlig forskning og tilgængelige data. Alle beregninger udføres deterministisk ud fra dokumenterede modeller og datakilder.
             </p>
-            <p className="leading-relaxed text-[#8891A3]">
+            <p className="leading-relaxed text-[#667085]">
               Tallene her er vores bedste bud, baseret på statistik og modeller — ikke en garanti for, hvad der kommer til at ske for dig, dit optag eller din karriere. Officiel ansøgning sker altid via Optagelse.dk.
             </p>
-            <p className="leading-relaxed text-[#8891A3]">
+            <p className="leading-relaxed text-[#667085]">
               Vi anbefaler desuden at tale med en studievejleder om dit konkrete valg — denne platform er ét godt input blandt flere, ikke en erstatning for personlig vejledning.
             </p>
           </div>
@@ -41,7 +41,7 @@ export function Footer() {
               <li className="flex items-center gap-2 text-[#0B7A57]">✓ Matchvalg gemmes ikke i en konto</li>
               <li className="flex items-center gap-2 text-[#0B7A57]">✓ Ingen reklamer eller kommercielle interesser</li>
             </ul>
-            <p className="pt-1 text-[10px] leading-relaxed text-[#8891A3]">
+            <p className="pt-1 text-[10px] leading-relaxed text-[#667085]">
               Hosting kan levere tekniske drifts- og performance-målinger. Matchværktøjet opretter ikke en personlig brugerprofil.
             </p>
           </div>
@@ -83,7 +83,7 @@ export function Footer() {
 
         {/* Bottom Bar: Single Copyright + Data Timestamp */}
         <div className="pt-6 border-t border-[#E7E9EF] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px]">
-          <p className="text-[#8891A3]">
+          <p className="text-[#667085]">
             © {new Date().getFullYear()} Uddannelsesindsigt • Uafhængig beslutningsstøtte
           </p>
           <div className="flex items-center gap-1.5 font-mono-data text-[#0B7A57] font-semibold">

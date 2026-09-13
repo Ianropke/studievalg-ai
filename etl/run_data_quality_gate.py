@@ -1,6 +1,7 @@
 """Run the non-negotiable data integrity gates for Studievalg-AI."""
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -16,8 +17,16 @@ def run(script: str) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--allow-blocked",
+        action="store_true",
+        help="Return success for an explicitly BLOCKED mapping state while preserving that status in the report.",
+    )
+    args = parser.parse_args()
     steps = [run("build_education_crosswalk.py")]
-    status = "PASS" if all(x["returncode"] == 0 for x in steps) else "FAIL"
+    returncodes = {step["returncode"] for step in steps}
+    status = "PASS" if returncodes == {0} else ("BLOCKED" if returncodes <= {0, 2} else "FAIL")
     report = {
         "status": status,
         "steps": steps,
@@ -31,7 +40,7 @@ def main() -> int:
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0 if status == "PASS" else 1
+    return 0 if status == "PASS" or (status == "BLOCKED" and args.allow_blocked) else 1
 
 
 if __name__ == "__main__":

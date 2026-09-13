@@ -73,7 +73,7 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
         </span>
         <span className="font-semibold">Datakvalitet: {qualityLabel(scores)}</span>
         <span className="font-semibold">Aktive rankingsignaler: {activeRankingSignals}/3</span>
-        <span className="text-[#8891A3]">Model opdateret: {DATA_STATUS.scoring.updatedLabel}</span>
+        <span className="text-[#667085]">Model opdateret: {DATA_STATUS.scoring.updatedLabel}</span>
       </div>
       <p className="mt-1 leading-relaxed">
         AI-resiliens er et model-/crosswalkindeks, ikke en sandsynlighed for automatisering eller en prognose for arbejdsløshed.
@@ -91,14 +91,14 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
                 <div key={row.key} className="rounded-md border border-[#E7E9EF] bg-[#FFFFFF] px-2 py-1.5">
                   <span className="block font-semibold text-[#12172B]">{row.label}</span>
                   <span className="block text-[10px]">{statusLabel(status)}</span>
-                  <span className="block text-[10px] text-[#8891A3]">{metricStatusNote(status)}</span>
+                  <span className="block text-[10px] text-[#667085]">{metricStatusNote(status)}</span>
                   <span className="block text-[10px] font-semibold text-[#545D71]">{rankingLabel(scores, row.rankingKey)}</span>
                 </div>
               );
             })}
           </div>
           <p className="mt-1 leading-relaxed">Metrikstatus: {metricStatuses}</p>
-          <p className="mt-1 leading-relaxed text-[#8891A3]">
+          <p className="mt-1 leading-relaxed text-[#667085]">
             Scoringsmodel: {DATA_STATUS.scoring.methodologyVersion} · Katalog: {DATA_STATUS.scoring.datasetVersion}
           </p>
         </>

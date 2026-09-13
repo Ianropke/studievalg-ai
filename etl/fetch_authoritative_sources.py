@@ -12,7 +12,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin
@@ -24,7 +26,6 @@ RAW = ROOT / "data" / "sources" / "raw"
 MANIFEST = ROOT / "data" / "sources" / "raw_source_manifest.json"
 CROSSWALK_SPEC = ROOT / "data" / "sources" / "education_crosswalk_spec.json"
 
-UFM_CKAN_BASE = "https://datavejviser-indtastning.digst.govcloud.dk/api/3/action/package_show?id="
 UFM_EMPLOYMENT_ID = "c7f294fe-bf49-4f1d-98c2-61f0573bcb67"
 UFM_KOT_ID = "f13d335a-d4e5-456d-b176-2af0ba1d82c2"
 UFM_KOT_CATALOG = "https://datavejviser.dk/katalog/uddannelses-og-forskningsstyrelsen/f13d335a-d4e5-456d-b176-2af0ba1d82c2"
@@ -38,42 +39,80 @@ def get(url: str) -> requests.Response:
     return r
 
 
-def save_bytes(name: str, data: bytes, metadata: dict) -> None:
-    path = RAW / name
+def save_bytes(raw_root: Path, name: str, data: bytes, metadata: dict) -> None:
+    path = raw_root / name
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     metadata.update({
-        "path": str(path.relative_to(ROOT)),
+        "path": str((RAW / name).relative_to(ROOT)),
         "sha256": hashlib.sha256(data).hexdigest(),
         "bytes": len(data),
     })
 
 
-def fetch_ufm_dataset(dataset_id: str, dataset_name: str, catalog_url: str, filename: str, manifest: list[dict]) -> None:
-    payload = get(UFM_CKAN_BASE + dataset_id).json()
-    if not payload.get("success"):
-        raise RuntimeError(f"UFM CKAN package_show returned success=false for {dataset_name}")
-    resources = payload["result"]["resources"]
-    csv_resources = [r for r in resources if str(r.get("format", "")).upper() == "CSV" and r.get("url")]
-    if not csv_resources:
-        raise RuntimeError(f"{dataset_name}: no CSV distribution found in public CKAN metadata")
-    resource = csv_resources[0]
-    r = get(resource["url"])
+def extract_distributions(payload: dict) -> list[dict[str, str | None]]:
+    distributions = []
+    for item in payload.get("@graph", []):
+        item_type = item.get("@type")
+        types = item_type if isinstance(item_type, list) else [item_type]
+        if "dcat:Distribution" not in types:
+            continue
+        access = item.get("dcat:accessURL") or {}
+        distributions.append({
+            "format": item.get("dct:format"),
+            "access_url": access.get("@id") if isinstance(access, dict) else None,
+            "title": item.get("dct:title"),
+        })
+    return distributions
+
+
+def fetch_ufm_catalog_metadata(
+    raw_root: Path,
+    dataset_id: str,
+    dataset_name: str,
+    catalog_url: str,
+    filename: str,
+    manifest: list[dict],
+) -> None:
+    """Snapshot current official metadata without pretending the report page is CSV.
+
+    Datavejviser's former CKAN ``package_show`` endpoint now returns 404. Its
+    public DCAT JSON-LD endpoint is current, but the advertised CSV distribution
+    currently points to the rendered UFM report rather than a machine CSV URL.
+    We therefore preserve metadata and fail closed for programme scoring.
+    """
+    metadata_url = f"{catalog_url}.jsonld"
+    response = get(metadata_url)
+    payload = response.json()
+    distributions = extract_distributions(payload)
+    if not distributions:
+        raise RuntimeError(f"{dataset_name}: official DCAT metadata has no distributions")
+    csv_distributions = [item for item in distributions if str(item.get("format", "")).upper() == "CSV"]
+    if not csv_distributions:
+        raise RuntimeError(f"{dataset_name}: official DCAT metadata no longer declares a CSV distribution")
+    csv_url = csv_distributions[0].get("access_url")
     meta = {
         "source": "Uddannelses- og Forskningsstyrelsen",
         "dataset": dataset_name,
-        "distribution": "CSV",
+        "dataset_id": dataset_id,
+        "distribution": "DCAT JSON-LD metadata",
         "catalog_url": catalog_url,
-        "source_url": resource["url"],
-        "resource_name": resource.get("name"),
+        "source_url": metadata_url,
+        "declared_csv_access_url": csv_url,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "license": "CC BY 4.0",
+        "status": "METADATA_ONLY",
+        "note": (
+            "The declared CSV access URL currently resolves to the rendered UFM report page, "
+            "not a verified CSV distribution. It is not ingested as programme-level evidence."
+        ),
+        "distributions": distributions,
     }
-    save_bytes(filename, r.content, meta)
+    save_bytes(raw_root, filename, response.content, meta)
     manifest.append(meta)
 
 
-def fetch_dst_register(manifest: list[dict]) -> None:
+def fetch_dst_register(raw_root: Path, manifest: list[dict]) -> None:
     html = get(DST_REGISTER_PAGE).text
     hrefs = re.findall(r'href=["\']([^"\']+)["\']', html, flags=re.I)
     wanted = [
@@ -100,18 +139,25 @@ def fetch_dst_register(manifest: list[dict]) -> None:
             "retrieved_at": datetime.now(timezone.utc).isoformat(),
             "classification_note": "UDD/AUDD are authoritative Danish education identifiers; programme-to-observation mapping must be explicit.",
         }
-        save_bytes(f"dst_education_register/{name}", r.content, meta)
+        save_bytes(raw_root, f"dst_education_register/{name}", r.content, meta)
         manifest.append(meta)
 
 
-def fetch_lons11_schema(manifest: list[dict]) -> None:
+def validate_lons11_schema(info: dict) -> str:
+    education_variables = [
+        str(variable.get("id", ""))
+        for variable in info.get("variables", [])
+        if str(variable.get("id", "")).upper() in {"UDD", "UDDANNELSE"}
+    ]
+    if not education_variables:
+        raise RuntimeError("LONS11 schema changed; no UDD/UDDANNELSE education variable found")
+    return education_variables[0]
+
+
+def fetch_lons11_schema(raw_root: Path, manifest: list[dict]) -> None:
     tableinfo_url = "https://api.statbank.dk/v1/tableinfo/LONS11?lang=da"
     info = get(tableinfo_url).json()
-    variables = {v["id"]: v for v in info["variables"]}
-    # Do not assume that a variable named UDD exists forever. Fail clearly if
-    # the table's education dimension changes and require a reviewed query.
-    if not any(v.get("id", "").upper() == "UDD" for v in info["variables"]):
-        raise RuntimeError("LONS11 schema changed; no UDD education variable found")
+    education_variable = validate_lons11_schema(info)
     data = json.dumps(info, ensure_ascii=False, indent=2).encode("utf-8")
     meta = {
         "source": "Danmarks Statistik",
@@ -120,9 +166,10 @@ def fetch_lons11_schema(manifest: list[dict]) -> None:
         "source_url": tableinfo_url,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "status": "SCHEMA_ONLY",
+        "education_variable": education_variable,
         "note": "Salary dimensions are deliberately not guessed. A reviewed query is required before downloading salary observations.",
     }
-    save_bytes("dst_lons11_tableinfo.json", data, meta)
+    save_bytes(raw_root, "dst_lons11_tableinfo.json", data, meta)
     manifest.append(meta)
 
 
@@ -140,7 +187,7 @@ def write_crosswalk_spec() -> None:
             "Each production mapping must contain kot_code, udd_code, mapping_method, mapping_source, mapping_period, and mapping_confidence.",
             "Unmapped programmes remain UNMAPPED and cannot receive labour/salary scores."
         ],
-        "allowed_mapping_methods": ["OFFICIAL_SOURCE", "VERIFIED_CROSSWALK"],
+        "allowed_mapping_methods": ["OFFICIAL", "DOCUMENTED_CROSSWALK", "EXPERT_REVIEW"],
         "required_provenance": ["source_url", "dataset", "period"],
         "note": "The ingestion pipeline creates the contract and raw source snapshots; it does not manufacture the KOT-to-UDD relationship."
     }
@@ -149,17 +196,37 @@ def write_crosswalk_spec() -> None:
 
 
 def main() -> int:
-    RAW.mkdir(parents=True, exist_ok=True)
     manifest: list[dict] = []
-    fetch_ufm_dataset(UFM_EMPLOYMENT_ID, "Beskæftigelse", UFM_EMPLOYMENT_CATALOG, "ufm_beskaeftigelse.csv", manifest)
-    fetch_ufm_dataset(UFM_KOT_ID, "Søgning og optagelse via KOT", UFM_KOT_CATALOG, "ufm_kot.csv", manifest)
-    fetch_dst_register(manifest)
-    fetch_lons11_schema(manifest)
+    with tempfile.TemporaryDirectory(prefix="uddannelsesindsigt-source-refresh-") as temp_dir:
+        staged_raw = Path(temp_dir) / "raw"
+        staged_raw.mkdir(parents=True, exist_ok=True)
+        fetch_ufm_catalog_metadata(staged_raw, UFM_EMPLOYMENT_ID, "Beskæftigelse", UFM_EMPLOYMENT_CATALOG, "ufm_beskaeftigelse_catalog.jsonld", manifest)
+        fetch_ufm_catalog_metadata(staged_raw, UFM_KOT_ID, "Søgning og optagelse via KOT", UFM_KOT_CATALOG, "ufm_kot_catalog.jsonld", manifest)
+        fetch_dst_register(staged_raw, manifest)
+        fetch_lons11_schema(staged_raw, manifest)
+
+        # Publish only after every official endpoint and schema check succeeded.
+        # Existing O*NET snapshots are left untouched.
+        RAW.mkdir(parents=True, exist_ok=True)
+        for staged in staged_raw.rglob("*"):
+            if staged.is_file():
+                destination = RAW / staged.relative_to(staged_raw)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(staged, destination)
     write_crosswalk_spec()
-    MANIFEST.write_text(
-        json.dumps({"retrieved_at": datetime.now(timezone.utc).isoformat(), "sources": manifest}, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    manifest_payload = {
+        "schema_version": "2.0",
+        "retrieved_at": datetime.now(timezone.utc).isoformat(),
+        "sources": manifest,
+        "status_counts": {
+            status: sum(1 for item in manifest if item.get("status", "AVAILABLE") == status)
+            for status in sorted({item.get("status", "AVAILABLE") for item in manifest})
+        },
+        "scoring_readiness": "BLOCKED_PENDING_VERIFIED_UFM_DISTRIBUTION_AND_PROGRAMME_MAPPINGS",
+    }
+    temporary_manifest = MANIFEST.with_suffix(".json.tmp")
+    temporary_manifest.write_text(json.dumps(manifest_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary_manifest.replace(MANIFEST)
     print(f"Fetched {len(manifest)} authoritative source artefacts.")
     print(f"Crosswalk contract written to {CROSSWALK_SPEC.relative_to(ROOT)}")
     return 0

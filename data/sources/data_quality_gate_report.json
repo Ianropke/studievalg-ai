@@ -1,0 +1,17 @@
+{
+  "status": "BLOCKED",
+  "steps": [
+    {
+      "script": "build_education_crosswalk.py",
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "No authoritative KOT-to-UDD mapping source was found in raw sources.\n"
+    }
+  ],
+  "policy": {
+    "no_fuzzy_mapping": true,
+    "no_default_education_mapping": true,
+    "no_score_without_observation": true,
+    "unmapped_programmes_have_no_labour_or_salary_score": true
+  }
+}

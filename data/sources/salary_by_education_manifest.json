@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "status": "SOURCE_READY_NOT_PROGRAMME_MAPPED",
+  "row_count": 522,
+  "excluded_aggregate_or_missing_rows": 12,
+  "education_category_count": 87,
+  "periods": [
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024"
+  ],
+  "source": "Danmarks Statistik",
+  "dataset": "LONS11",
+  "source_retrieved_at": "2026-09-13",
+  "raw_source_sha256": "4876184905f08c0abab9e44b9a8cb9b474f857910eba56e03fe9d77927cee739",
+  "output_sha256": "4356a2b73e5a0fb8899378002d22d6dfb619ef286d5d0dc6ca772e629c46f557",
+  "query": {
+    "table": "LONS11",
+    "format": "CSV",
+    "lang": "da",
+    "variables": [
+      {
+        "code": "UDDANNELSE",
+        "values": [
+          "*"
+        ]
+      },
+      {
+        "code": "SEKTOR",
+        "values": [
+          "1000"
+        ]
+      },
+      {
+        "code": "AFLOEN",
+        "values": [
+          "TIFA"
+        ]
+      },
+      {
+        "code": "LONGRP",
+        "values": [
+          "VOK"
+        ]
+      },
+      {
+        "code": "LØNMÅL",
+        "values": [
+          "FORINKL"
+        ]
+      },
+      {
+        "code": "KØN",
+        "values": [
+          "MOK"
+        ]
+      },
+      {
+        "code": "Tid",
+        "values": [
+          "2019",
+          "2020",
+          "2021",
+          "2022",
+          "2023",
+          "2024"
+        ]
+      }
+    ]
+  },
+  "transformation": "Parsed official education-category code from the LONS11 label; excluded aggregate totals and blank/suppressed cells; no interpolation or programme mapping.",
+  "limitation": "These observations cannot enter programme rankings until a documented KOT-to-compatible-education mapping exists."
+}

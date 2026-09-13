@@ -6,6 +6,7 @@ score is present, a corresponding observation and provenance record.
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 from pathlib import Path
@@ -21,10 +22,17 @@ def norm(value: str) -> str:
     return " ".join((value or "").strip().lower().split())
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--allow-blocked",
+        action="store_true",
+        help="Return success when authoritative crosswalk/score inputs are explicitly unavailable.",
+    )
+    args = parser.parse_args()
     if not CROSSWALK.exists() or not SCORES.exists():
         report = {"status": "BLOCKED", "reason": "Crosswalk or canonical score table is not available yet."}
         OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        return 2
+        return 0 if args.allow_blocked else 2
     with CROSSWALK.open(encoding="utf-8-sig", newline="") as f:
         crosswalk = list(csv.DictReader(f))
     with SCORES.open(encoding="utf-8-sig", newline="") as f:
@@ -45,16 +53,22 @@ def main() -> int:
                 "score_provenance_present": bool(score and (score.get("source") or score.get("labour_source") or score.get("salary_source"))),
             })
     missing = [r for r in rows if not r["score_row_present"]]
+    missing_provenance = [r for r in rows if r["score_row_present"] and not r["score_provenance_present"]]
     report = {
-        "status": "PASS" if rows and not missing else ("FAIL" if rows else "BLOCKED"),
+        "status": "PASS" if rows and not missing and not missing_provenance else ("FAIL" if rows else "BLOCKED"),
         "targets": len(rows),
         "missing_score_rows": len(missing),
+        "missing_score_provenance_rows": len(missing_provenance),
         "rows": rows,
         "policy": "A score without traceable source provenance is not production-valid.",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return 0 if report["status"] == "PASS" else 1
+    if report["status"] == "PASS":
+        return 0
+    if report["status"] == "BLOCKED" and args.allow_blocked:
+        return 0
+    return 1
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -1,0 +1,424 @@
+{
+  "schema_version": "1.0",
+  "model_version": "2026.6",
+  "canonical_formula": "0.75 * (1 - automation_risk) + 0.25 * augmentation_potential",
+  "cohort": {
+    "programme_count": 1413,
+    "onet31_mapped_programmes": 569,
+    "legacy_or_unmapped_excluded": 844,
+    "reason_for_exclusion": "Legacy/default AI values are not programme-specific O*NET 31.0 evidence."
+  },
+  "scenarios": [
+    {
+      "automation_resilience_weight": 0.6,
+      "augmentation_weight": 0.4,
+      "spearman_rank_correlation_with_canonical": 0.908017,
+      "top_20_overlap_with_canonical": 13,
+      "median_absolute_rank_shift": 38.5,
+      "p95_absolute_rank_shift": 224.5,
+      "max_absolute_rank_shift": 224.5,
+      "largest_rank_shifts": [
+        {
+          "kot_nr": "10238",
+          "title": "Miljø- og fødevareøkonomi, Frederiksberg C, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "10288",
+          "title": "Matematik-økonomi, København Ø, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "10430",
+          "title": "Økonomi, København K, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13010",
+          "title": "Erhvervsøkonomi, HA, Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13015",
+          "title": "Erhvervsøkonomi-informationsteknologi, HA (it.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13020",
+          "title": "Erhvervsøkonomi-erhvervsret, HA (jur.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13023",
+          "title": "Erhvervsøkonomi og markeds- og kulturanalyse, HA i markeds- og kulturanalyse, Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13025",
+          "title": "Erhvervsøkonomi-matematik, HA (mat.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13030",
+          "title": "Erhvervsøkonomi-filosofi, HA (fil.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        },
+        {
+          "kot_nr": "13035",
+          "title": "Erhvervsøkonomi-virksomhedskommunikation, HA (kom.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 279.5,
+          "absolute_shift": 224.5
+        }
+      ]
+    },
+    {
+      "automation_resilience_weight": 0.7,
+      "augmentation_weight": 0.3,
+      "spearman_rank_correlation_with_canonical": 0.999938,
+      "top_20_overlap_with_canonical": 20,
+      "median_absolute_rank_shift": 0.0,
+      "p95_absolute_rank_shift": 2.0,
+      "max_absolute_rank_shift": 20.5,
+      "largest_rank_shifts": [
+        {
+          "kot_nr": "10304",
+          "title": "Audiologopædi, København S, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 524.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "17245",
+          "title": "Audiologi, Odense M, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 524.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "17246",
+          "title": "Pædagogisk audiologi, Odense M, Studiestart: Sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 524.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "17247",
+          "title": "Audiologopædi, Odense M, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 524.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "10238",
+          "title": "Miljø- og fødevareøkonomi, Frederiksberg C, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 502.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "10288",
+          "title": "Matematik-økonomi, København Ø, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 502.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "10430",
+          "title": "Økonomi, København K, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 502.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "13010",
+          "title": "Erhvervsøkonomi, HA, Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 502.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "13015",
+          "title": "Erhvervsøkonomi-informationsteknologi, HA (it.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 502.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "13020",
+          "title": "Erhvervsøkonomi-erhvervsret, HA (jur.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 502.0,
+          "absolute_shift": 2.0
+        }
+      ]
+    },
+    {
+      "automation_resilience_weight": 0.75,
+      "augmentation_weight": 0.25,
+      "spearman_rank_correlation_with_canonical": 1.0,
+      "top_20_overlap_with_canonical": 20,
+      "median_absolute_rank_shift": 0.0,
+      "p95_absolute_rank_shift": 0.0,
+      "max_absolute_rank_shift": 0.0,
+      "largest_rank_shifts": [
+        {
+          "kot_nr": "10110",
+          "title": "Medicin, København Ø, Studiestart: sommer- og vinterstart",
+          "canonical_rank": 181.5,
+          "scenario_rank": 181.5,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10112",
+          "title": "Medicin, Køge, Studiestart: sommer- og vinterstart",
+          "canonical_rank": 181.5,
+          "scenario_rank": 181.5,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10140",
+          "title": "Veterinærmedicin, Frederiksberg C, Studiestart: sommerstart",
+          "canonical_rank": 181.5,
+          "scenario_rank": 181.5,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10218",
+          "title": "Datalogi-økonomi, København Ø, Studiestart: sommerstart",
+          "canonical_rank": 545.5,
+          "scenario_rank": 545.5,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10220",
+          "title": "Datalogi, København Ø, Studiestart: sommerstart",
+          "canonical_rank": 545.5,
+          "scenario_rank": 545.5,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10221",
+          "title": "Forsikringsmatematik, København Ø, Studiestart: sommerstart",
+          "canonical_rank": 567.0,
+          "scenario_rank": 567.0,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10222",
+          "title": "Kognitions- og datavidenskab, København K, Studiestart: sommerstart",
+          "canonical_rank": 545.5,
+          "scenario_rank": 545.5,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10238",
+          "title": "Miljø- og fødevareøkonomi, Frederiksberg C, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 504.0,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10240",
+          "title": "Landskabsarkitektur, Frederiksberg C, Studiestart: sommerstart",
+          "canonical_rank": 241.0,
+          "scenario_rank": 241.0,
+          "absolute_shift": 0.0
+        },
+        {
+          "kot_nr": "10246",
+          "title": "Professionsbachelor, skov- og landskabsingeniør, Fredensborg, Studiestart: sommerstart",
+          "canonical_rank": 395.0,
+          "scenario_rank": 395.0,
+          "absolute_shift": 0.0
+        }
+      ]
+    },
+    {
+      "automation_resilience_weight": 0.8,
+      "augmentation_weight": 0.2,
+      "spearman_rank_correlation_with_canonical": 0.999938,
+      "top_20_overlap_with_canonical": 20,
+      "median_absolute_rank_shift": 0.0,
+      "p95_absolute_rank_shift": 2.0,
+      "max_absolute_rank_shift": 20.5,
+      "largest_rank_shifts": [
+        {
+          "kot_nr": "10304",
+          "title": "Audiologopædi, København S, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 483.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "17245",
+          "title": "Audiologi, Odense M, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 483.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "17246",
+          "title": "Pædagogisk audiologi, Odense M, Studiestart: Sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 483.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "17247",
+          "title": "Audiologopædi, Odense M, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 483.5,
+          "absolute_shift": 20.5
+        },
+        {
+          "kot_nr": "10238",
+          "title": "Miljø- og fødevareøkonomi, Frederiksberg C, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 506.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "10288",
+          "title": "Matematik-økonomi, København Ø, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 506.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "10430",
+          "title": "Økonomi, København K, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 506.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "13010",
+          "title": "Erhvervsøkonomi, HA, Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 506.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "13015",
+          "title": "Erhvervsøkonomi-informationsteknologi, HA (it.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 506.0,
+          "absolute_shift": 2.0
+        },
+        {
+          "kot_nr": "13020",
+          "title": "Erhvervsøkonomi-erhvervsret, HA (jur.), Frederiksberg, Studiestart: sommerstart",
+          "canonical_rank": 504.0,
+          "scenario_rank": 506.0,
+          "absolute_shift": 2.0
+        }
+      ]
+    },
+    {
+      "automation_resilience_weight": 0.9,
+      "augmentation_weight": 0.1,
+      "spearman_rank_correlation_with_canonical": 0.954324,
+      "top_20_overlap_with_canonical": 20,
+      "median_absolute_rank_shift": 10.0,
+      "p95_absolute_rank_shift": 173.0,
+      "max_absolute_rank_shift": 173.0,
+      "largest_rank_shifts": [
+        {
+          "kot_nr": "45810",
+          "title": "Professionsbachelor, finans, København K, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45820",
+          "title": "Professionsbachelor, finans, Næstved, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45830",
+          "title": "Professionsbachelor, finans, Odense C, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45840",
+          "title": "Professionsbachelor, finans, Kolding, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45845",
+          "title": "Professionsbachelor, finans, Esbjerg, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45846",
+          "title": "Professionsbachelor, finans, Esbjerg, E-læring, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45850",
+          "title": "Professionsbachelor, finans, Herning, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45860",
+          "title": "Professionsbachelor, finans, Viby J, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45880",
+          "title": "Professionsbachelor, finans, Aalborg, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        },
+        {
+          "kot_nr": "45890",
+          "title": "Professionsbachelor, finans, Silkeborg, Studiestart: sommerstart",
+          "canonical_rank": 290.5,
+          "scenario_rank": 463.5,
+          "absolute_shift": 173.0
+        }
+      ]
+    }
+  ],
+  "interpretation": {
+    "status": "DETERMINISTIC_SENSITIVITY_ANALYSIS",
+    "supports": "Whether mapped-programme ordering is stable under plausible alternative formula weights.",
+    "does_not_support": "Predictive validity for Danish employment, individual outcomes, or causal AI effects.",
+    "human_validation_required": true
+  }
+}

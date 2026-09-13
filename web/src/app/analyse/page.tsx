@@ -112,7 +112,7 @@ export default function AIInsightsPage() {
                   <p className="mt-1 text-xs leading-relaxed text-[#334A75]">{insight.meaningForStudents}</p>
                 </div>
                 <p className="mt-3 text-[11px] leading-relaxed text-[#7C5A16]"><strong>Begrænsning:</strong> {insight.caution}</p>
-                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-[#E7E9EF] pt-4 text-[10px] text-[#8891A3]">
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-[#E7E9EF] pt-4 text-[10px] text-[#667085]">
                   <span>{insight.geography} · {insight.published}</span>
                   <a href={insight.sourceUrl} target="_blank" rel="noreferrer" className="font-bold text-[#1D4ED8] hover:underline">
                     {insight.sourceLabel} ↗
