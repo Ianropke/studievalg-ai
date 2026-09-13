@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ian claim v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "field": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {},
+    "status": {
+      "enum": [
+        "OBSERVED",
+        "VERIFIED",
+        "DERIVED",
+        "INFERRED",
+        "UNKNOWN",
+        "CONFLICT"
+      ]
+    },
+    "evidence_type": {
+      "enum": [
+        "REAL_WORLD",
+        "SYNTHETIC",
+        "MOCK",
+        "TEST"
+      ]
+    },
+    "source": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "locator": {
+              "type": "string",
+              "minLength": 1
+            },
+            "publisher": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidence_type": {
+              "enum": [
+                "REAL_WORLD",
+                "SYNTHETIC",
+                "MOCK",
+                "TEST"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "ref",
+            "locator",
+            "publisher",
+            "evidence_type"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "observed_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retrieved_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "transformation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "input_claim_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "method",
+            "version",
+            "input_claim_ids"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verification": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "checked_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "evidence_claim_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "rule",
+            "version",
+            "checked_at",
+            "evidence_claim_ids"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "conflict_claim_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "confidence": {
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "context": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "claim_id",
+    "field",
+    "value",
+    "status",
+    "evidence_type",
+    "source",
+    "observed_at",
+    "retrieved_at",
+    "transformation",
+    "verification",
+    "conflict_claim_ids",
+    "confidence",
+    "limitations",
+    "context"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "OBSERVED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "locator": {
+                "type": "string",
+                "minLength": 1
+              },
+              "publisher": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence_type": {
+                "enum": [
+                  "REAL_WORLD",
+                  "SYNTHETIC",
+                  "MOCK",
+                  "TEST"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "ref",
+              "locator",
+              "publisher",
+              "evidence_type"
+            ]
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "VERIFIED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "verification": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "rule": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "checked_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "evidence_claim_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "rule",
+              "version",
+              "checked_at",
+              "evidence_claim_ids"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "DERIVED",
+              "INFERRED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "transformation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "method": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "input_claim_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "method",
+              "version",
+              "input_claim_ids"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "UNKNOWN",
+              "CONFLICT"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "value": {
+            "type": "null"
+          },
+          "limitations": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

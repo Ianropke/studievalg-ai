@@ -1,0 +1,34 @@
+[
+  {
+    "claim_id": "education",
+    "field": "model_score",
+    "value": 0.62,
+    "status": "INFERRED",
+    "evidence_type": "SYNTHETIC",
+    "source": {
+      "type": "fixture",
+      "ref": "fixture://education",
+      "locator": "value",
+      "publisher": "education",
+      "evidence_type": "SYNTHETIC"
+    },
+    "observed_at": "2026-09-13T08:00:00Z",
+    "retrieved_at": "2026-09-13T08:01:00Z",
+    "transformation": {
+      "method": "illustrative_model",
+      "version": "1",
+      "input_claim_ids": []
+    },
+    "verification": null,
+    "conflict_claim_ids": [],
+    "confidence": 0.6,
+    "limitations": [
+      "Illustrative synthetic fixture; not empirical evidence."
+    ],
+    "context": {
+      "program_id": "demo",
+      "model_version": "demo-v1",
+      "scale": "0-1"
+    }
+  }
+]

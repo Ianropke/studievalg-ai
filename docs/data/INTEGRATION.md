@@ -1,0 +1,12 @@
+# Integrating in an existing project
+
+1. Copy `docs/data`, `schemas`, `validators` and the relevant tests into the project. Merge the small AGENTS routing section into existing instructions; never overwrite them. Keep only relevant domain examples if desired.
+2. Install the locked Python dependencies in an isolated environment. Non-Python hosts may call the validator as a service/process or implement equivalent schema AND semantic gates using these negative tests. JSON Schema alone is insufficient.
+3. Define canonical fields, units, entity/period context, source hierarchy, source snapshot/locator checks, freshness limits and approved consumer policies. Policies and callback registries belong in trusted application code, not request bodies or model output.
+4. Ingest immutable claim envelopes. Check real source identity/access/content in the adapter; validate on writes AND revalidate on consumption. Enforce ID uniqueness/immutability in host storage; store full lineage and versioned policy/rule records. Never mark placeholders REAL_WORLD.
+5. Register each transformation and verifier with tests for input semantics (use type-strict `same_json` for JSON context/value comparisons; Python equates booleans with numbers), permitted evidence and reproducibility. Fail on unregistered versions. CLI intentionally has no domain registry and rejects DERIVED/VERIFIED records; register these via Python integration as the wine example does.
+6. Route all scores/rankings/APIs through `consume` or `present`. Render status, evidence origin, limitations and degraded states. Remove legacy fallbacks and ensure cache/storage round trips preserve envelopes. Do not expose internal private source references to unauthorized users.
+7. Add host tests: inject inferred/synthetic/stale/conflicting data at ingestion; follow it through database, each ranking/API and rendered output; assert blocked/degraded states and no silent replacement. Cover background jobs and older endpoints as well as the primary flow.
+8. Add the template CI checks to existing CI without replacing the host's checks. Then run host integration tests. Record separately code correctness, controlled synthetic validation, empirical labelled results and operational production evidence.
+
+The package is ready to copy, not automatically installed into existing projects. No deployment, database migration, memory update or production validation is implied.

@@ -1,0 +1,29 @@
+[
+  {
+    "claim_id": "jobs",
+    "field": "documented_role",
+    "value": "Data lead",
+    "status": "OBSERVED",
+    "evidence_type": "SYNTHETIC",
+    "source": {
+      "type": "fixture",
+      "ref": "fixture://jobs",
+      "locator": "value",
+      "publisher": "jobs",
+      "evidence_type": "SYNTHETIC"
+    },
+    "observed_at": "2026-09-13T08:00:00Z",
+    "retrieved_at": "2026-09-13T08:01:00Z",
+    "transformation": null,
+    "verification": null,
+    "conflict_claim_ids": [],
+    "confidence": null,
+    "limitations": [
+      "Illustrative synthetic fixture; not empirical evidence."
+    ],
+    "context": {
+      "person_id": "fictional-person",
+      "period": "2023-2025"
+    }
+  }
+]

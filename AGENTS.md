@@ -6,6 +6,8 @@ Keep this file high-signal. Load deeper context only when the active task needs 
 
 ## Context routing
 
+- Cross-cutting claim provenance and evidence gates → `docs/data/DATA_CONTRACT.md`; load only the relevant file under `docs/data/domain/` for data-flow changes. Use `schemas/claim.schema.json` and the trusted validator integration described in `docs/data/INTEGRATION.md`.
+
 - Model semantics, formulas and epistemic levels → `docs/MODEL_METHODOLOGY.md`.
 - Current implementation and evidence status → `docs/PROJECT_STATE.md`.
 - Data/source and mapping requirements → `data/DATA_SOURCE_CONTRACT.md` and `data/sources/README.md`.
