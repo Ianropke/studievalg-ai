@@ -1,5 +1,5 @@
 {
-  "retrieved_at": "2026-09-13",
+  "retrieved_at": "2026-10-05",
   "sources": [
     {
       "provider": "Uddannelses- og Forskningsstyrelsen",
@@ -18,7 +18,7 @@
       "purpose": "Observed salary statistics by education group.",
       "status": "AVAILABLE_FOR_EDUCATION_GROUP_ANALYSIS_NOT_PROGRAMME_MAPPED",
       "retrieved_file": "data/sources/raw/LONS11.csv",
-      "sha256": "4876184905f08c0abab9e44b9a8cb9b474f857910eba56e03fe9d77927cee739",
+      "sha256": "2efdd7621ce2deac2a9d9c3c498a48c56b378a970419b267efddd7bb073d0548",
       "bytes": 103082,
       "shape": {
         "columns": 8,
@@ -68,19 +68,19 @@
           {
             "code": "Tid",
             "values": [
-              "2019",
               "2020",
               "2021",
               "2022",
               "2023",
-              "2024"
+              "2024",
+              "2025"
             ]
           }
         ]
       },
       "tableinfo": {
         "text": "Løn",
-        "updated": "2025-09-29T08:00:00",
+        "updated": "2026-09-29T08:00:00",
         "unit": "Kr.",
         "variables": [
           {
@@ -116,7 +116,7 @@
           {
             "id": "Tid",
             "text": "tid",
-            "values": 10
+            "values": 11
           }
         ]
       }

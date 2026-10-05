@@ -5,18 +5,18 @@
   "excluded_aggregate_or_missing_rows": 12,
   "education_category_count": 87,
   "periods": [
-    "2019",
     "2020",
     "2021",
     "2022",
     "2023",
-    "2024"
+    "2024",
+    "2025"
   ],
   "source": "Danmarks Statistik",
   "dataset": "LONS11",
-  "source_retrieved_at": "2026-09-13",
-  "raw_source_sha256": "4876184905f08c0abab9e44b9a8cb9b474f857910eba56e03fe9d77927cee739",
-  "output_sha256": "4356a2b73e5a0fb8899378002d22d6dfb619ef286d5d0dc6ca772e629c46f557",
+  "source_retrieved_at": "2026-10-05",
+  "raw_source_sha256": "2efdd7621ce2deac2a9d9c3c498a48c56b378a970419b267efddd7bb073d0548",
+  "output_sha256": "864b206738c0bac23e5d307e1b009ab557e78c729b45685684a528500a50776f",
   "query": {
     "table": "LONS11",
     "format": "CSV",
@@ -61,12 +61,12 @@
       {
         "code": "Tid",
         "values": [
-          "2019",
           "2020",
           "2021",
           "2022",
           "2023",
-          "2024"
+          "2024",
+          "2025"
         ]
       }
     ]

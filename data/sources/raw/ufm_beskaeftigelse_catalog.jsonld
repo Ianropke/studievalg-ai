@@ -42,18 +42,6 @@
   },
   "@graph": [
     {
-      "@id": "http://publications.europa.eu/resource/authority/language/DAN",
-      "@type": "dct:LinguisticSystem"
-    },
-    {
-      "@id": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "@type": "dct:Frequency"
-    },
-    {
-      "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
-      "@type": "dct:RightsStatement"
-    },
-    {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/9c4fc428-ad4e-4102-b4f7-b5f80f4ef261",
       "@type": "dcat:Distribution",
       "adms:status": {
@@ -77,27 +65,15 @@
       "dct:title": "Kommasepareret Fil"
     },
     {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/d2590e30-fe4b-47e2-a604-f58dbcdaf68a",
-      "@type": "dcat:Distribution",
-      "adms:status": {
-        "@id": "http://purl.org/adms/status/Completed"
-      },
-      "dcat:accessURL": {
-        "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
-      },
-      "dct:format": "XLSX",
-      "dct:issued": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:23.138041"
-      },
-      "dct:language": {
-        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
-      },
-      "dct:modified": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:23.125486"
-      },
-      "dct:title": "Excel-ark"
+      "@id": "http://publications.europa.eu/resource/authority/language/DAN",
+      "@type": "dct:LinguisticSystem"
+    },
+    {
+      "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+      "@type": [
+        "foaf:Document",
+        "rdfs:Resource"
+      ]
     },
     {
       "@id": "https://data.gov.dk/id/thing/contactpoint-a55f0bb0-edc1-49bf-a356-792903ad9287",
@@ -108,34 +84,6 @@
       }
     },
     {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6",
-      "@type": "dcat:Distribution",
-      "adms:status": {
-        "@id": "http://purl.org/adms/status/Completed"
-      },
-      "dcat:accessURL": {
-        "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
-      },
-      "dct:format": "HTML",
-      "dct:issued": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:23.138036"
-      },
-      "dct:language": {
-        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
-      },
-      "dct:modified": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:23.125332"
-      },
-      "dct:title": "Websidevisning"
-    },
-    {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609",
-      "@type": "foaf:Agent",
-      "foaf:name": "Uddannelses- og Forskningsstyrelsen"
-    },
-    {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187",
       "@type": "dcat:Dataset",
       "dcat:contactPoint": {
@@ -143,21 +91,21 @@
       },
       "dcat:distribution": [
         {
-          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6"
-        },
-        {
           "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/9c4fc428-ad4e-4102-b4f7-b5f80f4ef261"
         },
         {
           "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/d2590e30-fe4b-47e2-a604-f58dbcdaf68a"
+        },
+        {
+          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6"
         }
       ],
       "dcat:keyword": [
-        "dimittender",
         "Uddannelse, kultur og sport",
         "Efter uddannelse",
-        "beskæftigelse",
-        "fuldførte"
+        "fuldførte",
+        "dimittender",
+        "beskæftigelse"
       ],
       "dcat:landingPage": {
         "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
@@ -188,12 +136,12 @@
         "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609"
       },
       "dct:temporal": {
-        "@id": "_:N8f2070748d94420bb8521e268f9a4ea6"
+        "@id": "_:Naf5fc3be9ca44ba39948ba2bb1174fe9"
       },
       "dct:title": "Beskæftigelse"
     },
     {
-      "@id": "_:N8f2070748d94420bb8521e268f9a4ea6",
+      "@id": "_:Naf5fc3be9ca44ba39948ba2bb1174fe9",
       "@type": "dct:PeriodOfTime",
       "dcat:startDate": {
         "@type": "xsd:date",
@@ -201,11 +149,63 @@
       }
     },
     {
-      "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
-      "@type": [
-        "foaf:Document",
-        "rdfs:Resource"
-      ]
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609",
+      "@type": "foaf:Agent",
+      "foaf:name": "Uddannelses- og Forskningsstyrelsen"
+    },
+    {
+      "@id": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "@type": "dct:Frequency"
+    },
+    {
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6",
+      "@type": "dcat:Distribution",
+      "adms:status": {
+        "@id": "http://purl.org/adms/status/Completed"
+      },
+      "dcat:accessURL": {
+        "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
+      },
+      "dct:format": "HTML",
+      "dct:issued": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:23.138036"
+      },
+      "dct:language": {
+        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
+      },
+      "dct:modified": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:23.125332"
+      },
+      "dct:title": "Websidevisning"
+    },
+    {
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/d2590e30-fe4b-47e2-a604-f58dbcdaf68a",
+      "@type": "dcat:Distribution",
+      "adms:status": {
+        "@id": "http://purl.org/adms/status/Completed"
+      },
+      "dcat:accessURL": {
+        "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
+      },
+      "dct:format": "XLSX",
+      "dct:issued": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:23.138041"
+      },
+      "dct:language": {
+        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
+      },
+      "dct:modified": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:23.125486"
+      },
+      "dct:title": "Excel-ark"
+    },
+    {
+      "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
+      "@type": "dct:RightsStatement"
     }
   ]
 }
