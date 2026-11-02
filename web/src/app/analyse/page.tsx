@@ -45,7 +45,7 @@ export default function AIInsightsPage() {
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl space-y-10 px-5 py-10 sm:px-6">
         <header className="mx-auto max-w-3xl space-y-4 text-center">
           <span className="inline-flex rounded-full border border-[#2563EB]/20 bg-[#E7EEFE] px-3 py-1 text-xs font-semibold text-[#1D4ED8]">
-            Ny forskning · opdateret {AI_RESEARCH_UPDATED_AT}
+            Seneste tilføjelse · {AI_RESEARCH_UPDATED_AT}
           </span>
           <h1 className="font-display text-4xl font-bold tracking-tight text-[#12172B]">
             AI Insights til dit uddannelsesvalg

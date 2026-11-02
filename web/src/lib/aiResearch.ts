@@ -14,7 +14,7 @@ export interface AIResearchInsight {
   sourceUrl: string;
 }
 
-export const AI_RESEARCH_UPDATED_AT = "9. september 2026";
+export const AI_RESEARCH_UPDATED_AT = "2. november 2026";
 
 /**
  * Curated context for young people choosing an education.
@@ -24,6 +24,19 @@ export const AI_RESEARCH_UPDATED_AT = "9. september 2026";
  * one Danish programme.
  */
 export const AI_RESEARCH_INSIGHTS: AIResearchInsight[] = [
+  {
+    id: "ilo-empirical-evidence-2026",
+    value: "2026",
+    title: "Hvad viser undersøgelser af AI på arbejdspladsen?",
+    summary: "ILO's forskningsoversigt finder produktivitetsgevinster, men resultaterne er ujævne. Hidtil er omfattende jobtab begrænset, mens mulighederne for yngre arbejdere kan komme under pres.",
+    meaningForStudents: "Undersøg hvordan uddannelsen giver dig faglig fordybelse, erfaring med AI og mulighed for praktik eller studiejob. Tal med studerende om deres vej ind i faget.",
+    caution: "Oversigten samler internationale undersøgelser. Den forudsiger hverken jobmuligheder eller jobtab for en bestemt dansk uddannelse.",
+    geography: "Internationalt",
+    published: "1. juni 2026",
+    status: "FORSKNINGSRESULTAT",
+    sourceLabel: "ILO: empirisk evidens",
+    sourceUrl: "https://www.ilo.org/publications/impact-genai-jobs-productivity-and-work-organization-review-empirical",
+  },
   {
     id: "dk-young-ai-use",
     value: "66%",
