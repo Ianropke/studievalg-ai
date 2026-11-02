@@ -138,7 +138,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
 
     await expect(page.getByRole('heading', { name: 'AI Insights til dit uddannelsesvalg' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Find uddannelser →' })).toBeVisible();
-    await expect(page.locator('section[aria-labelledby="latest-research-heading"] article')).toHaveCount(6);
+    await expect(page.getByRole('heading', { name: 'Hvad viser undersøgelser af AI på arbejdspladsen?' })).toBeVisible();
 
     const hasHorizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,

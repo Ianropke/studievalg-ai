@@ -1,6 +1,6 @@
 # Uddannelsesindsigt — current project state
 
-Last reconciled: 2026-09-13.
+Last reconciled: 2026-09-20.
 
 ## Canonical implementation
 
@@ -35,6 +35,7 @@ The stricter Python `education_profile_scores` pipeline is different: `etl/build
 - A reviewed, bounded LONS11 extract now contains 522 usable observations across 87 official education categories for 2019–2024. It uses total sector, combined pay form, employees excluding young people and apprentices, earnings per hour worked, all sexes, and six annual observations.
 - LONS11 is source-ready at education-category grain, but it is not programme-mapped evidence. No salary value enters the client ranking until a documented KOT-to-compatible-education mapping exists.
 - UFM employment remains blocked because the official metadata currently points its CSV distribution at a rendered Power BI report rather than a verified machine-readable CSV URL. The pipeline records this status and does not scrape or relabel the report.
+- On 14 September 2026, UFM Datavarehus replied to a request for machine-readable employment data, schema, KOT→UDD/AUDD mapping and reuse terms: "Det har vi af ressourcemæssige årsager desværre ikke mulighed for at hjælpe med." Ian acknowledged the reply the same day. This closes the direct request; it does not establish that the data or mapping do not exist, nor does it validate any programme-level join. Keep the blocked evidence status until an independently verifiable source and mapping are available.
 - `data/EVIDENCE_READINESS_REPORT.json` is the canonical machine-readable coverage/readiness summary. Current status is `PARTIAL_BLOCKED`.
 
 ### Model sensitivity
