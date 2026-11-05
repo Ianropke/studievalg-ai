@@ -42,23 +42,27 @@
   },
   "@graph": [
     {
-      "@id": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
-      "@type": [
-        "foaf:Document",
-        "rdfs:Resource"
-      ]
-    },
-    {
-      "@id": "http://publications.europa.eu/resource/authority/language/DAN",
-      "@type": "dct:LinguisticSystem"
-    },
-    {
-      "@id": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "@type": "dct:Frequency"
-    },
-    {
-      "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
-      "@type": "dct:RightsStatement"
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/d3d282da-0c0b-4c16-9c36-841bac285545",
+      "@type": "dcat:Distribution",
+      "adms:status": {
+        "@id": "http://purl.org/adms/status/Completed"
+      },
+      "dcat:accessURL": {
+        "@id": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag"
+      },
+      "dct:format": "CSV",
+      "dct:issued": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:24.870561"
+      },
+      "dct:language": {
+        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
+      },
+      "dct:modified": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:24.859301"
+      },
+      "dct:title": "Kommasepareret Fil"
     },
     {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/bf23b49d-f466-434f-9378-451330c8d42d",
@@ -84,34 +88,6 @@
       "dct:title": "Excel-ark"
     },
     {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/d3d282da-0c0b-4c16-9c36-841bac285545",
-      "@type": "dcat:Distribution",
-      "adms:status": {
-        "@id": "http://purl.org/adms/status/Completed"
-      },
-      "dcat:accessURL": {
-        "@id": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag"
-      },
-      "dct:format": "CSV",
-      "dct:issued": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:24.870561"
-      },
-      "dct:language": {
-        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
-      },
-      "dct:modified": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:24.859301"
-      },
-      "dct:title": "Kommasepareret Fil"
-    },
-    {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609",
-      "@type": "foaf:Agent",
-      "foaf:name": "Uddannelses- og Forskningsstyrelsen"
-    },
-    {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/92001223-77af-4bea-a5dd-e2b859c52eba",
       "@type": "dcat:Distribution",
       "adms:status": {
@@ -135,25 +111,49 @@
       "dct:title": "Websidevisning"
     },
     {
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609",
+      "@type": "foaf:Agent",
+      "foaf:name": "Uddannelses- og Forskningsstyrelsen"
+    },
+    {
+      "@id": "https://datavarehus.ufm.dk/rapporter/sogning-og-optag",
+      "@type": [
+        "foaf:Document",
+        "rdfs:Resource"
+      ]
+    },
+    {
+      "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
+      "@type": "dct:RightsStatement"
+    },
+    {
+      "@id": "http://publications.europa.eu/resource/authority/language/DAN",
+      "@type": "dct:LinguisticSystem"
+    },
+    {
+      "@id": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "@type": "dct:Frequency"
+    },
+    {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c",
       "@type": "dcat:Dataset",
       "dcat:distribution": [
+        {
+          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/bf23b49d-f466-434f-9378-451330c8d42d"
+        },
         {
           "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/d3d282da-0c0b-4c16-9c36-841bac285545"
         },
         {
           "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/92001223-77af-4bea-a5dd-e2b859c52eba"
-        },
-        {
-          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/f0be5aab-b606-4f89-be85-750d9fe4052c/resource/bf23b49d-f466-434f-9378-451330c8d42d"
         }
       ],
       "dcat:keyword": [
-        "Ansøgninger",
         "prioriteter",
-        "adgangskrav",
-        "optagne",
         "afviste kvalificerede",
+        "optagne",
+        "Ansøgninger",
+        "adgangskrav",
         "Uddannelse, kultur og sport"
       ],
       "dcat:landingPage": {
@@ -185,12 +185,12 @@
         "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609"
       },
       "dct:temporal": {
-        "@id": "_:Nc780894959094da189754d151f94fbc8"
+        "@id": "_:Nefb1106fe2e243a0946c78b488c8bf7f"
       },
       "dct:title": "Søgning og optagelse via KOT"
     },
     {
-      "@id": "_:Nc780894959094da189754d151f94fbc8",
+      "@id": "_:Nefb1106fe2e243a0946c78b488c8bf7f",
       "@type": "dct:PeriodOfTime",
       "dcat:startDate": {
         "@type": "xsd:date",

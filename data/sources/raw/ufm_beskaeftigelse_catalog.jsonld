@@ -42,39 +42,13 @@
   },
   "@graph": [
     {
-      "@id": "http://publications.europa.eu/resource/authority/language/DAN",
-      "@type": "dct:LinguisticSystem"
-    },
-    {
-      "@id": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
-      "@type": "dct:Frequency"
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609",
+      "@type": "foaf:Agent",
+      "foaf:name": "Uddannelses- og Forskningsstyrelsen"
     },
     {
       "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC",
       "@type": "dct:RightsStatement"
-    },
-    {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/9c4fc428-ad4e-4102-b4f7-b5f80f4ef261",
-      "@type": "dcat:Distribution",
-      "adms:status": {
-        "@id": "http://purl.org/adms/status/Completed"
-      },
-      "dcat:accessURL": {
-        "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
-      },
-      "dct:format": "CSV",
-      "dct:issued": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:23.138043"
-      },
-      "dct:language": {
-        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
-      },
-      "dct:modified": {
-        "@type": "xsd:dateTime",
-        "@value": "2025-01-14T12:35:23.125610"
-      },
-      "dct:title": "Kommasepareret Fil"
     },
     {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/d2590e30-fe4b-47e2-a604-f58dbcdaf68a",
@@ -100,14 +74,6 @@
       "dct:title": "Excel-ark"
     },
     {
-      "@id": "https://data.gov.dk/id/thing/contactpoint-a55f0bb0-edc1-49bf-a356-792903ad9287",
-      "@type": "vcard:Organization",
-      "vcard:fn": "Uddannelses- og Forskningsstyrelsen",
-      "vcard:hasEmail": {
-        "@id": "mailto:dvh@ufm.dk"
-      }
-    },
-    {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6",
       "@type": "dcat:Distribution",
       "adms:status": {
@@ -131,9 +97,50 @@
       "dct:title": "Websidevisning"
     },
     {
-      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609",
-      "@type": "foaf:Agent",
-      "foaf:name": "Uddannelses- og Forskningsstyrelsen"
+      "@id": "http://publications.europa.eu/resource/authority/frequency/ANNUAL",
+      "@type": "dct:Frequency"
+    },
+    {
+      "@id": "http://publications.europa.eu/resource/authority/language/DAN",
+      "@type": "dct:LinguisticSystem"
+    },
+    {
+      "@id": "https://data.gov.dk/id/thing/contactpoint-a55f0bb0-edc1-49bf-a356-792903ad9287",
+      "@type": "vcard:Organization",
+      "vcard:fn": "Uddannelses- og Forskningsstyrelsen",
+      "vcard:hasEmail": {
+        "@id": "mailto:dvh@ufm.dk"
+      }
+    },
+    {
+      "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
+      "@type": [
+        "rdfs:Resource",
+        "foaf:Document"
+      ]
+    },
+    {
+      "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/9c4fc428-ad4e-4102-b4f7-b5f80f4ef261",
+      "@type": "dcat:Distribution",
+      "adms:status": {
+        "@id": "http://purl.org/adms/status/Completed"
+      },
+      "dcat:accessURL": {
+        "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
+      },
+      "dct:format": "CSV",
+      "dct:issued": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:23.138043"
+      },
+      "dct:language": {
+        "@id": "http://publications.europa.eu/resource/authority/language/DAN"
+      },
+      "dct:modified": {
+        "@type": "xsd:dateTime",
+        "@value": "2025-01-14T12:35:23.125610"
+      },
+      "dct:title": "Kommasepareret Fil"
     },
     {
       "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187",
@@ -143,21 +150,21 @@
       },
       "dcat:distribution": [
         {
-          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6"
+          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/9c4fc428-ad4e-4102-b4f7-b5f80f4ef261"
         },
         {
-          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/9c4fc428-ad4e-4102-b4f7-b5f80f4ef261"
+          "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/293814ea-25cb-4457-8b80-3eb174e9bca6"
         },
         {
           "@id": "https://datavejviser-indtastning.digst.govcloud.dk/dataset/cc937caf-8cd2-4c7a-8180-58203c2da187/resource/d2590e30-fe4b-47e2-a604-f58dbcdaf68a"
         }
       ],
       "dcat:keyword": [
-        "dimittender",
-        "Uddannelse, kultur og sport",
-        "Efter uddannelse",
         "beskæftigelse",
-        "fuldførte"
+        "Efter uddannelse",
+        "fuldførte",
+        "Uddannelse, kultur og sport",
+        "dimittender"
       ],
       "dcat:landingPage": {
         "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse"
@@ -188,24 +195,17 @@
         "@id": "https://datavejviser-indtastning.digst.govcloud.dk/organization/ab62513e-e93b-41ae-a656-be47b3d2a609"
       },
       "dct:temporal": {
-        "@id": "_:N8f2070748d94420bb8521e268f9a4ea6"
+        "@id": "_:Nec3153f9cc0f43a5aeec0fca581b4b90"
       },
       "dct:title": "Beskæftigelse"
     },
     {
-      "@id": "_:N8f2070748d94420bb8521e268f9a4ea6",
+      "@id": "_:Nec3153f9cc0f43a5aeec0fca581b4b90",
       "@type": "dct:PeriodOfTime",
       "dcat:startDate": {
         "@type": "xsd:date",
         "@value": "2008-01-01"
       }
-    },
-    {
-      "@id": "https://datavarehus.ufm.dk/rapporter/beskaeftigelse",
-      "@type": [
-        "foaf:Document",
-        "rdfs:Resource"
-      ]
     }
   ]
 }
