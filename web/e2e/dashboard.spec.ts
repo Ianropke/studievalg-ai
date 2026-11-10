@@ -25,7 +25,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await page.waitForTimeout(300);
 
     const firstCardTitle = page.locator('article h3').first();
-    await expect(firstCardTitle).toContainText('Medicin');
+    await expect(firstCardTitle).toHaveText(/^Medicin,/);
   });
 
   test('E2E-03: AI er fravalgt som standard og kan tilvælges eksplicit', async ({ page }) => {
