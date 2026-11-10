@@ -8,8 +8,8 @@
 export const DATA_STATUS = {
   catalogue: {
     programmeCount: 1413,
-    admissionsUpdatedAt: "2026-07-26",
-    admissionsUpdatedLabel: "2025-katalogværdier (delvist kildeverificeret)",
+    admissionsUpdatedAt: "2026-11-10",
+    admissionsUpdatedLabel: "KOT-optaget 2026 (delvis dækning)",
     source: "UFM/KOT",
   },
   scoring: {

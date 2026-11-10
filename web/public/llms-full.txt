@@ -4,7 +4,7 @@ Canonical URL: https://uddannelsesindsigt.com/
 Language: Danish
 Audience: Young people comparing Danish higher-education programmes
 Programme count: 1,413
-Admissions values: catalogue fields labelled 2025; 345 numeric values match the official 2025 workbook by KOT number, but non-numeric statuses are not reliably represented. The 2026 field contains a placeholder, not thresholds.
+Admissions values: official KOT 2026 results are displayed for 879 of 1,413 catalogue entries after exact ID and normalized-name matching. Forty shared IDs have conflicting names; 494 catalogue IDs are absent from the workbook, and 38 official IDs are absent from the catalogue. Vacancy statuses refer to the 2026 admission snapshot, not current availability. Verify current requirements with official sources.
 AI model version: 2026.6
 AI model updated: 2026-09-10
 

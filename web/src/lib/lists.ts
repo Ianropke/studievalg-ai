@@ -3,6 +3,7 @@ import { getEnrichedScores } from "./domainScoring";
 import { normalizeProgramName } from "./programName";
 import { DATA_STATUS } from "./dataStatus";
 import { roundAiScore } from "./aiPresentation";
+import { admission2026Label, admission2026Threshold, getAdmission2026 } from "./admissions2026";
 
 export { normalizeProgramName };
 
@@ -96,20 +97,20 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   },
   "top-10-svaereste-adgangskvotienter": {
     slug: "top-10-svaereste-adgangskvotienter",
-    title: "Høje kvotienter i det ældre katalog",
-    seoTitle: "Historiske adgangskvotienter i kataloget",
-    badge: "2025-katalogværdier · historiske",
-    description: "Eksempler på høje kvotienter i katalogets 2025-felt.",
-    introHedge: "De numeriske værdier matcher 2025-filen på KOT-nummer; listen er ikke en aktuel officiel topliste. Kontrollér 2026-tallene hos UddannelsesGuiden eller uddannelsesstedet.",
+    title: "Høje adgangskvotienter ved optaget i 2026",
+    seoTitle: "Høje adgangskvotienter i 2026",
+    badge: "KOT-optaget 2026 · delvis dækning",
+    description: "Eksempler på høje kvotienter ved optaget i 2026 blandt katalogets sikkert matchede uddannelser.",
+    introHedge: "Listen dækker kun katalogets uddannelser med matchende KOT-nummer og navn, ikke hele det officielle optag. Kvotienter ændrer sig, og uddannelsens sværhedsgrad kan ikke udledes af dem. Kontrollér aktuelle krav hos uddannelsesstedet.",
     metricLabel: "Adgangskvotient",
     limit: 10,
     getValue: (p) => {
-      const kvStr = String(p.latest_kvotient || "");
-      const num = parseFloat(kvStr.replace(",", "."));
-      const isNum = !isNaN(num);
-      return { display: kvStr || "Alle optaget", numeric: isNum ? num : 0, raw: kvStr };
+      const admission = getAdmission2026(p);
+      const num = admission2026Threshold(admission);
+      return { display: admission2026Label(admission), numeric: num ?? 0, raw: num };
     },
     sortOrder: "desc",
+    filter: (p) => admission2026Threshold(getAdmission2026(p)) !== null,
     readerQuestions: [
       {
         question: "Er en høj adgangskvotient et fast adgangskrav?",
@@ -123,23 +124,23 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   },
   "top-10-letteste-adgangskvotienter": {
     slug: "top-10-letteste-adgangskvotienter",
-    title: "Uddannelser uden verificeret numerisk kvotient",
-    seoTitle: "Uddannelser uden verificeret kvotient",
-    badge: "Katalogdata · ikke kildeverificeret",
-    description: "Eksempler på uddannelser uden numerisk kvotient i det ældre katalog.",
-    introHedge: "En manglende numerisk værdi betyder ikke nødvendigvis, at alle blev optaget. Kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet.",
+    title: "Uddannelser hvor alle blev optaget i 2026",
+    seoTitle: "Alle optaget på uddannelser i 2026",
+    badge: "KOT-optaget 2026 · historiske statusser",
+    description: "Eksempler på matchede uddannelser, hvor kilden oplyser, at alle blev optaget i 2026.",
+    introHedge: "Dette er eksempler blandt sikkert matchede uddannelser, ikke en komplet liste. Ledige pladser refererer alene til optaget i 2026 og kan have ændret sig. Kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet.",
     metricLabel: "Adgangskvotient",
     limit: 10,
     getValue: (p) => {
-      const kvStr = String(p.latest_kvotient || "Alle optaget");
-      const isAlle = kvStr.toLowerCase().includes("alle") || kvStr === "";
-      return { display: isAlle ? "Ikke verificeret" : kvStr, numeric: isAlle ? 1 : 99, raw: kvStr };
+      const label = admission2026Label(getAdmission2026(p));
+      return { display: label, numeric: 1, raw: label };
     },
     sortOrder: "asc",
+    filter: (p) => { const admission = getAdmission2026(p); return admission.kind === "matched" && ["Alle optaget", "Alle optaget, ledige pladser"].includes(admission.record.kvote1_raw); },
     readerQuestions: [
       {
         question: "Betyder en manglende kvotient, at alle blev optaget?",
-        answer: "Nej. Katalogets manglende numeriske værdi dokumenterer ikke udfaldet. Se de officielle optagelsestal og uddannelsens adgangskrav.",
+        answer: "Nej. Listen viser kun uddannelser, hvor den officielle kilde specifikt angiver alle optaget i 2026. Andre manglende kvotienter kan have en anden forklaring.",
       },
       {
         question: "Vil alle også blive optaget næste år?",
@@ -170,8 +171,8 @@ export function getListData(slug: string): { config: ListConfig; items: Array<{ 
       seen.set(key, item);
     } else {
       const existing = seen.get(key)!;
-      const existingKv = parseFloat(String(existing.program.latest_kvotient || "0").replace(",", ".")) || 0;
-      const currentKv = parseFloat(String(item.program.latest_kvotient || "0").replace(",", ".")) || 0;
+      const existingKv = admission2026Threshold(getAdmission2026(existing.program)) ?? 0;
+      const currentKv = admission2026Threshold(getAdmission2026(item.program)) ?? 0;
       if (currentKv > existingKv) seen.set(key, item);
     }
   }

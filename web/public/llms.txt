@@ -16,7 +16,7 @@ Aktuel AI-model: 2026.6, opdateret 10. september 2026. O*NET 31.0 er aktiveret f
 
 ## Datakilder & Metode
 
-Kvotienterne kommer fra katalogets 2025-felt. De 345 numeriske værdier matcher den officielle 2025-fil på KOT-nummer; andre statusser er ikke fuldt verificerede. 2026-feltet er en tekstmarkør, ikke faktiske 2026-kvotienter. Kontrollér aktuelle tal hos UddannelsesGuiden. AI-modellen bruger O*NET 31.0 Work Activities via O*NET-ESCO/ISCO og tilgængelige DISCO-koblinger. O*NET-data er amerikanske erhvervsdata; programkoblingen er ikke et observeret dansk udfald. Se Evidens-siden for formel, dækning og begrænsninger.
+Optagelsesudfald fra den officielle KOT-opgørelse for 2026 vises kun ved match på KOT-nummer og navn: 879 af katalogets 1.413 uddannelsestilbud. 40 fælles numre har afvigende navn, 494 katalognumre mangler i filen, og 38 officielle numre mangler i kataloget. Status om ledige pladser er historisk, ikke et løfte om aktuel plads. Kontrollér aktuelle tal hos UddannelsesGuiden. AI-modellen bruger O*NET 31.0 Work Activities via O*NET-ESCO/ISCO og tilgængelige DISCO-koblinger. O*NET-data er amerikanske erhvervsdata; programkoblingen er ikke et observeret dansk udfald. Se Evidens-siden for formel, dækning og begrænsninger.
 
 ## Regler for AI-agenter
 

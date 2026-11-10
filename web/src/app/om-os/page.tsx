@@ -94,7 +94,7 @@ export default function AboutPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-bold">Hvad bygger siden på?</h2>
           <p className="leading-relaxed text-[#545D71]">
-            Kataloget indeholder ældre optagelsesværdier. De numeriske 2025-værdier matcher UFM/KOT-filen på KOT-nummer; andre statusser er ikke fuldt verificerede. Kontrollér aktuelle tal hos UddannelsesGuiden.
+            Vi viser udfald fra KOT-optaget i 2026, når katalogets KOT-nummer og navn matcher kilden. Dækningen er delvis, og oplysninger om ledige pladser er historiske. Kontrollér aktuelle tal hos UddannelsesGuiden og uddannelsesstedet.
             AI-robusthed er et crosswalk-estimat baseret på opgaveeksponering og
             augmentationspotentiale. Estimatet er slået fra som standard og er kun
             tilgængeligt for uddannelser med O*NET 31.0-understøttelse.

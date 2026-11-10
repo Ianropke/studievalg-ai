@@ -14,6 +14,7 @@ import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } from "@/lib/shareMatch";
+import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -231,9 +232,9 @@ export default function Dashboard() {
     });
     const exactMajors = EXACT_MAJOR_MAP[rawQuery] || EXACT_MAJOR_MAP[normalizedQuery] || [];
     let list = allPrograms.map((prog) => {
-      const latestKv = prog.latest_kvotient;
-      const kvNum = typeof latestKv === "number" ? latestKv : null;
-      const meetsGpa = kvNum !== null ? gpa >= kvNum : true;
+      const admission = getAdmission2026(prog);
+      const kvNum = admission2026Threshold(admission);
+      const meetsGpa = kvNum !== null && gpa >= kvNum;
       const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
       const robustScore = enriched.ai_resilience;
       const aiEligible = enriched.ranking_eligible.ai;
@@ -245,7 +246,7 @@ export default function Dashboard() {
         const pNormTitle = normalizeSearchText(pTitleLow);
         const pDisco = (prog.disco_titel || "").toLowerCase();
         const pKot = (prog.kot_nr || "").toLowerCase();
-        const isExactMajor = exactMajors.some((major) => pTitleLow.startsWith(major) || pTitleLow.includes(major));
+        const isExactMajor = exactMajors.some((major) => pTitleLow.startsWith(major));
         if (isExactMajor) {
           relevanceBoost = 1000;
         } else {
@@ -269,18 +270,17 @@ export default function Dashboard() {
       let whyText = "";
       if (kvNum !== null) {
         if (meetsGpa) {
-          whyText = `Dit snit på ${gpa.toFixed(1)} ligger på eller over den registrerede historiske kvotient på ${kvNum}.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
+          whyText = `Dit snit på ${gpa.toFixed(1)} ligger på eller over kvotienten ved optaget i 2026 (${kvNum}). Det er ikke en garanti for optagelse.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
         } else {
-          whyText = `Katalogets historiske kvotient er ${kvNum}, så et snit på ${gpa.toFixed(1)} ligger under katalogværdien.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
+          whyText = `Dit snit på ${gpa.toFixed(1)} ligger under kvotienten ved optaget i 2026 (${kvNum}). Kvotienten kan ændre sig.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
         }
       } else {
-        whyText = `Kataloget viser ikke en numerisk kvotient. Kontrollér optagelsestal og adgangskrav hos uddannelsesstedet.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
+        whyText = `Der kan ikke sammenlignes med en numerisk kvotient for optaget i 2026. Kontrollér optagelsestal og adgangskrav hos uddannelsesstedet.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
       }
 
-      const institutionName = (prog.institution || prog.institution_navn || "") as string;
-      const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
+      const institutionName = admission2026Institution(prog);
       const cityName = (prog.by || "") as string;
-      return { ...prog, udbud_titel: formattedTitle, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
+      return { ...prog, udbud_titel: formattedTitle, by: cityName, institution: institutionName, admissionLabel: admission2026Label(admission), skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
@@ -378,7 +378,7 @@ export default function Dashboard() {
             passer <span className="border-b-4 border-[#0F9D6E] pb-1">bedst til dig?</span>
           </h1>
           <p className="text-sm text-[#545D71] max-w-lg mx-auto font-normal leading-relaxed">
-            Søg i uddannelseskataloget, sammenlign ældre kvotienter, og vælg selv om tydeligt markerede AI-modelestimater skal indgå.
+            Søg i uddannelseskataloget, sammenlign kvotienter fra optaget i 2026, og vælg selv om tydeligt markerede AI-modelestimater skal indgå.
           </p>
         </div>
 
@@ -409,7 +409,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
-            Katalogets 345 numeriske 2025-værdier matcher den officielle fil på KOT-nummer. Øvrige statusser er ikke fuldt verificerede. Brug de aktuelle tal på <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a>. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.
+            Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.
             <span className="mt-1 block">Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status og begrænsninger.</span>
           </div>
           <div data-testid="ai-model-toggle-panel" className={`rounded-xl border p-4 ${includeAiModels ? "border-[#0F9D6E]/35 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
@@ -453,7 +453,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3">
             <div>
               <h2 className="text-xl font-bold text-[#12172B] font-display">Uddannelser at undersøge</h2>
-              <p className="text-xs text-[#545D71]">{includeAiModels ? "AI-modelestimat indgår · kun uddannelser med O*NET 31.0-dækning" : "Sorteret efter søgerelevans og ældre katalogværdier · AI indgår ikke"}</p>
+              <p className="text-xs text-[#545D71]">{includeAiModels ? "AI-modelestimat indgår · kun uddannelser med O*NET 31.0-dækning" : "Sorteret efter søgerelevans og 2026-kvotienter, hvor de er kendt · AI indgår ikke"}</p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setShowShareModal(true)} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><span>✨</span><span>Del dit match</span></button>
@@ -492,11 +492,11 @@ export default function Dashboard() {
                         ) : null}
                       </div>
                       <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
-                        <span className="text-[11px] text-[#667085] block">Kvote 1-katalogværdi (2025)</span>
+                        <span className="text-[11px] text-[#667085] block">Kvote 1 ved optaget i 2026</span>
                         {prog.kvNum !== null ? (
-                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.latest_kvotient}</span><span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${prog.meetsGpa ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20" : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"}`}>{prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}{prog.meetsGpa ? "På eller over historisk kvotient" : `Under historisk kvotient (${prog.kvNum})`}</span></div>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.admissionLabel}</span><span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${prog.meetsGpa ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20" : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"}`}>{prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}{prog.meetsGpa ? "På eller over kvotienten i 2026" : `Under kvotienten i 2026 (${prog.kvNum})`}</span></div>
                         ) : (
-                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-sm font-semibold text-[#545D71]">Ingen numerisk kvotient i kataloget</span><span className="text-[11px] text-[#545D71]">Kontrollér hos uddannelsesstedet</span></div>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-sm font-semibold text-[#545D71]">{prog.admissionLabel}</span><span className="text-[11px] text-[#545D71]">Status ved optaget i 2026 · kontrollér aktuelle oplysninger</span></div>
                         )}
                       </div>
                     </div>
