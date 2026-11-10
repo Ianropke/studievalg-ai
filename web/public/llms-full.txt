@@ -4,7 +4,7 @@ Canonical URL: https://uddannelsesindsigt.com/
 Language: Danish
 Audience: Young people comparing Danish higher-education programmes
 Programme count: 1,413
-Admissions source: UFM/KOT
+Admissions values: catalogue fields labelled 2025; 345 numeric values match the official 2025 workbook by KOT number, but non-numeric statuses are not reliably represented. The 2026 field contains a placeholder, not thresholds.
 AI model version: 2026.6
 AI model updated: 2026-09-10
 
@@ -65,7 +65,7 @@ job replacement.
 
 ## Citation guidance
 
-When citing an admission threshold, identify the year and UFM/KOT as source.
+Do not cite catalogue admission values as verified official or current 2026 thresholds. Consult UddannelsesGuiden or UFSN for official current values.
 When citing an AI score, include "modelestimat", model version 2026.6 and the
 programme's O*NET coverage status. Do not infer an AI score for an uncovered
 programme, and do not present small score differences as precise forecasts.

@@ -10,7 +10,7 @@ import type { NormalizedScores, RawProgramScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
-import { EvidenceList } from "@/components/EvidenceList";
+import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/EvidenceList";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } from "@/lib/shareMatch";
@@ -261,7 +261,7 @@ export default function Dashboard() {
       const gpaEligibilityBonus = (kvNum !== null && meetsGpa) ? 15 : 0;
       const aiSortScore = includeAiModels && aiEligible ? robustScore : 0;
       const totalSortScore = relevanceBoost + gpaEligibilityBonus + aiSortScore;
-      prog.udbud_titel = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
+      const formattedTitle = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
 
       const aiPhrase = includeAiModels
         ? `AI-modelestimatet er ${aiBand(robustScore)} (ca. ${roundAiScore(robustScore)}/100)`
@@ -269,18 +269,18 @@ export default function Dashboard() {
       let whyText = "";
       if (kvNum !== null) {
         if (meetsGpa) {
-          whyText = `Med et snit på ${gpa.toFixed(1)} opfylder du den seneste Kvote 1-kvotient på ${kvNum}.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
+          whyText = `Dit snit på ${gpa.toFixed(1)} ligger på eller over den registrerede historiske kvotient på ${kvNum}.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
         } else {
-          whyText = `Den seneste Kvote 1-kvotient var ${kvNum}, så et snit på ${gpa.toFixed(1)} ligger under den observerede grænse.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
+          whyText = `Katalogets historiske kvotient er ${kvNum}, så et snit på ${gpa.toFixed(1)} ligger under katalogværdien.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
         }
       } else {
-        whyText = `KOT-data angiver “Alle optaget” for den seneste optagelse.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
+        whyText = `Kataloget viser ikke en numerisk kvotient. Kontrollér optagelsestal og adgangskrav hos uddannelsesstedet.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
       }
 
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
       const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
       const cityName = (prog.by || "") as string;
-      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
+      return { ...prog, udbud_titel: formattedTitle, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
@@ -378,7 +378,7 @@ export default function Dashboard() {
             passer <span className="border-b-4 border-[#0F9D6E] pb-1">bedst til dig?</span>
           </h1>
           <p className="text-sm text-[#545D71] max-w-lg mx-auto font-normal leading-relaxed">
-            Søg blandt alle danske videregående uddannelser, sammenlign observerede KOT-optagelsesdata, og vælg selv om tydeligt markerede AI-modelestimater skal indgå.
+            Søg i uddannelseskataloget, sammenlign ældre kvotienter, og vælg selv om tydeligt markerede AI-modelestimater skal indgå.
           </p>
         </div>
 
@@ -390,6 +390,7 @@ export default function Dashboard() {
                 <span className="text-[#12172B] font-mono-data font-bold text-sm">{gpa.toFixed(1)}</span>
               </div>
               <input id="gpa-slider" type="range" min="2.0" max="12.0" step="0.1" value={gpa} onChange={(e) => setGpa(Number(e.target.value))} aria-label={`Gennemsnit: ${gpa.toFixed(1)}`} className="w-full h-2 bg-[#E7E9EF] rounded-lg appearance-none cursor-pointer accent-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" />
+              <p className="text-xs leading-relaxed text-[#545D71]">Sammenligningen bygger på historiske kvotienter, der kan ændre sig. Den er ingen garanti for optagelse. Kontrollér også fagkrav og andre adgangskrav hos uddannelsesstedet.</p>
             </div>
             <div className="space-y-2">
               <label htmlFor="university-select" className="text-xs font-semibold text-[#12172B] block">Vælg universitet eller uddannelsessted</label>
@@ -408,7 +409,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
-            KOT/adgangstal er observerede optagelsesdata. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.
+            Katalogets 345 numeriske 2025-værdier matcher den officielle fil på KOT-nummer. Øvrige statusser er ikke fuldt verificerede. Brug de aktuelle tal på <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a>. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.
             <span className="mt-1 block">Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status og begrænsninger.</span>
           </div>
           <div data-testid="ai-model-toggle-panel" className={`rounded-xl border p-4 ${includeAiModels ? "border-[#0F9D6E]/35 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
@@ -452,7 +453,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3">
             <div>
               <h2 className="text-xl font-bold text-[#12172B] font-display">Uddannelser at undersøge</h2>
-              <p className="text-xs text-[#545D71]">{includeAiModels ? "AI-modelestimat indgår · kun uddannelser med O*NET 31.0-dækning" : "Sorteret efter søgerelevans og seneste Kvote 1-data · AI indgår ikke"}</p>
+              <p className="text-xs text-[#545D71]">{includeAiModels ? "AI-modelestimat indgår · kun uddannelser med O*NET 31.0-dækning" : "Sorteret efter søgerelevans og ældre katalogværdier · AI indgår ikke"}</p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setShowShareModal(true)} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><span>✨</span><span>Del dit match</span></button>
@@ -463,7 +464,7 @@ export default function Dashboard() {
           {loading ? (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow animate-pulse">
               <div className="w-12 h-12 border-4 border-[#0F9D6E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <h3 className="text-base font-bold text-[#12172B]">Downloader nyeste optagelsesdata...</h3>
+              <h3 className="text-base font-bold text-[#12172B]">Indlæser uddannelseskataloget...</h3>
               <p className="text-xs text-[#545D71]">Analyserer kataloget og markerer model-/provenansstatus.</p>
             </div>
           ) : topMatches.length > 0 ? (
@@ -491,11 +492,11 @@ export default function Dashboard() {
                         ) : null}
                       </div>
                       <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
-                        <span className="text-[11px] text-[#667085] block">Kvote 1 adgangskvotient (seneste KOT-data)</span>
+                        <span className="text-[11px] text-[#667085] block">Kvote 1-katalogværdi (2025)</span>
                         {prog.kvNum !== null ? (
-                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.latest_kvotient}</span><span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${prog.meetsGpa ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20" : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"}`}>{prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}{prog.meetsGpa ? "Kvote 1 opfyldt" : `Under seneste Kvote 1 (${prog.kvNum})`}</span></div>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.latest_kvotient}</span><span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${prog.meetsGpa ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20" : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"}`}>{prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}{prog.meetsGpa ? "På eller over historisk kvotient" : `Under historisk kvotient (${prog.kvNum})`}</span></div>
                         ) : (
-                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">Alle optaget</span><span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E6F4ED] text-[#0B7A57] border border-[#0F9D6E]/20"><CheckCircleIcon /> Seneste KOT: Alle optaget</span></div>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-sm font-semibold text-[#545D71]">Ingen numerisk kvotient i kataloget</span><span className="text-[11px] text-[#545D71]">Kontrollér hos uddannelsesstedet</span></div>
                         )}
                       </div>
                     </div>
@@ -509,7 +510,7 @@ export default function Dashboard() {
                     {isExpanded && (
                       <div className="pt-4 border-t border-[#E7E9EF] space-y-4 text-xs">
                         <div className="space-y-2"><span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">Kurser og fagindhold</span><div className="flex flex-wrap gap-1.5">{prog.skills_hierarchy?.courses?.map((c: string, i: number) => (<span key={i} className="bg-[#F7F8FA] text-[#12172B] border border-[#D8DBE4] px-2.5 py-1 rounded-md text-[11px] font-semibold">{c}</span>))}</div></div>
-                        <div className="space-y-2 pt-2 border-t border-[#E7E9EF]"><span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">Evidenskilder</span>{includeAiModels && <ScoreDisclosure scores={prog.scoreDetails!} />}<EvidenceList evidence={prog.rag_evidence} /></div>
+                        <div className="space-y-2 pt-2 border-t border-[#E7E9EF]"><span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">Evidenskilder</span>{includeAiModels && <ScoreDisclosure scores={prog.scoreDetails!} />}<EvidenceList evidence={withoutUnverifiedAdmissionsEvidence(prog.rag_evidence)} /></div>
                       </div>
                     )}
                   </article>

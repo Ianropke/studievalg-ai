@@ -7,7 +7,7 @@ import { getAllPrograms, getProgramBySlug, createProgramSlug } from "@/lib/slugs
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
-import { EvidenceList } from "@/components/EvidenceList";
+import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/EvidenceList";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { normalizeProgramName } from "@/lib/programName";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const title = prog.udbud_titel || "Uddannelse";
   const inst = prog.institution || prog.institution_navn || "";
-  const kv = prog.latest_kvotient || "Alle optaget";
+  const kv = typeof prog.latest_kvotient === "number" ? String(prog.latest_kvotient) : "ikke verificeret";
   const enriched = getEnrichedScores(title, prog.scores);
   const robust = enriched.ai_resilience;
   const aiDescription = enriched.ranking_eligible.ai
@@ -40,13 +40,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: `${title} — adgangskvotient og AI-perspektiv | Uddannelsesindsigt`,
-    description: `${title} ved ${inst}: Seneste Kvote 1-adgangskvotient ${kv}. ${aiDescription}`,
+    description: `${title} ved ${inst}: Kvote 1-katalogværdi fra 2025: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
     alternates: {
       canonical: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
     },
     openGraph: {
       title: `${title} | Uddannelsesindsigt`,
-      description: `${title} ved ${inst}: adgangskvotient ${kv}. ${aiDescription}`,
+      description: `${title} ved ${inst}: Kvote 1-katalogværdi fra 2025: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
       url: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
       siteName: "Uddannelsesindsigt",
       locale: "da_DK",
@@ -68,7 +68,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
   const inst = prog.institution || prog.institution_navn || "Uddannelsessted";
   const city = prog.by || "";
   const kot = String(prog.kot_nr || "");
-  const kv = prog.latest_kvotient || "Alle optaget";
+  const kv = typeof prog.latest_kvotient === "number" ? String(prog.latest_kvotient) : "Ikke verificeret";
 
   const enriched = getEnrichedScores(title, prog.scores);
   const robustScore = enriched.ai_resilience;
@@ -91,7 +91,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
       },
     },
     "identifier": kot,
-    "description": `Seneste Kvote 1-adgangskvotient ${kv}. ${aiEligible ? `${aiBand(robustScore)} AI-robusthed i et tydeligt markeret modelestimat.` : "AI-modelestimat ikke tilgængeligt."}`,
+    "description": `Kvote 1-katalogværdi fra 2025: ${kv}; kontrollér aktuelle oplysninger hos uddannelsesstedet. ${aiEligible ? `${aiBand(robustScore)} AI-robusthed i et tydeligt markeret modelestimat.` : "AI-modelestimat ikke tilgængeligt."}`,
     "url": `https://uddannelsesindsigt.com/uddannelse/${slug}`,
   };
 
@@ -161,10 +161,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             </div>
 
             <div className="bg-[#F7F8FA] p-4 rounded-xl border border-[#E7E9EF] text-left md:text-right shrink-0 w-full md:w-auto">
-              <span className="text-[11px] text-[#667085] block">Kvote 1 adgangskvotient (2026)</span>
+              <span className="text-[11px] text-[#667085] block">Kvote 1-katalogværdi fra 2025</span>
               <span className="text-2xl font-bold text-[#12172B] font-mono-data">{kv}</span>
-              <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E6F4ED] text-[#0B7A57] border border-[#0F9D6E]/20 mt-1 block">
-                Officiel UFM-registerdata
+              <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#F7F8FA] text-[#545D71] border border-[#D8DBE4] mt-1 block">
+                Ældre katalogværdi · kontrollér aktuelle optagelsestal
               </span>
             </div>
           </div>
@@ -187,7 +187,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B7A57]">AI-perspektiv</p>
                 <h2 className="mt-1 text-lg font-bold text-[#12172B]">{aiEligible ? `${aiBand(robustScore)} modelestimat` : "Ikke tilgængeligt"}</h2>
-                <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#545D71]">{aiEligible ? `Baseret på amerikanske O*NET 31.0-opgavedata via en program-crosswalk. Dækning på hele siden: ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser.` : "Uddannelsen vises stadig i kataloget og kan sammenlignes på observerede optagelsesdata."}</p>
+                <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#545D71]">{aiEligible ? `Baseret på amerikanske O*NET 31.0-opgavedata via en program-crosswalk. Dækning på hele siden: ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser.` : "Uddannelsen vises stadig i kataloget. Kontrollér aktuelle adgangskrav og optagelsestal hos uddannelsesstedet."}</p>
               </div>
               {aiEligible && <span className="w-fit rounded-full border border-[#0F9D6E]/30 bg-white px-4 py-2 text-sm font-bold text-[#0B7A57]">ca. {roundedRobustScore}/100</span>}
             </div>
@@ -220,10 +220,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           <div className="space-y-4 pt-4 border-t border-[#E7E9EF]">
             <h3 className="text-base font-bold text-[#12172B]">Evidensforklaring & Modelanalyse</h3>
             <p className="text-xs text-[#545D71] leading-relaxed">
-              Kvote 1-adgangskvotienten for <strong className="text-[#12172B]">{title}</strong> var senest <strong className="text-[#12172B]">{kv}</strong>. {aiEligible ? `AI-perspektivet er et modelestimat i kategorien “${aiBand(robustScore)}”, afrundet til ca. ${roundedRobustScore}/100.` : "Der er ikke tilstrækkeligt grundlag for et programspecifikt AI-estimat."}
+              Katalogets kvote 1-værdi fra 2025 for <strong className="text-[#12172B]">{title}</strong> er <strong className="text-[#12172B]">{kv}</strong>. Kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet. {aiEligible ? `AI-perspektivet er et modelestimat i kategorien “${aiBand(robustScore)}”, afrundet til ca. ${roundedRobustScore}/100.` : "Der er ikke tilstrækkeligt grundlag for et programspecifikt AI-estimat."}
             </p>
             <ScoreDisclosure scores={enriched} />
-            <EvidenceList evidence={prog.rag_evidence} />
+            <EvidenceList evidence={withoutUnverifiedAdmissionsEvidence(prog.rag_evidence)} />
 
             {prog.skills_hierarchy && (
               <div className="bg-[#F7F8FA] p-4 rounded-xl border border-[#E7E9EF] space-y-2 text-xs">

@@ -82,10 +82,10 @@ export default function EvidensPage() {
           <div className="space-y-4">
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#0F9D6E] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
-                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 1: OFFICIEL REGISTERDATA (HÅRDE TAL)</h3>
-                <span className="font-mono-data text-[10px] text-[#0B7A57] bg-[#E3F6EE] px-2 py-0.5 rounded font-bold border border-[#0F9D6E]/20">Observeret / registerdata</span>
+                <h3 className="font-bold text-[#12172B] text-xs uppercase tracking-wider">NIVEAU 1: OPTAGELSESDATA</h3>
+                <span className="font-mono-data text-[10px] text-[#545D71] bg-[#F7F8FA] px-2 py-0.5 rounded font-bold border border-[#D8DBE4]">Delvist verificeret</span>
               </div>
-              <p className="text-xs text-[#545D71] leading-relaxed">Danmarks Statistik og UFM (KOT) leverer observerede tal for blandt andet optagelse og adgangskvotienter. De beskriver historiske eller registrerede forhold — ikke nødvendigvis fremtidig efterspørgsel eller den enkeltes udfald.</p>
+              <p className="text-xs text-[#545D71] leading-relaxed">Katalogets 345 numeriske 2025-værdier matcher den officielle KOT-fil på KOT-nummer. Af 1.068 ikke-numeriske værdier svarer 518 til “alle optaget” i 2025, 77 har en anden officiel status, og 473 numre findes ikke i 2025-filen. Derfor vises de ikke som bekræftet optag. Katalogets 2026-felt er en tekstmarkør. 919 af 1.413 KOT-numre findes i 2026-filen; dette verificerer ikke uddannelsesidentitet eller kvotient. <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="underline font-semibold">Se aktuelle optagelsestal på UddannelsesGuiden</a>.</p>
             </div>
             <div className="bg-[#FFFFFF] p-5 rounded-lg border-l-4 border-l-[#2563EB] border-y border-r border-[#E7E9EF] shadow-sm space-y-2">
               <div className="flex justify-between items-center">
