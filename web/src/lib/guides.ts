@@ -23,7 +23,7 @@ export interface GuideConfig {
   questions: Array<{ question: string; answer: string }>;
 }
 
-export const GUIDE_UPDATED_AT = "2026-09-09";
+export const GUIDE_UPDATED_AT = "2026-11-10";
 
 export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
   "hvad-kan-jeg-laese-med-mit-snit": {
@@ -31,19 +31,19 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
     title: "Hvad kan jeg læse med mit snit?",
     seoTitle: "Hvad kan jeg læse med mit snit? Historiske adgangskvotienter",
     description:
-      "Sammenlign dit snit med ældre katalogværdier og kontrollér aktuelle adgangskrav hos uddannelsesstedet.",
-    badge: "Kvote 1 · ældre katalogværdier",
+      "Sammenlign dit snit med optaget i 2026 og kontrollér aktuelle adgangskrav hos uddannelsesstedet.",
+    badge: "Kvote 1 · optaget i 2026",
     intro:
-      "Dit gennemsnit er et praktisk pejlemærke, men ikke et facit for dit studievalg. Matchværktøjet sammenholder dit snit med ældre katalogværdier fra 2025. Kontrollér de aktuelle tal hos UddannelsesGuiden. AI-modelestimater er et valgfrit ekstra perspektiv.",
+      "Dit gennemsnit er et praktisk pejlemærke, men ikke et facit for dit studievalg. Matchværktøjet sammenholder dit snit med kvotienter fra optaget i 2026, hvor uddannelsen kan matches sikkert. Kontrollér aktuelle tal hos UddannelsesGuiden. AI-modelestimater er et valgfrit ekstra perspektiv.",
     sections: [
       {
         title: "Start med dit faktiske gennemsnit",
         paragraphs: [
-          "Indstil dit snit i matchværktøjet. Uddannelser med en numerisk katalogværdi markeres, når dit snit ligger over eller under den ældre værdi.",
-          "Katalogværdien beskriver et historisk optag i 2025. Kvotienten kan ændre sig fra år til år og er ikke et løfte om optagelse.",
+          "Indstil dit snit i matchværktøjet. Uddannelser med en numerisk 2026-kvotient markeres, når dit snit ligger over eller under den historiske værdi.",
+          "Kvotienten beskriver optaget i 2026. Den kan ændre sig fra år til år og er ikke et løfte om optagelse.",
         ],
         bullets: [
-          "Se uddannelser, du kan undersøge nærmere ud fra den historiske 2025-værdi, og relevante alternativer.",
+          "Se uddannelser, du kan undersøge nærmere ud fra 2026-værdien, og relevante alternativer.",
           "Brug institutionsfilteret, hvis geografi eller uddannelsessted betyder meget.",
           "Åbn uddannelsesprofilen for at kontrollere KOT-nummer, datadato og modelstatus.",
         ],
@@ -51,8 +51,8 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       {
         title: "Sådan læser du optagelsestallene",
         paragraphs: [
-          "Katalogets 345 numeriske værdier i 2025-feltet matcher den officielle 2025-fil på KOT-nummer. Andre statusser er ikke fuldt verificerede. En manglende numerisk værdi beviser ikke, at alle blev optaget. Find aktuelle tal hos UddannelsesGuiden og kontrollér adgangskrav hos uddannelsesstedet.",
-          "Hvis dit snit ligger under katalogværdien fra 2025, kan Kvote 2 eller beslægtede uddannelser stadig være relevante. Kontrollér altid de aktuelle adgangskrav og frister hos de officielle myndigheder.",
+          "KOT-kildens 2026-udfald vises, når KOT-nummer og navn matcher. Ikke alle katalogets uddannelser kan matches, og en manglende numerisk værdi beviser ikke, at alle blev optaget. Oplysninger om ledige pladser gælder 2026-optaget, ikke nødvendigvis nu. Find aktuelle tal hos UddannelsesGuiden.",
+          "Hvis dit snit ligger under kvotienten fra 2026, kan kvote 2 eller beslægtede uddannelser stadig være relevante. Kontrollér altid de aktuelle adgangskrav og frister hos de officielle myndigheder.",
         ],
       },
       {
@@ -75,8 +75,8 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
     relatedLinks: [
       {
         href: "/lister/top-10-letteste-adgangskvotienter",
-        label: "Uddannelser uden verificeret kvotient",
-        description: "Se eksempler, hvor kataloget ikke har en verificeret numerisk kvotient.",
+        label: "Uddannelser hvor alle blev optaget i 2026",
+        description: "Se eksempler på matchede uddannelser med denne historiske status.",
       },
       {
         href: "/lister/top-10-svaereste-adgangskvotienter",

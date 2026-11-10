@@ -8,13 +8,13 @@ import { test, expect } from '@playwright/test';
 test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('/');
   });
 
   test('E2E-01: Forside indlæser korrekt med Nordisk Myndigheds-UI og top navigation', async ({ page }) => {
     await expect(page).toHaveTitle(/Uddannelsesindsigt/i);
     await expect(page.locator('h1')).toContainText('Hvilken uddannelse');
-    await expect(page.getByText(/2025-katalogværdier \(delvist kildeverificeret\)/).first()).toBeVisible();
+    await expect(page.getByText(/KOT-optaget 2026 \(delvis dækning\)/).first()).toBeVisible();
   });
 
   test('E2E-02: Søgning på "læge" placerer Medicin som #1 match', async ({ page }) => {

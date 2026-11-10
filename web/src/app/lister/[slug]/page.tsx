@@ -5,6 +5,7 @@ import { LIST_CONFIGS, getListData } from "@/lib/lists";
 import { createProgramSlug } from "@/lib/slugs";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
+import { admission2026Institution, admission2026Label, getAdmission2026 } from "@/lib/admissions2026";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { roundAiScore } from "@/lib/aiPresentation";
@@ -127,8 +128,8 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
         <div className="space-y-4">
           {items.map(({ program, rank, valueDisplay }) => {
             const progSlug = createProgramSlug(program);
-            const inst = program.institution || program.institution_navn || "Uddannelsessted";
-            const kv = typeof program.latest_kvotient === "number" ? program.latest_kvotient : "Ikke verificeret";
+            const inst = admission2026Institution(program);
+            const kv = admission2026Label(getAdmission2026(program));
             const scoreDetails = getEnrichedScores(program.udbud_titel, program.scores);
             const rob = scoreDetails.ai_resilience;
 
@@ -159,7 +160,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
                     </Link>
 
                     <div className="flex items-center gap-3 text-xs text-[#545D71] pt-1">
-                      <span>Kvote 1: <strong className="font-mono-data text-[#12172B]">{kv}</strong></span>
+                      <span>Kvote 1 (2026): <strong className="font-mono-data text-[#12172B]">{kv}</strong></span>
                       {slug.includes("ai-") && <><span>•</span><span>AI-modelestimat: <strong className="font-mono-data text-[#0B7A57]">ca. {roundAiScore(rob)}/100</strong></span></>}
                     </div>
                     {slug.includes("ai-") && <ScoreDisclosure scores={scoreDetails} compact />}

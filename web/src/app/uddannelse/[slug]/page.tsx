@@ -11,6 +11,7 @@ import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { normalizeProgramName } from "@/lib/programName";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
+import { admission2026Institution, admission2026Label, getAdmission2026 } from "@/lib/admissions2026";
 
 export async function generateStaticParams() {
   const all = getAllPrograms();
@@ -30,8 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const title = prog.udbud_titel || "Uddannelse";
-  const inst = prog.institution || prog.institution_navn || "";
-  const kv = typeof prog.latest_kvotient === "number" ? String(prog.latest_kvotient) : "ikke verificeret";
+  const inst = admission2026Institution(prog);
+  const kv = admission2026Label(getAdmission2026(prog));
   const enriched = getEnrichedScores(title, prog.scores);
   const robust = enriched.ai_resilience;
   const aiDescription = enriched.ranking_eligible.ai
@@ -40,13 +41,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: `${title} — adgangskvotient og AI-perspektiv | Uddannelsesindsigt`,
-    description: `${title} ved ${inst}: Kvote 1-katalogværdi fra 2025: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
+    description: `${title} ved ${inst}: Kvote 1 ved optaget i 2026: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
     alternates: {
       canonical: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
     },
     openGraph: {
       title: `${title} | Uddannelsesindsigt`,
-      description: `${title} ved ${inst}: Kvote 1-katalogværdi fra 2025: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
+      description: `${title} ved ${inst}: Kvote 1 ved optaget i 2026: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
       url: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
       siteName: "Uddannelsesindsigt",
       locale: "da_DK",
@@ -65,10 +66,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
   }
 
   const title = prog.udbud_titel || "Uddannelse";
-  const inst = prog.institution || prog.institution_navn || "Uddannelsessted";
+  const inst = admission2026Institution(prog);
   const city = prog.by || "";
   const kot = String(prog.kot_nr || "");
-  const kv = typeof prog.latest_kvotient === "number" ? String(prog.latest_kvotient) : "Ikke verificeret";
+  const kv = admission2026Label(getAdmission2026(prog));
 
   const enriched = getEnrichedScores(title, prog.scores);
   const robustScore = enriched.ai_resilience;
@@ -91,7 +92,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
       },
     },
     "identifier": kot,
-    "description": `Kvote 1-katalogværdi fra 2025: ${kv}; kontrollér aktuelle oplysninger hos uddannelsesstedet. ${aiEligible ? `${aiBand(robustScore)} AI-robusthed i et tydeligt markeret modelestimat.` : "AI-modelestimat ikke tilgængeligt."}`,
+    "description": `Kvote 1 ved optaget i 2026: ${kv}; kontrollér aktuelle oplysninger hos uddannelsesstedet. ${aiEligible ? `${aiBand(robustScore)} AI-robusthed i et tydeligt markeret modelestimat.` : "AI-modelestimat ikke tilgængeligt."}`,
     "url": `https://uddannelsesindsigt.com/uddannelse/${slug}`,
   };
 
@@ -161,10 +162,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             </div>
 
             <div className="bg-[#F7F8FA] p-4 rounded-xl border border-[#E7E9EF] text-left md:text-right shrink-0 w-full md:w-auto">
-              <span className="text-[11px] text-[#667085] block">Kvote 1-katalogværdi fra 2025</span>
+              <span className="text-[11px] text-[#667085] block">Kvote 1 ved optaget i 2026</span>
               <span className="text-2xl font-bold text-[#12172B] font-mono-data">{kv}</span>
               <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#F7F8FA] text-[#545D71] border border-[#D8DBE4] mt-1 block">
-                Ældre katalogværdi · kontrollér aktuelle optagelsestal
+                Historisk optag · kontrollér aktuelle optagelsestal og ledige pladser
               </span>
             </div>
           </div>
@@ -220,7 +221,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           <div className="space-y-4 pt-4 border-t border-[#E7E9EF]">
             <h3 className="text-base font-bold text-[#12172B]">Evidensforklaring & Modelanalyse</h3>
             <p className="text-xs text-[#545D71] leading-relaxed">
-              Katalogets kvote 1-værdi fra 2025 for <strong className="text-[#12172B]">{title}</strong> er <strong className="text-[#12172B]">{kv}</strong>. Kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet. {aiEligible ? `AI-perspektivet er et modelestimat i kategorien “${aiBand(robustScore)}”, afrundet til ca. ${roundedRobustScore}/100.` : "Der er ikke tilstrækkeligt grundlag for et programspecifikt AI-estimat."}
+              Kvote 1 ved optaget i 2026 for <strong className="text-[#12172B]">{title}</strong>: <strong className="text-[#12172B]">{kv}</strong>. Kilden anvendes kun ved match på KOT-nummer og navn. Oplysninger om ledige pladser er historiske; kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet. {aiEligible ? `AI-perspektivet er et modelestimat i kategorien “${aiBand(robustScore)}”, afrundet til ca. ${roundedRobustScore}/100.` : "Der er ikke tilstrækkeligt grundlag for et programspecifikt AI-estimat."}
             </p>
             <ScoreDisclosure scores={enriched} />
             <EvidenceList evidence={withoutUnverifiedAdmissionsEvidence(prog.rag_evidence)} />
@@ -266,7 +267,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
                       </h4>
                       <span className="text-[10px] font-mono-data font-semibold text-[#0B7A57] bg-[#E6F4ED] px-2 py-0.5 rounded-full shrink-0">KOT {simProg.kot_nr}</span>
                     </div>
-                    <p className="text-[11px] text-[#545D71] truncate">{simProg.institution || simProg.institution_navn}</p>
+                    <p className="text-[11px] text-[#545D71] truncate">{admission2026Institution(simProg)}</p>
                   </Link>
                 ))}
             </div>
