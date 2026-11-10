@@ -247,7 +247,10 @@ export default function Dashboard() {
         const pDisco = (prog.disco_titel || "").toLowerCase();
         const pKot = (prog.kot_nr || "").toLowerCase();
         const isExactMajor = exactMajors.some((major) => pTitleLow.startsWith(major));
-        if (isExactMajor) {
+        const isNamedMajor = exactMajors.some((major) => pTitleLow === major || pTitleLow.startsWith(`${major},`));
+        if (isNamedMajor) {
+          relevanceBoost = 1100;
+        } else if (isExactMajor) {
           relevanceBoost = 1000;
         } else {
           const directTitleMatch = expandedTerms.some((term) => term && (pTitleLow.includes(term) || pNormTitle.includes(normalizeSearchText(term))));
