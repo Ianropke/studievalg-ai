@@ -13,6 +13,27 @@ const KEY_ROUTES = [
 ];
 
 test.describe("Tilgængelighed, responsive flader og discovery", () => {
+  test("adgangsvisning lover ikke optag og skelner manglende kvotient", async ({ page }) => {
+    await page.goto("/?q=bioteknologi");
+    await expect(page.getByText(/ingen garanti for optagelse/i)).toBeVisible();
+    await expect(page.getByText("Kvote 1 opfyldt")).toHaveCount(0);
+    await page.goto("/sammenlign?a=10234&b=10318");
+    await expect(page.getByText("På eller over historisk kvotient")).toBeVisible();
+    await expect(page.getByText("Ingen numerisk kvotient i kataloget")).toBeVisible();
+    await expect(page.getByText("Adgangssnit opfyldt")).toHaveCount(0);
+    await page.goto("/uddannelse/10318-finsk-koebenhavn-k-studiestart-sommerstart");
+    await expect(page.getByText("Ældre katalogværdi · kontrollér aktuelle optagelsestal")).toBeVisible();
+    await expect(page.getByText("Alle optaget", { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/kan sammenlignes på observerede optagelsesdata/)).toHaveCount(0);
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /2025.*ikke verificeret/i);
+    await page.goto("/uddannelse/10234-bioteknologi-frederiksberg-c-studiestart-sommerstart");
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /2025.*8\.1/);
+    await page.goto("/evidens");
+    await expect(page.getByText(/77 har en anden officiel status/)).toBeVisible();
+    await page.goto("/");
+    await expect(page.locator('meta[name="keywords"]')).not.toHaveAttribute("content", /KOT optagelse 2026/);
+  });
+
   for (const route of KEY_ROUTES) {
     test(`ingen alvorlige automatiske accessibility-fejl på ${route}`, async ({ page }) => {
       await page.goto(route);

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Guides til studievalg | Uddannelsesindsigt",
     description:
-      "Brug konkrete optagelsesdata og tydeligt markerede modelestimater til at undersøge dit studievalg.",
+      "Brug ældre katalogtal og tydeligt markerede modelestimater til at undersøge dit studievalg.",
     url: "https://uddannelsesindsigt.com/guides",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
@@ -43,7 +43,7 @@ export default function GuidesPage() {
             Guides til at vælge uddannelse
           </h1>
           <p className="text-sm leading-relaxed text-[#545D71]">
-            Gå fra brede spørgsmål til konkrete muligheder. Guiderne kombinerer officielle optagelsesdata med tydeligt markerede modelindikatorer og viser, hvornår du bør kontrollere oplysninger hos uddannelsesstedet eller en studievejleder.
+            Gå fra brede spørgsmål til konkrete muligheder. Guiderne bruger ældre katalogtal og tydeligt markerede modelindikatorer og viser, hvornår du bør kontrollere oplysninger hos uddannelsesstedet eller en studievejleder.
           </p>
         </section>
 

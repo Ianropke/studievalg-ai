@@ -18,6 +18,10 @@ function readUrl(item: unknown): string {
   return /^https?:\/\//i.test(value) ? value : "";
 }
 
+export function withoutUnverifiedAdmissionsEvidence(evidence?: readonly unknown[]): readonly unknown[] {
+  return (evidence || []).filter((item) => !/ufm|kot/i.test(readField(item, ["source", "source_title", "report_title", "dataset"])));
+}
+
 export function EvidenceList({ evidence = [], compact = false }: EvidenceListProps) {
   const usable = evidence
     .map((item) => ({

@@ -47,7 +47,7 @@ export default function OpenGraphImage() {
             Find uddannelse efter snit og AI
           </span>
           <span style={{ marginTop: 26, fontSize: 25, lineHeight: 1.4, color: "#E6EEF7" }}>
-            Sammenlign 1.413 danske videregående uddannelser med officielle optagelsestal og tydeligt markerede modelestimater.
+            Sammenlign danske uddannelser med ældre katalogtal og tydeligt markerede modelestimater.
           </span>
         </div>
 

@@ -29,17 +29,17 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
   "hvad-kan-jeg-laese-med-mit-snit": {
     slug: "hvad-kan-jeg-laese-med-mit-snit",
     title: "Hvad kan jeg læse med mit snit?",
-    seoTitle: "Hvad kan jeg læse med mit snit? Adgangskvotienter 2026",
+    seoTitle: "Hvad kan jeg læse med mit snit? Historiske adgangskvotienter",
     description:
-      "Brug dit gymnasiale gennemsnit til at finde og sammenligne danske uddannelser med de seneste Kvote 1-adgangskvotienter fra UFM.",
-    badge: "Kvote 1 og optagelsesdata 2026",
+      "Sammenlign dit snit med ældre katalogværdier og kontrollér aktuelle adgangskrav hos uddannelsesstedet.",
+    badge: "Kvote 1 · ældre katalogværdier",
     intro:
-      "Dit gennemsnit er et praktisk filter, men ikke et facit for dit studievalg. Matchværktøjet sammenholder dit snit med den senest registrerede Kvote 1-kvotient. Hvis du selv vælger det, kan et tydeligt markeret AI-modelestimat bruges som et ekstra perspektiv.",
+      "Dit gennemsnit er et praktisk pejlemærke, men ikke et facit for dit studievalg. Matchværktøjet sammenholder dit snit med ældre katalogværdier fra 2025. Kontrollér de aktuelle tal hos UddannelsesGuiden. AI-modelestimater er et valgfrit ekstra perspektiv.",
     sections: [
       {
         title: "Start med dit faktiske gennemsnit",
         paragraphs: [
-          "Indstil dit snit i matchværktøjet. Uddannelser med en numerisk adgangskvotient markeres, når dit snit lå over eller under den senest registrerede Kvote 1-kvotient.",
+          "Indstil dit snit i matchværktøjet. Uddannelser med en numerisk katalogværdi markeres, når dit snit ligger over eller under den ældre værdi.",
           "Adgangskvotienten beskriver sidste optag og kan ændre sig fra år til år. Den er derfor ikke et løfte om optagelse næste år.",
         ],
         bullets: [
@@ -51,7 +51,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       {
         title: "Sådan læser du optagelsestallene",
         paragraphs: [
-          "En numerisk kvotient er den laveste registrerede Kvote 1-kvotient ved det seneste optag. “Alle optaget” betyder, at alle kvalificerede ansøgere blev optaget i det pågældende optag — ikke at uddannelsen er uden adgangskrav.",
+          "Katalogets 345 numeriske værdier i 2025-feltet matcher den officielle 2025-fil på KOT-nummer. Andre statusser er ikke fuldt verificerede. En manglende numerisk værdi beviser ikke, at alle blev optaget. Find aktuelle tal hos UddannelsesGuiden og kontrollér adgangskrav hos uddannelsesstedet.",
           "Hvis dit snit ligger under den seneste kvotient, kan Kvote 2 eller beslægtede uddannelser stadig være relevante. Kontrollér altid de aktuelle adgangskrav og frister hos de officielle myndigheder.",
         ],
       },
@@ -75,8 +75,8 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
     relatedLinks: [
       {
         href: "/lister/top-10-letteste-adgangskvotienter",
-        label: "Uddannelser hvor alle blev optaget",
-        description: "Se udvalgte uddannelser med “Alle optaget” i seneste optag.",
+        label: "Uddannelser uden verificeret kvotient",
+        description: "Se eksempler, hvor kataloget ikke har en verificeret numerisk kvotient.",
       },
       {
         href: "/lister/top-10-svaereste-adgangskvotienter",
@@ -209,7 +209,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       {
         title: "1. Afgræns dine reelle muligheder",
         paragraphs: [
-          "Sammenhold dit gennemsnit med den seneste Kvote 1-kvotient, men behold relevante Kvote 2-muligheder og beslægtede uddannelser i feltet. Geografi, transport og studiemiljø kan være lige så afgørende som uddannelsens navn.",
+          "Kontrollér den aktuelle Kvote 1-kvotient hos UddannelsesGuiden, og behold relevante Kvote 2-muligheder og beslægtede uddannelser i feltet. Geografi, transport og studiemiljø kan være lige så afgørende som uddannelsens navn.",
         ],
       },
       {
@@ -267,7 +267,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
       {
         question: "Hvilke tal bør jeg lægge mest vægt på?",
         answer:
-          "Start med fagligt indhold, motivation, studieform og praktiske muligheder. Brug adgangskvotienten til at forstå seneste optag, og brug kun AI-estimatet som et supplerende perspektiv.",
+          "Start med fagligt indhold, motivation, studieform og praktiske muligheder. Find den seneste adgangskvotient hos UddannelsesGuiden, og brug kun AI-estimatet som et supplerende perspektiv.",
       },
       {
         question: "Er uddannelsen med den højeste AI-score altid bedst?",

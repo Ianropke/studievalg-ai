@@ -1,10 +1,10 @@
 import { getProgramCatalog } from "./programCatalog";
-import { getEnrichedScores, isAllAdmitted } from "./domainScoring";
+import { getEnrichedScores } from "./domainScoring";
 import { normalizeProgramName } from "./programName";
 import { DATA_STATUS } from "./dataStatus";
 import { roundAiScore } from "./aiPresentation";
 
-export { normalizeProgramName, isAllAdmitted };
+export { normalizeProgramName };
 
 export interface ProgramItem {
   id: string;
@@ -96,11 +96,11 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   },
   "top-10-svaereste-adgangskvotienter": {
     slug: "top-10-svaereste-adgangskvotienter",
-    title: "Top 10 Sværeste Uddannelser at Komme Ind På",
-    seoTitle: "Uddannelser med de højeste adgangskvotienter 2026",
-    badge: "Kvote 1 Hovedtal 2026",
-    description: "De 10 videregående uddannelser med de højeste Kvote 1 adgangskvotienter i Danmark.",
-    introHedge: "Officiel opgørelse over de 10 uddannelser i Danmark med de højeste Kvote 1 adgangskvotienter ifølge seneste optagelsesdata fra UFM.",
+    title: "Høje kvotienter i det ældre katalog",
+    seoTitle: "Historiske adgangskvotienter i kataloget",
+    badge: "2025-katalogværdier · historiske",
+    description: "Eksempler på høje kvotienter i katalogets 2025-felt.",
+    introHedge: "De numeriske værdier matcher 2025-filen på KOT-nummer; listen er ikke en aktuel officiel topliste. Kontrollér 2026-tallene hos UddannelsesGuiden eller uddannelsesstedet.",
     metricLabel: "Adgangskvotient",
     limit: 10,
     getValue: (p) => {
@@ -123,23 +123,23 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
   },
   "top-10-letteste-adgangskvotienter": {
     slug: "top-10-letteste-adgangskvotienter",
-    title: "Top 10 Uddannelser Hvor Alle Optages",
-    seoTitle: "Uddannelser hvor alle blev optaget i 2026",
-    badge: "Kvote 1 Hovedtal 2026",
-    description: "Udvalgte videregående uddannelser med ledige pladser eller hvor alle ansøgere der opfylder adgangskravene optages.",
-    introHedge: "Oversigt over 10 populære uddannelser med høj faglig kvalitet, hvor der senest var adgang for alle ansøgere der opfyldte adgangskravene (Kvotient: Alle optaget).",
+    title: "Uddannelser uden verificeret numerisk kvotient",
+    seoTitle: "Uddannelser uden verificeret kvotient",
+    badge: "Katalogdata · ikke kildeverificeret",
+    description: "Eksempler på uddannelser uden numerisk kvotient i det ældre katalog.",
+    introHedge: "En manglende numerisk værdi betyder ikke nødvendigvis, at alle blev optaget. Kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet.",
     metricLabel: "Adgangskvotient",
     limit: 10,
     getValue: (p) => {
       const kvStr = String(p.latest_kvotient || "Alle optaget");
       const isAlle = kvStr.toLowerCase().includes("alle") || kvStr === "";
-      return { display: kvStr, numeric: isAlle ? 1 : 99, raw: kvStr };
+      return { display: isAlle ? "Ikke verificeret" : kvStr, numeric: isAlle ? 1 : 99, raw: kvStr };
     },
     sortOrder: "asc",
     readerQuestions: [
       {
-        question: "Betyder “Alle optaget”, at der ikke er adgangskrav?",
-        answer: "Nej. Du skal stadig opfylde uddannelsens adgangskrav. Betegnelsen beskriver blot udfaldet blandt kvalificerede ansøgere ved det seneste optag.",
+        question: "Betyder en manglende kvotient, at alle blev optaget?",
+        answer: "Nej. Katalogets manglende numeriske værdi dokumenterer ikke udfaldet. Se de officielle optagelsestal og uddannelsens adgangskrav.",
       },
       {
         question: "Vil alle også blive optaget næste år?",

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Om Uddannelsesindsigt | Data, metode og ansvar",
     description:
-      "Sådan arbejder Uddannelsesindsigt med offentlige optagelsesdata, arbejdsmarkedsindikatorer og AI-estimater.",
+      "Sådan arbejder Uddannelsesindsigt med ældre katalogtal, databegrænsninger og AI-estimater.",
     url: "https://uddannelsesindsigt.com/om-os",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
@@ -94,7 +94,7 @@ export default function AboutPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-bold">Hvad bygger siden på?</h2>
           <p className="leading-relaxed text-[#545D71]">
-            Optagelsesoplysninger kommer fra offentlige UFM/KOT-data.
+            Kataloget indeholder ældre optagelsesværdier. De numeriske 2025-værdier matcher UFM/KOT-filen på KOT-nummer; andre statusser er ikke fuldt verificerede. Kontrollér aktuelle tal hos UddannelsesGuiden.
             AI-robusthed er et crosswalk-estimat baseret på opgaveeksponering og
             augmentationspotentiale. Estimatet er slået fra som standard og er kun
             tilgængeligt for uddannelser med O*NET 31.0-understøttelse.

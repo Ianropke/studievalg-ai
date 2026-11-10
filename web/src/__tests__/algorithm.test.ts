@@ -1,4 +1,4 @@
-import { getEnrichedScores, isAllAdmitted } from "../lib/domainScoring";
+import { getEnrichedScores } from "../lib/domainScoring";
 import { buildMatchSharePath, parseMatchShareParams } from "../lib/shareMatch";
 import { AI_RESEARCH_INSIGHTS } from "../lib/aiResearch";
 import { aiBand, roundAiScore } from "../lib/aiPresentation";
@@ -221,12 +221,6 @@ export function runUnitTests() {
   const explicitResilienceProg = getEnrichedScores("Medicin", { automation_risk: 0.15, augmentation_potential: 0.8, ...mappedAiMetadata });
   assert.ok(explicitResilienceProg.ai_resilience === 84, `Test 21 Fejl: 75/25-formlen bør give 84, fik ${explicitResilienceProg.ai_resilience}`);
   console.log("  ✅ TEST-21: Frontendkontrakt for 75/25 AI-resiliens godkendt");
-
-  // Test 22: “Alle optaget”-listen må ikke inkludere numeriske adgangskvotienter.
-  assert.ok(isAllAdmitted("Alle optaget") === true, "Test 22 Fejl: 'Alle optaget' skal genkendes");
-  assert.ok(isAllAdmitted("") === true, "Test 22 Fejl: Tom kvotient skal behandles som alle optaget");
-  assert.ok(isAllAdmitted("7,3") === false, "Test 22 Fejl: Numerisk kvotient må ikke behandles som alle optaget");
-  console.log("  ✅ TEST-22: Adgangslisten filtrerer korrekt på 'Alle optaget'");
 
   // Test 23: Den publicerede katalogdækning er den dokumenterede 569/1.413.
   const catalogue = initialProgramsCatalog as Array<{ udbud_titel: string; scores?: Parameters<typeof getEnrichedScores>[1] }>;

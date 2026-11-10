@@ -1,6 +1,6 @@
 # Uddannelsesindsigt — current project state
 
-Last reconciled: 2026-09-20.
+Last reconciled: 2026-09-20. Admissions evidence updated: 2026-11-10.
 
 ## Canonical implementation
 
@@ -15,7 +15,9 @@ The active product is a hybrid system:
 
 ### Admissions
 
-KOT/UFM admissions values are observed descriptive admissions data. They describe admissions/selection and do not directly measure labour-market demand or future outcomes.
+The catalogue's `kvotient_2026` is a placeholder in all 1,413 rows, not a 2026 threshold. Its `latest_kvotient` falls back to the field labelled 2025. On 10 November 2026, all 345 numeric 2025 values matched the official [2025 workbook](https://ufsn.dk/media/ibmjfhzj/hovedtal-2025-til-ufm-dk.xlsx) by KOT number (SHA-256 `62b7d682186744f91e8562a65577e6625b21d562af530e1097b3e9f37e2c46ef`). Of 1,068 catalogue values labelled `Alle optaget`, 518 match an official all-admitted status; 77 have a different official status and 473 IDs are absent from that workbook. Therefore do not interpret a non-numeric value as proof that all applicants were admitted, or describe these as current 2026 results. Admissions thresholds describe admissions/selection and do not measure labour-market demand or future outcomes.
+
+On 10 November 2026, the catalogue was compared by KOT number with the official [2026 KOT workbook](https://ufsn.dk/media/omyojnzg/kot-hovedtal-2026.xlsx), SHA-256 `98efdeeffdee67b470c3ee24ccdb6c68d735a365f0c39c32d9b7eda75b221ce4`. Of 957 unique official programme IDs, 919 occur in the 1,413-row catalogue; 38 official IDs are absent, and 494 catalogue IDs do not appear in the workbook. This is an ID-level comparison, not proof of programme identity, current availability or verified threshold values. Do not silently import the workbook until programme identity, scope, status categories and unmatched records are reconciled through a reproducible producer pipeline.
 
 ### AI/O*NET
 

@@ -128,7 +128,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
           {items.map(({ program, rank, valueDisplay }) => {
             const progSlug = createProgramSlug(program);
             const inst = program.institution || program.institution_navn || "Uddannelsessted";
-            const kv = program.latest_kvotient || "Alle optaget";
+            const kv = typeof program.latest_kvotient === "number" ? program.latest_kvotient : "Ikke verificeret";
             const scoreDetails = getEnrichedScores(program.udbud_titel, program.scores);
             const rob = scoreDetails.ai_resilience;
 

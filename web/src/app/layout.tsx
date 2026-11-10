@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://uddannelsesindsigt.com"),
   title: "Find uddannelse efter snit og AI | Uddannelsesindsigt",
   description:
-    "Søg blandt 1.413 danske videregående uddannelser med officielle optagelsestal og et valgfrit, tydeligt markeret AI-perspektiv.",
+    "Søg i 1.413 danske uddannelsestilbud med ældre katalogtal og et valgfrit, tydeligt markeret AI-perspektiv.",
   keywords: [
     "uddannelsesindsigt",
     "studievalg",
@@ -36,7 +36,6 @@ export const metadata: Metadata = {
     "AI arbejdsmarked",
     "O*NET 31.0",
     "AI robuste uddannelser",
-    "KOT optagelse 2026",
     "grænsekvotienter",
     "uddannelsessøgning",
     "videregående uddannelser",
@@ -46,7 +45,7 @@ export const metadata: Metadata = {
   publisher: "Uddannelsesindsigt",
   openGraph: {
     title: "Hvilken uddannelse passer til dit snit og dine prioriteter?",
-    description: "Søg blandt 1.413 danske videregående uddannelser med optagelsestal og et valgfrit AI-perspektiv.",
+    description: "Søg i 1.413 uddannelsestilbud med ældre katalogtal og et valgfrit AI-perspektiv.",
     url: "https://uddannelsesindsigt.com",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
@@ -56,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Find uddannelse efter snit og AI",
-    description: "Sammenlign danske uddannelser med officielle optagelsestal og tydeligt markerede modelestimater.",
+    description: "Sammenlign danske uddannelser med ældre katalogtal og tydeligt markerede modelestimater.",
     images: [DEFAULT_SOCIAL_IMAGE_URL],
   },
   alternates: {
