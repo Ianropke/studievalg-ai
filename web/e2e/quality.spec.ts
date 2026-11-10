@@ -14,6 +14,9 @@ const KEY_ROUTES = [
 
 test.describe("Tilgængelighed, responsive flader og discovery", () => {
   test("adgangsvisning lover ikke optag og skelner manglende kvotient", async ({ page }) => {
+    test.setTimeout(60_000);
+    const hydrationErrors: string[] = [];
+    page.on("pageerror", (error) => { if (/hydration/i.test(error.message)) hydrationErrors.push(error.message); });
     await page.goto("/?q=bioteknologi");
     await expect(page.getByText(/ingen garanti for optagelse/i)).toBeVisible();
     await expect(page.getByText("Kvote 1 opfyldt")).toHaveCount(0);
@@ -32,6 +35,12 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     await expect(page.getByText(/77 har en anden officiel status/)).toBeVisible();
     await page.goto("/");
     await expect(page.locator('meta[name="keywords"]')).not.toHaveAttribute("content", /KOT optagelse 2026/);
+    await page.goto("/guides/hvad-kan-jeg-laese-med-mit-snit");
+    await expect(page.locator("main")).not.toContainText(/sidste optag|seneste kvotient|sandsynligvis kunne søge/i);
+    await page.goto("/lister/top-10-letteste-adgangskvotienter");
+    await expect(page.getByText("DATASTATUS & BEGRÆNSNINGER")).toBeVisible();
+    await expect(page.getByText("MODELBASERET EVIDENS & METODE")).toHaveCount(0);
+    expect(hydrationErrors).toEqual([]);
   });
 
   for (const route of KEY_ROUTES) {

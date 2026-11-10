@@ -40,10 +40,10 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
         title: "Start med dit faktiske gennemsnit",
         paragraphs: [
           "Indstil dit snit i matchværktøjet. Uddannelser med en numerisk katalogværdi markeres, når dit snit ligger over eller under den ældre værdi.",
-          "Adgangskvotienten beskriver sidste optag og kan ændre sig fra år til år. Den er derfor ikke et løfte om optagelse næste år.",
+          "Katalogværdien beskriver et historisk optag i 2025. Kvotienten kan ændre sig fra år til år og er ikke et løfte om optagelse.",
         ],
         bullets: [
-          "Se både uddannelser, du sandsynligvis kunne søge via Kvote 1, og relevante alternativer.",
+          "Se uddannelser, du kan undersøge nærmere ud fra den historiske 2025-værdi, og relevante alternativer.",
           "Brug institutionsfilteret, hvis geografi eller uddannelsessted betyder meget.",
           "Åbn uddannelsesprofilen for at kontrollere KOT-nummer, datadato og modelstatus.",
         ],
@@ -52,7 +52,7 @@ export const GUIDE_CONFIGS: Record<string, GuideConfig> = {
         title: "Sådan læser du optagelsestallene",
         paragraphs: [
           "Katalogets 345 numeriske værdier i 2025-feltet matcher den officielle 2025-fil på KOT-nummer. Andre statusser er ikke fuldt verificerede. En manglende numerisk værdi beviser ikke, at alle blev optaget. Find aktuelle tal hos UddannelsesGuiden og kontrollér adgangskrav hos uddannelsesstedet.",
-          "Hvis dit snit ligger under den seneste kvotient, kan Kvote 2 eller beslægtede uddannelser stadig være relevante. Kontrollér altid de aktuelle adgangskrav og frister hos de officielle myndigheder.",
+          "Hvis dit snit ligger under katalogværdien fra 2025, kan Kvote 2 eller beslægtede uddannelser stadig være relevante. Kontrollér altid de aktuelle adgangskrav og frister hos de officielle myndigheder.",
         ],
       },
       {

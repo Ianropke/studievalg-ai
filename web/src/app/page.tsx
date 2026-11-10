@@ -261,7 +261,7 @@ export default function Dashboard() {
       const gpaEligibilityBonus = (kvNum !== null && meetsGpa) ? 15 : 0;
       const aiSortScore = includeAiModels && aiEligible ? robustScore : 0;
       const totalSortScore = relevanceBoost + gpaEligibilityBonus + aiSortScore;
-      prog.udbud_titel = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
+      const formattedTitle = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
 
       const aiPhrase = includeAiModels
         ? `AI-modelestimatet er ${aiBand(robustScore)} (ca. ${roundAiScore(robustScore)}/100)`
@@ -280,7 +280,7 @@ export default function Dashboard() {
       const institutionName = (prog.institution || prog.institution_navn || "") as string;
       const latestKvotientVal = (prog.latest_kvotient || "Alle optaget") as React.ReactNode;
       const cityName = (prog.by || "") as string;
-      return { ...prog, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
+      return { ...prog, udbud_titel: formattedTitle, by: cityName, institution: institutionName, latest_kvotient: latestKvotientVal, skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
@@ -464,7 +464,7 @@ export default function Dashboard() {
           {loading ? (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow animate-pulse">
               <div className="w-12 h-12 border-4 border-[#0F9D6E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <h3 className="text-base font-bold text-[#12172B]">Downloader nyeste optagelsesdata...</h3>
+              <h3 className="text-base font-bold text-[#12172B]">Indlæser uddannelseskataloget...</h3>
               <p className="text-xs text-[#545D71]">Analyserer kataloget og markerer model-/provenansstatus.</p>
             </div>
           ) : topMatches.length > 0 ? (

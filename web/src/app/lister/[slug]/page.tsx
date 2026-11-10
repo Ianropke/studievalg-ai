@@ -90,7 +90,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
         {/* Title & Badge */}
         <div className="space-y-3 border-b border-[#E7E9EF] pb-6">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-[#E6F4ED] text-[#0B7A57] text-[11px] font-bold px-3 py-1 rounded-full border border-[#0F9D6E]/20">
+            <span className={slug.includes("ai-") ? "bg-[#E6F4ED] text-[#0B7A57] text-[11px] font-bold px-3 py-1 rounded-full border border-[#0F9D6E]/20" : "bg-[#F7F8FA] text-[#545D71] text-[11px] font-bold px-3 py-1 rounded-full border border-[#D8DBE4]"}>
               {config.badge}
             </span>
             <span className="text-[11px] text-[#667085]">
@@ -111,7 +111,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
         <div className="bg-[#EFF6FF] border border-[#2563EB]/20 p-5 rounded-xl space-y-1.5">
           <div className="flex items-center gap-2 text-xs font-bold text-[#1D4ED8]">
             <span className="w-2 h-2 rounded-full bg-[#2563EB]"></span>
-            <span>MODELBASERET EVIDENS &amp; METODE</span>
+            <span>{slug.includes("ai-") ? "MODELBASERET EVIDENS & METODE" : "DATASTATUS & BEGRÆNSNINGER"}</span>
           </div>
           <p className="text-xs text-[#12172B] leading-relaxed">
             {config.introHedge}
