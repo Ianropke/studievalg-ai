@@ -90,6 +90,60 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.getByRole('status')).toContainText('Linket kunne ikke kopieres');
   });
 
+  test('adresselinje og tilbageknap gendanner snit, sortering og aktive filtre', async ({ page }) => {
+    await page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)').fill('8,2');
+    await expect(page).toHaveURL(/gpa=8\.2/);
+    await page.getByLabel('Vælg universitet eller uddannelsessted').selectOption('au');
+    await expect(page).toHaveURL(/u=au/);
+    await expect(page.getByLabel('Aktive filtre')).toContainText('Uddannelsessted: AU');
+    await page.getByLabel('Sortér resultater').selectOption('highest');
+    await expect(page).toHaveURL(/sort=highest/);
+    await page.goBack();
+    await expect(page.getByLabel('Sortér resultater')).toHaveValue('closest');
+    await expect(page.getByLabel('Vælg universitet eller uddannelsessted')).toHaveValue('au');
+    await page.goBack();
+    await expect(page.getByLabel('Vælg universitet eller uddannelsessted')).toHaveValue('all');
+    await expect(page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)')).toHaveValue('8,2');
+    await page.reload();
+    await expect(page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)')).toHaveValue('8,2');
+  });
+
+  test('tilbage annullerer en endnu ikke gemt adresseændring', async ({ page }) => {
+    const input = page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)');
+    await input.fill('8,2');
+    await expect(page).toHaveURL(/gpa=8\.2/);
+    await input.fill('9,2');
+    await expect(page).toHaveURL(/gpa=9\.2/);
+    await input.fill('9,3');
+    await page.goBack();
+    await expect(input).toHaveValue('8,2');
+    await page.waitForTimeout(600);
+    await expect(page).toHaveURL(/gpa=8\.2/);
+    await expect(input).toHaveValue('8,2');
+  });
+
+  test('institutionsfilter følger kildeverificeret uddannelsessted frem for KOT-prefix', async ({ page }) => {
+    await page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' }).fill('20410');
+    await page.getByLabel('Vælg universitet eller uddannelsessted').selectOption('sdu');
+    await expect(page.getByTestId('program-card').first()).toContainText('Syddansk Universitet');
+    await page.getByLabel('Vælg universitet eller uddannelsessted').selectOption('au');
+    await expect(page.getByTestId('program-card')).toHaveCount(0);
+  });
+
+  test('mobilfilter åbner som dialog og kan betjenes med tastatur', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 844 });
+    const trigger = page.getByRole('button', { name: /Uddannelsessted: Alle · Vælg filter/ });
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const dialog = page.getByRole('dialog', { name: 'Filtrér efter uddannelsessted' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel('Vælg uddannelsessted på mobil').selectOption('sdu');
+    await expect(dialog.getByRole('button', { name: /Vis \d+ uddannelser/ })).toBeVisible();
+    await dialog.getByRole('button', { name: /Vis \d+ uddannelser/ }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect(page.getByLabel('Aktive filtre')).toContainText('Uddannelsessted: SDU');
+  });
+
   test('E2E-03: AI er fravalgt som standard og kan tilvælges eksplicit', async ({ page }) => {
     const firstThreeIds = () => page.locator('[data-testid="program-card"]').evaluateAll((cards) =>
       cards.slice(0, 3).map((card) => card.getAttribute('data-program-id'))

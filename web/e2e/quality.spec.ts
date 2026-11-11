@@ -52,6 +52,13 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     expect(data.join(' ')).not.toMatch(/"addressLocality"\s*:\s*"jordemoder"/i);
   });
 
+  test("reduceret bevægelse respekteres", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto('/');
+    const duration = await page.getByRole('button', { name: 'Del din søgning' }).evaluate((element) => getComputedStyle(element).transitionDuration);
+    expect(duration.split(',').every((part) => parseFloat(part) <= 0.00001)).toBe(true);
+  });
+
   for (const route of KEY_ROUTES) {
     test(`ingen alvorlige automatiske accessibility-fejl på ${route}`, async ({ page }) => {
       await page.goto(route);

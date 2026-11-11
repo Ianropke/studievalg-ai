@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useDeferredValue } from "react";
+import React, { useState, useMemo, useEffect, useDeferredValue, useRef } from "react";
 import Link from "next/link";
 import { track } from "@vercel/analytics/react";
 import { Header } from "@/components/Header";
@@ -106,6 +106,17 @@ const EXACT_MAJOR_MAP: Record<string, string[]> = {
   "økonomi": ["erhvervsøkonomi", "økonomi"]
 };
 
+const UNIVERSITY_LABELS: Record<string, string> = {
+  ku: "KU", dtu: "DTU", au: "AU", cbs: "CBS", sdu: "SDU", aau: "AAU", ruc: "RUC", itu: "ITU", professionshojskole: "Professionshøjskoler og erhvervsakademier",
+};
+const UNIVERSITY_OPTIONS = [
+  ["all", "Alle universiteter og uddannelsessteder"], ["ku", "Københavns Universitet (KU)"],
+  ["dtu", "Danmarks Tekniske Universitet (DTU)"], ["au", "Aarhus Universitet (AU)"],
+  ["cbs", "Copenhagen Business School (CBS)"], ["sdu", "Syddansk Universitet (SDU)"],
+  ["aau", "Aalborg Universitet (AAU)"], ["ruc", "Roskilde Universitet (RUC)"],
+  ["itu", "IT-Universitetet i København (ITU)"], ["professionshojskole", "Professionshøjskoler og erhvervsakademier (delvis dækning)"],
+] as const;
+
 function normalizeSearchText(text: string): string {
   let cleaned = text
     .toLowerCase()
@@ -199,21 +210,46 @@ export default function Dashboard() {
   const [sectionLimits, setSectionLimits] = useState({ at_or_above: 5, near_above: 3, further_above: 2, unknown: 2 });
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
+  const [urlReady, setUrlReady] = useState(false);
+  const [urlRevision, setUrlRevision] = useState(0);
+  const restoringUrl = useRef(false);
+  const pendingUrlTimer = useRef<number | null>(null);
+  const filterDialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    let frame = 0;
+    const restore = () => {
+      if (pendingUrlTimer.current !== null) window.clearTimeout(pendingUrlTimer.current);
       const shared = parseMatchShareParams(window.location.search);
-      if (Object.keys(shared).length > 0) {
-        requestAnimationFrame(() => {
-          if (shared.gpa !== undefined) setGpaInput(formatDanishNumber(shared.gpa));
-          if (shared.includeAiModels !== undefined) setIncludeAiModels(shared.includeAiModels);
-          if (shared.university) setSelectedUniversity(shared.university);
-          if (shared.query) setSearchQuery(shared.query);
-          if (shared.sort) setSort(shared.sort);
-        });
-      }
-    }
+      restoringUrl.current = true;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        setGpaInput(shared.gpa === undefined ? "" : formatDanishNumber(shared.gpa));
+        setIncludeAiModels(shared.includeAiModels ?? false);
+        setSelectedUniversity(shared.university ?? "all");
+        setSearchQuery(shared.query ?? "");
+        setSort(shared.sort ?? "closest");
+        setVisibleCount(10);
+        setUrlReady(true);
+        setUrlRevision((current) => current + 1);
+      });
+    };
+    restore();
+    window.addEventListener("popstate", restore);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("popstate", restore); };
   }, []);
+
+  useEffect(() => {
+    if (!urlReady) return;
+    if (restoringUrl.current) { restoringUrl.current = false; return; }
+    const nextPath = buildMatchSharePath({ gpa: gpa ?? undefined, includeAiModels, university: selectedUniversity as ShareableUniversity, query: searchQuery, sort });
+    const timeout = window.setTimeout(() => {
+      pendingUrlTimer.current = null;
+      if (`${window.location.pathname}${window.location.search}` !== nextPath) window.history.pushState(null, "", `${nextPath}${window.location.hash}`);
+    }, 400);
+    pendingUrlTimer.current = timeout;
+    return () => { window.clearTimeout(timeout); if (pendingUrlTimer.current === timeout) pendingUrlTimer.current = null; };
+  }, [gpa, includeAiModels, selectedUniversity, searchQuery, sort, urlReady, urlRevision]);
 
   useEffect(() => {
     const syncSaved = () => {
@@ -311,21 +347,17 @@ export default function Dashboard() {
 
       if (deferredSelectedUniversity !== "all") {
         const item = p as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-        const kot = String(item.kot_nr || "");
         const inst = (item.institution || item.institution_navn || "").toLowerCase();
-        const title = (item.udbud_titel || "").toLowerCase();
-        const isUniv = kot.length === 5 && parseInt(kot, 10) >= 10000 && parseInt(kot, 10) < 30000;
-        if (deferredSelectedUniversity === "cbs") return kot.startsWith("13") || inst.includes("cbs") || inst.includes("copenhagen business school") || title.includes("copenhagen business school");
-        if (deferredSelectedUniversity === "ku") return kot.startsWith("10") || inst.includes("københavns universitet") || inst.includes("ku,") || inst === "ku";
-        if (deferredSelectedUniversity === "dtu") return kot.startsWith("14") || kot.startsWith("15") || kot.startsWith("23") || inst.includes("dtu") || inst.includes("danmarks tekniske");
-        if (deferredSelectedUniversity === "au") return kot.startsWith("20") || kot.startsWith("21") || kot.startsWith("22") || inst.includes("aarhus universitet") || inst.includes("au,");
-        if (deferredSelectedUniversity === "sdu") return kot.startsWith("17") || kot.startsWith("18") || kot.startsWith("19") || inst.includes("syddansk") || inst.includes("sdu,");
-        if (deferredSelectedUniversity === "aau") return kot.startsWith("25") || kot.startsWith("26") || inst.includes("aalborg universitet") || inst.includes("aau,");
-        if (deferredSelectedUniversity === "ruc") return kot.startsWith("16") || inst.includes("roskilde universitet") || inst.includes("ruc,");
-        if (deferredSelectedUniversity === "itu") return kot.startsWith("24") || inst.includes("it-universitet") || inst.includes("itu,") || title.includes("it-universitet");
+        if (deferredSelectedUniversity === "cbs") return inst.includes("copenhagen business school");
+        if (deferredSelectedUniversity === "ku") return inst.includes("københavns universitet");
+        if (deferredSelectedUniversity === "dtu") return inst.includes("danmarks tekniske universitet");
+        if (deferredSelectedUniversity === "au") return inst.includes("aarhus universitet");
+        if (deferredSelectedUniversity === "sdu") return inst.includes("syddansk universitet");
+        if (deferredSelectedUniversity === "aau") return inst.includes("aalborg universitet");
+        if (deferredSelectedUniversity === "ruc") return inst.includes("roskilde universitet");
+        if (deferredSelectedUniversity === "itu") return inst.includes("it-universitet");
         if (deferredSelectedUniversity === "professionshojskole") {
-          if (isUniv) return false;
-          return (kot.length === 5 && parseInt(kot, 10) >= 30000) || title.includes("professionsbachelor") || title.includes("erhvervsakademi") || inst.includes("professionshøjskole") || inst.includes("erhvervsakademi");
+          return /professionshøjskol|erhvervsakademi|university college|universitetscollege|uc syd/.test(inst);
         }
       }
       return true;
@@ -417,20 +449,21 @@ export default function Dashboard() {
               <p id="gpa-help" className={`text-xs leading-relaxed ${gpaInvalid ? "text-[#B45309]" : "text-[#545D71]"}`}>{gpaInvalid ? "Skriv et snit mellem 2,0 og 12,0 med komma eller punktum." : "Indtast dit eget snit for at sammenligne med optaget i 2026."}</p>
               {gpa !== null && <><label htmlFor="gpa-slider" className="block text-xs text-[#545D71]">Justér dit snit: {formatDanishNumber(gpa)}</label><input id="gpa-slider" type="range" min="2" max="12" step="0.1" value={gpa} onChange={(event) => { setGpaInput(formatDanishNumber(Number(event.target.value))); setVisibleCount(10); }} aria-label={`Gennemsnit: ${formatDanishNumber(gpa)}`} className="w-full h-6 bg-transparent cursor-pointer accent-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" /></>}
             </div>
-            <div className="space-y-2">
+            <div className="hidden space-y-2 sm:block">
               <label htmlFor="university-select" className="text-xs font-semibold text-[#12172B] block">Vælg universitet eller uddannelsessted</label>
-              <select id="university-select" value={selectedUniversity} onChange={(e) => setSelectedUniversity(e.target.value)} className="w-full bg-[#FFFFFF] border border-[#D8DBE4] rounded-lg px-3 py-2 text-xs text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]">
-                <option value="all">Alle universiteter og uddannelsessteder {loading ? "..." : `(${allPrograms.length})`}</option>
-                <option value="ku">Københavns Universitet (KU)</option>
-                <option value="dtu">Danmarks Tekniske Universitet (DTU)</option>
-                <option value="au">Aarhus Universitet (AU)</option>
-                <option value="cbs">Copenhagen Business School (CBS)</option>
-                <option value="sdu">Syddansk Universitet (SDU)</option>
-                <option value="aau">Aalborg Universitet (AAU)</option>
-                <option value="ruc">Roskilde Universitet (RUC)</option>
-                <option value="itu">IT-Universitetet i København (ITU)</option>
-                <option value="professionshojskole">Professionshøjskoler og erhvervsakademier</option>
+              <select id="university-select" value={selectedUniversity} onChange={(e) => { setSelectedUniversity(e.target.value); setVisibleCount(10); }} className="w-full min-h-11 bg-[#FFFFFF] border border-[#D8DBE4] rounded-lg px-3 py-2 text-xs text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]">
+                {UNIVERSITY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}{value === "all" && !loading ? ` (${allPrograms.length})` : ""}</option>)}
               </select>
+              <p className="text-[11px] text-[#545D71]">Ved filter vises kun uddannelser med et verificeret uddannelsessted i 2026-kilden. Professions- og akademifilteret er ikke nødvendigvis komplet.</p>
+            </div>
+            <div className="sm:hidden"><button type="button" onClick={() => filterDialog.current?.showModal()} className="min-h-11 w-full rounded-lg border border-[#D8DBE4] px-3 text-left text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Uddannelsessted: {selectedUniversity === "all" ? "Alle" : UNIVERSITY_LABELS[selectedUniversity] || selectedUniversity} · Vælg filter</button>
+              <dialog ref={filterDialog} aria-labelledby="mobile-filter-title" className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-2xl border border-[#D8DBE4] bg-white p-6 text-[#12172B] shadow-xl backdrop:bg-[#12172B]/60 sm:hidden">
+                <div className="flex items-center justify-between gap-3"><h2 id="mobile-filter-title" className="text-lg font-bold">Filtrér efter uddannelsessted</h2><button type="button" onClick={() => filterDialog.current?.close()} aria-label="Luk filtre" className="min-h-11 min-w-11 rounded focus:outline-none focus:ring-2 focus:ring-[#2563EB]">✕</button></div>
+                <label htmlFor="mobile-university-select" className="mt-4 block text-xs font-semibold">Vælg uddannelsessted på mobil</label>
+                <select id="mobile-university-select" value={selectedUniversity} onChange={(event) => { setSelectedUniversity(event.target.value); setVisibleCount(10); }} className="mt-2 min-h-11 w-full rounded-lg border border-[#D8DBE4] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">{UNIVERSITY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+                <p className="mt-3 text-xs leading-relaxed text-[#545D71]">Ved filter vises kun uddannelser med et verificeret uddannelsessted i 2026-kilden. Professions- og akademifilteret er ikke nødvendigvis komplet. AI-tilvalget findes på forsiden.</p>
+                <button type="button" onClick={() => filterDialog.current?.close()} className="mt-5 min-h-11 w-full rounded-xl bg-[#12172B] px-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Vis {matchedPrograms.length} uddannelser</button>
+              </dialog>
             </div>
           </div>
           <details className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
@@ -464,8 +497,10 @@ export default function Dashboard() {
           </div>
           <div className="pt-2 border-t border-[#E7E9EF] relative">
             <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none pt-2"><SearchIcon /></div>
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
+            <input type="text" maxLength={120} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(10); }} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full min-h-11 bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
           </div>
+          {(selectedUniversity !== "all" || searchQuery.trim() || includeAiModels) && <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="Aktive filtre"><span className="font-semibold text-[#545D71]">Aktive filtre:</span>{selectedUniversity !== "all" && <button type="button" onClick={() => setSelectedUniversity("all")} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern filter for uddannelsessted">Uddannelsessted: {UNIVERSITY_LABELS[selectedUniversity] || selectedUniversity} ×</button>}{searchQuery.trim() && <button type="button" onClick={() => setSearchQuery("")} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern søgning">Søgning: {searchQuery} ×</button>}{includeAiModels && <button type="button" onClick={() => { setIncludeAiModels(false); if (sort === "ai") setSort("closest"); }} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern AI-filter">AI-modeldata ×</button>}<button type="button" onClick={() => { setSelectedUniversity("all"); setSearchQuery(""); setIncludeAiModels(false); if (sort === "ai") setSort("closest"); setVisibleCount(10); }} className="min-h-11 rounded px-2 font-semibold text-[#1D4ED8] underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Nulstil alle filtre</button></div>}
+          <p className="text-[11px] leading-relaxed text-[#545D71]">Snit, søgning og filtre vises i adresselinjen, så de kan deles og gendannes. Adressen kan gemmes i browserhistorik og sendes ved sideindlæsning. Del kun linket, hvis du vil dele disse valg.</p>
           <div className="border-t border-[#E7E9EF] pt-3">
             <button type="button" onClick={() => setShowSaved(!showSaved)} aria-expanded={showSaved} aria-controls="saved-programs" className="min-h-11 text-sm font-semibold text-[#1D4ED8] hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Min liste ({savedIds.length}) {showSaved ? "↑" : "↓"}</button>
             {savedError && <p role="status" className="text-xs text-[#B45309]">{savedError}</p>}
