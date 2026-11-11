@@ -189,9 +189,11 @@ export default function Dashboard() {
   const gpa = parseGpaInput(gpaInput);
   const gpaInvalid = gpaInput.trim() !== "" && gpa === null;
   const [sort, setSort] = useState<ResultSort>("closest");
+  const effectiveSort = sort === "closest" && gpa === null ? "alphabetical" : sort;
   const [includeAiModels, setIncludeAiModels] = useState(false);
   const [expandedProgram, setExpandedProgram] = useState<ProgramItem | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
+  const [sectionLimits, setSectionLimits] = useState({ at_or_above: 5, near_above: 3, further_above: 2, unknown: 2 });
   const [showShareModal, setShowShareModal] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
 
@@ -204,6 +206,7 @@ export default function Dashboard() {
           if (shared.includeAiModels !== undefined) setIncludeAiModels(shared.includeAiModels);
           if (shared.university) setSelectedUniversity(shared.university);
           if (shared.query) setSearchQuery(shared.query);
+          if (shared.sort) setSort(shared.sort);
         });
       }
     }
@@ -345,7 +348,7 @@ export default function Dashboard() {
   const sections = showGroups
     ? (["at_or_above", "near_above", "further_above", "unknown"] as const).map((key) => {
         const items = matchedPrograms.filter((program) => admissionGroup(program.kvNum, gpa) === key);
-        return { key, items, shown: items.slice(0, key === "at_or_above" ? visibleCount : Math.max(3, visibleCount - 7)) };
+        return { key, items, shown: items.slice(0, sectionLimits[key]) };
       }).filter((section) => section.items.length > 0)
     : [{ key: "all" as const, items: matchedPrograms, shown: matchedPrograms.slice(0, visibleCount) }];
   const topMatches = sections.flatMap((section) => section.shown);
@@ -355,6 +358,7 @@ export default function Dashboard() {
     includeAiModels,
     university: selectedUniversity as ShareableUniversity,
     query: searchQuery,
+    sort: effectiveSort,
   })}`;
 
   return (
@@ -443,14 +447,14 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setShowShareModal(true)} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><span>✨</span><span>Del dit match</span></button>
-              <span aria-live="polite" className="text-xs text-[#545D71] font-mono-data font-semibold hidden sm:inline">{loading ? "Henter..." : `${matchedPrograms.length} uddannelser i visningen`}</span>
+              <span className="text-xs text-[#545D71] font-mono-data font-semibold hidden sm:inline">{loading ? "Henter..." : `${matchedPrograms.length} uddannelser i visningen`}</span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <label htmlFor="result-sort" className="text-xs font-semibold text-[#12172B]">Sortér resultater</label>
-            <select id="result-sort" value={sort} onChange={(event) => { setSort(event.target.value as ResultSort); setVisibleCount(10); }} className="min-h-11 rounded-lg border border-[#D8DBE4] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
-              <option value="closest">Tættest på dit snit</option>
+            <select id="result-sort" value={effectiveSort} onChange={(event) => { setSort(event.target.value as ResultSort); setVisibleCount(10); }} className="min-h-11 rounded-lg border border-[#D8DBE4] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+              <option value="closest" disabled={gpa === null}>Tættest på dit snit</option>
               <option value="highest">Højeste kvotient</option>
               <option value="alphabetical">A–Å</option>
               {includeAiModels && <option value="ai">AI-robusthed</option>}
@@ -515,13 +519,14 @@ export default function Dashboard() {
                   </article>
                 );
               })}
+              {showGroups && section.shown.length < section.items.length && <button type="button" onClick={() => { if (section.key !== "all") setSectionLimits((current) => ({ ...current, [section.key]: current[section.key] + 10 })); }} className="min-h-11 rounded-lg border border-[#D8DBE4] bg-white px-4 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Vis flere: {groupLabels[section.key]} (viser {section.shown.length} af {section.items.length})</button>}
               </section>)}
             </div>
           ) : (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow"><h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3><p className="text-xs text-[#545D71]">{includeAiModels ? "Din søgning gav ingen resultater blandt de 569 uddannelser med AI-modeldata. Slå AI fra for at søge i alle 1.413 uddannelser." : "Prøv at vælge et andet uddannelsessted eller ryd dit søgefelt."}</p><button onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setIncludeAiModels(false); }} className="px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Nulstil og vis alle uddannelser</button></div>
           )}
 
-          {topMatches.length < matchedPrograms.length && (
+          {!showGroups && topMatches.length < matchedPrograms.length && (
             <div className="text-center pt-4"><button onClick={() => setVisibleCount((prev) => prev + 10)} className="px-6 py-2.5 bg-[#FFFFFF] border border-[#D8DBE4] hover:border-[#12172B] text-[#12172B] font-semibold rounded-lg text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Vis flere uddannelser (viser {topMatches.length} af {matchedPrograms.length})</button></div>
           )}
         </div>

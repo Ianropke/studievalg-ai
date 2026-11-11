@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { admissionGroup, compareResults, formatDanishNumber, marginLabel, parseGpaInput, type SortableResult } from "../lib/resultSorting";
+import { buildMatchSharePath, parseMatchShareParams } from "../lib/shareMatch";
 
 assert.equal(parseGpaInput("9,5"), 9.5);
 assert.equal(parseGpaInput("9.55"), 9.55);
@@ -16,4 +17,10 @@ const results = [row("Ukendt", null), row("Langt under", 3), row("Udenfor", 10.5
 assert.deepEqual(results.toSorted((a, b) => compareResults(a, b, "closest", 9.5, false)).map((r) => r.udbud_titel), ["Nær", "Langt under", "Udenfor", "Langt over", "Ukendt"]);
 assert.deepEqual(results.toSorted((a, b) => compareResults(a, b, "highest", 9.5, false)).map((r) => r.udbud_titel), ["Langt over", "Udenfor", "Nær", "Langt under", "Ukendt"]);
 assert.equal(compareResults(row("Medicin", 10.5, 1100), row("Biomedicin", 8, 300), "closest", 9.5, true) < 0, true);
+for (const sort of ["closest", "highest", "alphabetical", "ai"] as const) {
+  const url = buildMatchSharePath({ gpa: 9.5, includeAiModels: sort === "ai", university: "all", query: "", sort });
+  assert.equal(parseMatchShareParams(url.slice(1)).sort, sort);
+}
+assert.equal(parseMatchShareParams("?ai=0&sort=ai").sort, undefined);
+assert.equal(parseMatchShareParams("?sort=invalid").sort, undefined);
 console.log("Result sorting: validated input, historical-margin groups and ordering");

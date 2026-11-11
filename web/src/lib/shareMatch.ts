@@ -1,3 +1,5 @@
+import type { ResultSort } from "./resultSorting";
+
 export const SHAREABLE_UNIVERSITIES = [
   "all",
   "ku",
@@ -18,6 +20,7 @@ export interface MatchShareState {
   includeAiModels: boolean;
   university: ShareableUniversity;
   query: string;
+  sort?: ResultSort;
 }
 
 export type ParsedMatchShareState = Partial<MatchShareState>;
@@ -38,6 +41,7 @@ export function parseMatchShareParams(search: string): ParsedMatchShareState {
   const includeAi = params.get("ai");
   const university = params.get("u");
   const query = params.get("q");
+  const sort = params.get("sort");
 
   if (gpa !== undefined) parsed.gpa = gpa;
   if (includeAi === "1" || includeAi === "true") parsed.includeAiModels = true;
@@ -48,6 +52,8 @@ export function parseMatchShareParams(search: string): ParsedMatchShareState {
     parsed.university = university as ShareableUniversity;
   }
   if (query) parsed.query = query.trim().slice(0, 120);
+  if (sort && ["closest", "highest", "alphabetical"].includes(sort)) parsed.sort = sort as ResultSort;
+  if (sort === "ai" && parsed.includeAiModels === true) parsed.sort = "ai";
 
   return parsed;
 }
@@ -58,6 +64,7 @@ export function buildMatchSharePath(state: MatchShareState): string {
 
   if (state.university !== "all") params.set("u", state.university);
   if (state.query.trim()) params.set("q", state.query.trim().slice(0, 120));
+  if (state.sort && (state.sort !== "ai" || state.includeAiModels)) params.set("sort", state.sort);
 
   return `/?${params.toString()}`;
 }

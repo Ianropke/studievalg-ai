@@ -31,10 +31,16 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   test('snit kan indtastes med komma, sorteres og viser særskilte grupper', async ({ page }) => {
     const gpa = page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)');
     await expect(gpa).toHaveValue('');
+    await expect(page.getByLabel('Sortér resultater')).toHaveValue('alphabetical');
     await expect(page.getByText(/Indtast dit snit for at sammenligne kvotienter/)).toBeVisible();
     await gpa.fill('9,5');
+    await expect(page.getByLabel('Sortér resultater')).toHaveValue('closest');
     await expect(page.getByRole('heading', { name: /Lige uden for rækkevidde/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Uden numerisk kvotient/ })).toBeVisible();
+    const nearSection = page.getByRole('region', { name: /Lige uden for rækkevidde/ });
+    await expect(nearSection.getByTestId('program-card')).toHaveCount(3);
+    await nearSection.getByRole('button', { name: /Vis flere/ }).click();
+    await expect(nearSection.getByTestId('program-card')).toHaveCount(13);
     await expect(page.getByText(/Dit snit 9,5 · kvotient/).first()).toBeVisible();
     await page.getByLabel('Sortér resultater').selectOption('highest');
     await expect(page.getByText(/Højeste kvotient først/)).toBeVisible();
@@ -42,8 +48,10 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     const numericValues = values.map((value) => Number(value?.replace(',', '.')));
     expect(numericValues.every((value) => Number.isFinite(value))).toBe(true);
     expect(numericValues).toEqual([...numericValues].sort((a, b) => b - a));
+    await page.getByLabel('Sortér resultater').selectOption('closest');
     await gpa.fill('13');
     await expect(page.getByText(/Skriv et snit mellem 2,0 og 12,0/)).toBeVisible();
+    await expect(page.getByLabel('Sortér resultater')).toHaveValue('alphabetical');
   });
 
   test('E2E-03: AI er fravalgt som standard og kan tilvælges eksplicit', async ({ page }) => {
@@ -97,12 +105,13 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   });
 
   test('E2E-07: Et delt link gendanner snit, AI-tilvalg, uddannelsessted og søgning', async ({ page }) => {
-    await page.goto('/?gpa=8.2&ai=1&u=au&q=medicin');
+    await page.goto('/?gpa=8.2&ai=1&u=au&q=medicin&sort=ai');
 
     await expect(page.locator('#gpa-slider')).toHaveValue('8.2');
     await expect(page.getByTestId('include-ai-models')).toBeChecked();
     await expect(page.locator('#university-select')).toHaveValue('au');
     await expect(page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' })).toHaveValue('medicin');
+    await expect(page.getByLabel('Sortér resultater')).toHaveValue('ai');
   });
 
   test('E2E-08: Guidehub og beslutningsguide kan åbnes fra hovednavigationen', async ({ page }) => {
