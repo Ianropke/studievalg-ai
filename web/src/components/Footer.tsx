@@ -50,15 +50,11 @@ export function Footer() {
         {/* Middle Navigation & Datakilder */}
         <div className="pt-8 border-t border-[#E7E9EF] grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs">
           <div className="space-y-3">
-            <h3 className="font-bold text-[#12172B] uppercase tracking-wider text-[11px]">Værktøjer & Sider</h3>
-            <nav className="flex flex-wrap gap-x-6 gap-y-2 text-[#545D71]">
-              <Link href="/" className="hover:text-[#12172B] transition">Matchværktøj</Link>
-              <Link href="/lister/top-10-mest-ai-robuste-uddannelser" className="hover:text-[#12172B] transition">Toplister</Link>
-              <Link href="/guides" className="hover:text-[#12172B] transition">Guides til studievalg</Link>
-              <Link href="/sammenlign" className="hover:text-[#12172B] transition">Sammenlign uddannelser</Link>
-              <Link href="/analyse" className="hover:text-[#12172B] transition">AI Insights</Link>
-              <Link href="/evidens" className="hover:text-[#12172B] transition">Bag om dine scorer</Link>
-              <Link href="/om-os" className="hover:text-[#12172B] transition">Om Uddannelsesindsigt</Link>
+            <h3 className="font-bold text-[#12172B] uppercase tracking-wider text-[11px]">Mere om Uddannelsesindsigt</h3>
+            <nav aria-label="Supplerende navigation" className="flex flex-wrap gap-x-6 gap-y-2 text-[#545D71]">
+              <Link href="/analyse" className="rounded hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">AI-analyse</Link>
+              <Link href="/evidens" className="rounded hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Kilder og metode</Link>
+              <Link href="/om-os" className="rounded hover:text-[#12172B] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Om Uddannelsesindsigt</Link>
             </nav>
           </div>
 

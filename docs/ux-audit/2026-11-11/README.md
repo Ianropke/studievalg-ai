@@ -1,0 +1,9 @@
+# UX-audit: 11. november 2026
+
+Før-billederne viser den offentlige version ved 375, 768 og 1280 px for forsiden, en uddannelsesside, sammenligningen, AI-analyse og guides. Alle 15 opslag svarede HTTP 200 og havde ingen vandret overflow på dokumentniveau; det dokumenterer ikke i sig selv fuld tilgængelighed.
+
+Fase 1-billederne viser den lokale version efter indtastning af 9,5 ved 375 og 1280 px. De skal ses sammen med de tilsvarende før-billeder: før-billederne viser den daværende standard 9,5, mens efter-billederne viser en værdi, som er indtastet aktivt.
+
+Audit: den oprindelige nummerering og overskrift gav indtryk af en personlig rangering; det var ikke underbygget. Snit 9,5 var forudfyldt, institutionsfiltrene var gentaget, og forbeholdene optog meget plads inden resultaterne. Sammenligningssiden havde allerede en mobil vandret-rul-hjælp. Listen udelukkede ikke konsekvent uddannelser over snittet, selvom de øverste kort kunne give det indtryk.
+
+Databegrænsning: katalogets `by` er afledt af titler og indeholder ikke kun byer. Der er ingen pålidelig selvstændig katalogkolonne for region, undervisningssprog, uddannelsestype eller fagområde. De filtre kræver bedre dokumenterede data; der er ikke etableret nye klassifikationer i UX-arbejdet.

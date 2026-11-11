@@ -18,7 +18,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   });
 
   test('E2E-02: Søgning på "læge" placerer Medicin som #1 match', async ({ page }) => {
-    const searchInput = page.locator('input[type="text"]');
+    const searchInput = page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' });
     await searchInput.fill('læge');
 
     // Vent på deferred value opdatering
@@ -26,6 +26,24 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
 
     const firstCardTitle = page.locator('article h3').first();
     await expect(firstCardTitle).toHaveText(/^Medicin,/);
+  });
+
+  test('snit kan indtastes med komma, sorteres og viser særskilte grupper', async ({ page }) => {
+    const gpa = page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)');
+    await expect(gpa).toHaveValue('');
+    await expect(page.getByText(/Indtast dit snit for at sammenligne kvotienter/)).toBeVisible();
+    await gpa.fill('9,5');
+    await expect(page.getByRole('heading', { name: /Lige uden for rækkevidde/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Uden numerisk kvotient/ })).toBeVisible();
+    await expect(page.getByText(/Dit snit 9,5 · kvotient/).first()).toBeVisible();
+    await page.getByLabel('Sortér resultater').selectOption('highest');
+    await expect(page.getByText(/Højeste kvotient først/)).toBeVisible();
+    const values = await page.locator('[data-testid="program-card"]').evaluateAll((cards) => cards.slice(0, 5).map((card) => card.querySelector('.font-mono-data.text-xl')?.textContent));
+    const numericValues = values.map((value) => Number(value?.replace(',', '.')));
+    expect(numericValues.every((value) => Number.isFinite(value))).toBe(true);
+    expect(numericValues).toEqual([...numericValues].sort((a, b) => b - a));
+    await gpa.fill('13');
+    await expect(page.getByText(/Skriv et snit mellem 2,0 og 12,0/)).toBeVisible();
   });
 
   test('E2E-03: AI er fravalgt som standard og kan tilvælges eksplicit', async ({ page }) => {
@@ -65,15 +83,15 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await searchInput.fill('læge');
 
     await expect(page.locator('[data-testid="program-title"]').first()).toContainText('Medicin');
-    await expect(page.getByText(/matchede uddannelser/)).toBeVisible();
+    await expect(page.getByText(/uddannelser i visningen/).last()).toBeVisible();
   });
 
   test('E2E-06: Navigering til AI Insights og Evidens undersider', async ({ page }) => {
-    await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'AI Insights' }).click();
+    await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'AI-analyse' }).click();
     await expect(page).toHaveURL(/.*analyse/);
     await expect(page.locator('h1')).toContainText('AI Insights');
 
-    await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'Evidens' }).click();
+    await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'Kilder og metode' }).click();
     await expect(page).toHaveURL(/.*evidens/);
     await expect(page.locator('h1')).toContainText('Bag om dine scorer');
   });

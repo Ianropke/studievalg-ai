@@ -14,7 +14,7 @@ export const SHAREABLE_UNIVERSITIES = [
 export type ShareableUniversity = (typeof SHAREABLE_UNIVERSITIES)[number];
 
 export interface MatchShareState {
-  gpa: number;
+  gpa?: number;
   includeAiModels: boolean;
   university: ShareableUniversity;
   query: string;
@@ -53,10 +53,8 @@ export function parseMatchShareParams(search: string): ParsedMatchShareState {
 }
 
 export function buildMatchSharePath(state: MatchShareState): string {
-  const params = new URLSearchParams({
-    gpa: state.gpa.toFixed(1),
-    ai: state.includeAiModels ? "1" : "0",
-  });
+  const params = new URLSearchParams({ ai: state.includeAiModels ? "1" : "0" });
+  if (state.gpa !== undefined) params.set("gpa", state.gpa.toFixed(2).replace(/0$/, ""));
 
   if (state.university !== "all") params.set("u", state.university);
   if (state.query.trim()) params.set("q", state.query.trim().slice(0, 120));

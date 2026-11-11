@@ -11,8 +11,8 @@ export function Header() {
     { label: "Toplister", href: "/lister/top-10-mest-ai-robuste-uddannelser" },
     { label: "Guides", href: "/guides" },
     { label: "Sammenlign", href: "/sammenlign" },
-    { label: "AI Insights", href: "/analyse" },
-    { label: "Evidens", href: "/evidens" },
+    { label: "AI-analyse", href: "/analyse" },
+    { label: "Kilder og metode", href: "/evidens" },
   ];
 
   return (

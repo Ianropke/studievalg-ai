@@ -15,6 +15,7 @@ import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } from "@/lib/shareMatch";
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
+import { admissionGroup, compareResults, formatDanishNumber, marginLabel, parseGpaInput, type ResultSort } from "@/lib/resultSorting";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -167,18 +168,6 @@ const SlidersIcon = () => (
   </svg>
 );
 
-const CheckCircleIcon = () => (
-  <svg className="w-4 h-4 text-[#0B7A57]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const AlertTriangleIcon = () => (
-  <svg className="w-4 h-4 text-[#B45309]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-  </svg>
-);
-
 interface ProgramItem {
   kot_nr?: string;
   udbud_titel?: string;
@@ -196,7 +185,10 @@ export default function Dashboard() {
   const loading = false;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
-  const [gpa, setGpa] = useState(9.5);
+  const [gpaInput, setGpaInput] = useState("");
+  const gpa = parseGpaInput(gpaInput);
+  const gpaInvalid = gpaInput.trim() !== "" && gpa === null;
+  const [sort, setSort] = useState<ResultSort>("closest");
   const [includeAiModels, setIncludeAiModels] = useState(false);
   const [expandedProgram, setExpandedProgram] = useState<ProgramItem | null>(null);
   const [visibleCount, setVisibleCount] = useState(10);
@@ -208,7 +200,7 @@ export default function Dashboard() {
       const shared = parseMatchShareParams(window.location.search);
       if (Object.keys(shared).length > 0) {
         requestAnimationFrame(() => {
-          if (shared.gpa !== undefined) setGpa(shared.gpa);
+          if (shared.gpa !== undefined) setGpaInput(formatDanishNumber(shared.gpa));
           if (shared.includeAiModels !== undefined) setIncludeAiModels(shared.includeAiModels);
           if (shared.university) setSelectedUniversity(shared.university);
           if (shared.query) setSearchQuery(shared.query);
@@ -234,7 +226,7 @@ export default function Dashboard() {
     let list = allPrograms.map((prog) => {
       const admission = getAdmission2026(prog);
       const kvNum = admission2026Threshold(admission);
-      const meetsGpa = kvNum !== null && gpa >= kvNum;
+      const meetsGpa = kvNum !== null && gpa !== null && gpa >= kvNum;
       const enriched = getEnrichedScores(prog.udbud_titel, prog.scores);
       const robustScore = enriched.ai_resilience;
       const aiEligible = enriched.ranking_eligible.ai;
@@ -262,28 +254,14 @@ export default function Dashboard() {
         }
       }
 
-      const gpaEligibilityBonus = (kvNum !== null && meetsGpa) ? 15 : 0;
-      const aiSortScore = includeAiModels && aiEligible ? robustScore : 0;
-      const totalSortScore = relevanceBoost + gpaEligibilityBonus + aiSortScore;
       const formattedTitle = formatProgramTitle(prog.udbud_titel || "Uddannelsen");
-
-      const aiPhrase = includeAiModels
-        ? `AI-modelestimatet er ${aiBand(robustScore)} (ca. ${roundAiScore(robustScore)}/100)`
-        : "";
-      let whyText = "";
-      if (kvNum !== null) {
-        if (meetsGpa) {
-          whyText = `Dit snit på ${gpa.toFixed(1)} ligger på eller over kvotienten ved optaget i 2026 (${kvNum}). Det er ikke en garanti for optagelse.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
-        } else {
-          whyText = `Dit snit på ${gpa.toFixed(1)} ligger under kvotienten ved optaget i 2026 (${kvNum}). Kvotienten kan ændre sig.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
-        }
-      } else {
-        whyText = `Der kan ikke sammenlignes med en numerisk kvotient for optaget i 2026. Kontrollér optagelsestal og adgangskrav hos uddannelsesstedet.${aiPhrase ? ` ${aiPhrase}.` : ""}`;
-      }
+      const startMatch = formattedTitle.match(/,\s*Studiestart:\s*(.+)$/i);
+      const displayTitle = startMatch ? formattedTitle.slice(0, startMatch.index) : formattedTitle;
+      const startDetails = startMatch && /vinter/i.test(startMatch[1]) ? startMatch[1] : null;
 
       const institutionName = admission2026Institution(prog);
       const cityName = (prog.by || "") as string;
-      return { ...prog, udbud_titel: formattedTitle, by: cityName, institution: institutionName, admissionLabel: admission2026Label(admission), skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, totalSortScore, whyText, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
+      return { ...prog, udbud_titel: formattedTitle, displayTitle, startDetails, by: cityName, institution: institutionName, admissionLabel: admission2026Label(admission), skills_hierarchy: prog.skills_hierarchy, rag_evidence: prog.rag_evidence, scoreDetails: enriched, relevanceBoost, meetsGpa, kvNum, robustScore, aiEligible, locationsCount: 1, locationsList: [formatCityName(cityName)] };
     });
 
     list = list.filter((p) => {
@@ -325,7 +303,7 @@ export default function Dashboard() {
       return true;
     });
 
-    const sorted = list.sort((a, b) => b.totalSortScore - a.totalSortScore || String(a.udbud_titel).localeCompare(String(b.udbud_titel), "da"));
+    const sorted = list.sort((a, b) => compareResults(a, b, sort, gpa, Boolean(deferredSearchQuery.trim())));
     if (!deferredSearchQuery.trim()) {
       const groups = new Map<string, any[]>(); // eslint-disable-line @typescript-eslint/no-explicit-any
       for (const item of sorted) {
@@ -336,15 +314,13 @@ export default function Dashboard() {
       const deduplicated = [];
       for (const groupItems of groups.values()) {
         const rep = { ...groupItems[0] };
-        const cities = Array.from(new Set(groupItems.map((p: any) => formatCityName(p.by || "")))).filter(Boolean); // eslint-disable-line @typescript-eslint/no-explicit-any
-        rep.locationsCount = cities.length;
-        rep.locationsList = cities;
+        rep.locationsCount = groupItems.length;
         deduplicated.push(rep);
       }
       return deduplicated;
     }
     return sorted;
-  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, includeAiModels, allPrograms]);
+  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, includeAiModels, allPrograms, sort]);
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -358,9 +334,24 @@ export default function Dashboard() {
     }
   };
 
-  const topMatches = matchedPrograms.slice(0, visibleCount);
+  const groupLabels = {
+    at_or_above: "På eller over kvotienten i 2026",
+    near_above: "Lige uden for rækkevidde · op til 1,0 over dit snit",
+    further_above: "Mere end 1,0 over dit snit",
+    unknown: "Uden numerisk kvotient i 2026",
+    all: "Alle resultater",
+  } as const;
+  const showGroups = sort === "closest" && gpa !== null && !deferredSearchQuery.trim();
+  const sections = showGroups
+    ? (["at_or_above", "near_above", "further_above", "unknown"] as const).map((key) => {
+        const items = matchedPrograms.filter((program) => admissionGroup(program.kvNum, gpa) === key);
+        return { key, items, shown: items.slice(0, key === "at_or_above" ? visibleCount : Math.max(3, visibleCount - 7)) };
+      }).filter((section) => section.items.length > 0)
+    : [{ key: "all" as const, items: matchedPrograms, shown: matchedPrograms.slice(0, visibleCount) }];
+  const topMatches = sections.flatMap((section) => section.shown);
+  const sortDescription = sort === "closest" && gpa === null ? "A–Å indtil du indtaster et gyldigt snit" : ({ closest: "Tættest på dit snit, opdelt efter kvotient", highest: "Højeste kvotient først", alphabetical: "A–Å", ai: "Højeste AI-modelestimat først" } as const)[sort];
   const createShareUrl = () => `${window.location.origin}${buildMatchSharePath({
-    gpa,
+    gpa: gpa ?? undefined,
     includeAiModels,
     university: selectedUniversity as ShareableUniversity,
     query: searchQuery,
@@ -378,7 +369,7 @@ export default function Dashboard() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#12172B] leading-tight font-display">
             Hvilken uddannelse <br className="hidden sm:inline" />
-            passer <span className="border-b-4 border-[#0F9D6E] pb-1">bedst til dig?</span>
+            vil du <span className="border-b-4 border-[#0F9D6E] pb-1">undersøge?</span>
           </h1>
           <p className="text-sm text-[#545D71] max-w-lg mx-auto font-normal leading-relaxed">
             Søg i uddannelseskataloget, sammenlign kvotienter fra optaget i 2026, og vælg selv om tydeligt markerede AI-modelestimater skal indgå.
@@ -388,12 +379,10 @@ export default function Dashboard() {
         <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-6 card-shadow space-y-6 max-w-3xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-b border-[#E7E9EF] pb-5">
             <div className="space-y-2">
-              <div className="flex justify-between text-xs font-semibold">
-                <label htmlFor="gpa-slider" className="text-[#12172B]">Dit gymnasiale gennemsnit (Kvote 1)</label>
-                <span className="text-[#12172B] font-mono-data font-bold text-sm">{gpa.toFixed(1)}</span>
-              </div>
-              <input id="gpa-slider" type="range" min="2.0" max="12.0" step="0.1" value={gpa} onChange={(e) => setGpa(Number(e.target.value))} aria-label={`Gennemsnit: ${gpa.toFixed(1)}`} className="w-full h-2 bg-[#E7E9EF] rounded-lg appearance-none cursor-pointer accent-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" />
-              <p className="text-xs leading-relaxed text-[#545D71]">Sammenligningen bygger på historiske kvotienter, der kan ændre sig. Den er ingen garanti for optagelse. Kontrollér også fagkrav og andre adgangskrav hos uddannelsesstedet.</p>
+              <label htmlFor="gpa-input" className="block text-xs font-semibold text-[#12172B]">Dit gymnasiale gennemsnit (kvote 1)</label>
+              <input id="gpa-input" type="text" inputMode="decimal" placeholder="Fx 9,5" value={gpaInput} onChange={(event) => { setGpaInput(event.target.value); setVisibleCount(10); }} aria-invalid={gpaInvalid} aria-describedby="gpa-help" className="w-full min-h-11 bg-white border border-[#D8DBE4] rounded-lg px-3 py-2 text-sm text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]" />
+              <p id="gpa-help" className={`text-xs leading-relaxed ${gpaInvalid ? "text-[#B45309]" : "text-[#545D71]"}`}>{gpaInvalid ? "Skriv et snit mellem 2,0 og 12,0 med komma eller punktum." : "Indtast dit eget snit for at sammenligne med optaget i 2026."}</p>
+              {gpa !== null && <><label htmlFor="gpa-slider" className="block text-xs text-[#545D71]">Justér dit snit: {formatDanishNumber(gpa)}</label><input id="gpa-slider" type="range" min="2" max="12" step="0.1" value={gpa} onChange={(event) => { setGpaInput(formatDanishNumber(Number(event.target.value))); setVisibleCount(10); }} aria-label={`Gennemsnit: ${formatDanishNumber(gpa)}`} className="w-full h-6 bg-transparent cursor-pointer accent-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" /></>}
             </div>
             <div className="space-y-2">
               <label htmlFor="university-select" className="text-xs font-semibold text-[#12172B] block">Vælg universitet eller uddannelsessted</label>
@@ -411,24 +400,26 @@ export default function Dashboard() {
               </select>
             </div>
           </div>
-          <div className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
-            Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.
+          <details className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
+            <summary className="cursor-pointer font-semibold">Sådan læser du tallene</summary>
+            <p className="mt-2">Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.</p>
             <span className="mt-1 block">Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status og begrænsninger.</span>
-          </div>
+          </details>
           <div data-testid="ai-model-toggle-panel" className={`rounded-xl border p-4 ${includeAiModels ? "border-[#0F9D6E]/35 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
             <label htmlFor="include-ai-models" className="flex cursor-pointer items-start justify-between gap-4">
               <span>
                 <strong className="flex items-center gap-2 text-sm text-[#12172B]"><SlidersIcon /> Inddrag AI-modelestimater</strong>
                 <span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">
-                  Slå til for at afgrænse og sortere efter de {DATA_STATUS.scoring.mappedProgrammeCount.toLocaleString("da-DK")} uddannelser med O*NET 31.0-modeldata. Standardvisningen søger i alle {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser.
+                  Viser kun de {DATA_STATUS.scoring.mappedProgrammeCount.toLocaleString("da-DK")} uddannelser med O*NET 31.0-modeldata. Du kan vælge AI som sortering nedenfor. Standardvisningen søger i hele kataloget.
                 </span>
               </span>
               <input
                 id="include-ai-models"
                 data-testid="include-ai-models"
                 type="checkbox"
+                role="switch"
                 checked={includeAiModels}
-                onChange={(event) => { setIncludeAiModels(event.currentTarget.checked); setVisibleCount(10); }}
+                onChange={(event) => { setIncludeAiModels(event.currentTarget.checked); if (!event.currentTarget.checked && sort === "ai") setSort("closest"); setVisibleCount(10); }}
                 className="mt-0.5 h-5 w-5 shrink-0 accent-[#0F9D6E] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:ring-offset-2"
               />
             </label>
@@ -442,27 +433,30 @@ export default function Dashboard() {
             <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none pt-2"><SearchIcon /></div>
             <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
           </div>
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-[#E7E9EF] text-xs">
-            <span className="text-[#545D71] self-center font-medium">Filtrer:</span>
-            {[
-              { id: "all", label: "Alle" }, { id: "ku", label: "KU" }, { id: "dtu", label: "DTU" }, { id: "au", label: "AU" }, { id: "cbs", label: "CBS" }, { id: "sdu", label: "SDU" }, { id: "aau", label: "AAU" }, { id: "ruc", label: "RUC" }, { id: "professionshojskole", label: "Professionshøjskoler" },
-            ].map((u) => (
-              <button key={u.id} onClick={() => setSelectedUniversity(u.id)} className={`px-3 py-1 rounded-full border transition font-medium text-xs focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-1 ${selectedUniversity === u.id ? "bg-[#12172B] border-[#12172B] text-[#FFFFFF]" : "bg-[#FFFFFF] border-[#D8DBE4] text-[#545D71] hover:border-[#12172B] hover:text-[#12172B]"}`}>{u.label}</button>
-            ))}
-          </div>
         </div>
 
         <div className="space-y-4 max-w-3xl mx-auto">
           <div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3">
             <div>
               <h2 className="text-xl font-bold text-[#12172B] font-display">Uddannelser at undersøge</h2>
-              <p className="text-xs text-[#545D71]">{includeAiModels ? "AI-modelestimat indgår · kun uddannelser med O*NET 31.0-dækning" : "Sorteret efter søgerelevans og 2026-kvotienter, hvor de er kendt · AI indgår ikke"}</p>
+              <p className="text-xs text-[#545D71]">{deferredSearchQuery.trim() ? "Søgerelevans først · derefter " : "Sorteret: "}{sortDescription}{includeAiModels ? " · kun uddannelser med AI-modeldata" : " · AI fravalgt"}</p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setShowShareModal(true)} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><span>✨</span><span>Del dit match</span></button>
-              <span className="text-xs text-[#545D71] font-mono-data font-semibold hidden sm:inline">{loading ? "Henter..." : `${matchedPrograms.length} matchede uddannelser`}</span>
+              <span aria-live="polite" className="text-xs text-[#545D71] font-mono-data font-semibold hidden sm:inline">{loading ? "Henter..." : `${matchedPrograms.length} uddannelser i visningen`}</span>
             </div>
           </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label htmlFor="result-sort" className="text-xs font-semibold text-[#12172B]">Sortér resultater</label>
+            <select id="result-sort" value={sort} onChange={(event) => { setSort(event.target.value as ResultSort); setVisibleCount(10); }} className="min-h-11 rounded-lg border border-[#D8DBE4] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+              <option value="closest">Tættest på dit snit</option>
+              <option value="highest">Højeste kvotient</option>
+              <option value="alphabetical">A–Å</option>
+              {includeAiModels && <option value="ai">AI-robusthed</option>}
+            </select>
+          </div>
+          <p className="text-xs leading-relaxed text-[#545D71]">Kvotienter er fra optaget i 2026 og kan ændre sig. Dit snit er ingen garanti for optagelse; kontrollér også fagkrav og øvrige adgangskrav.</p>
 
           {loading ? (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow animate-pulse">
@@ -472,8 +466,10 @@ export default function Dashboard() {
             </div>
           ) : topMatches.length > 0 ? (
             <div className="space-y-4" data-testid="ranked-program-results">
-              <p aria-live="polite" className="text-xs text-[#545D71]">Resultaterne opdateres med det samme, når du søger, filtrerer, ændrer gennemsnittet eller slår AI til og fra.</p>
-              {topMatches.map((prog, index) => {
+              <p aria-live="polite" className="text-xs text-[#545D71]">{matchedPrograms.length} uddannelser i visningen. {gpa === null ? "Indtast dit snit for at sammenligne kvotienter." : "Resultaterne opdateres, når du ændrer dine valg."}</p>
+              {sections.map((section) => <section key={section.key} className="space-y-4" aria-label={groupLabels[section.key]}>
+              {showGroups && <div><h3 className="text-sm font-bold text-[#12172B]">{groupLabels[section.key]}</h3>{section.key === "near_above" && <p className="text-xs text-[#545D71]">Kvotienten kan ændre sig fra år til år. Dette er ikke en prognose for optagelse.</p>}</div>}
+              {section.shown.map((prog) => {
                 const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
                 return (
                   <article key={prog.kot_nr} data-testid="program-card" data-program-id={prog.kot_nr} className="border border-[#E7E9EF] bg-[#FFFFFF] rounded-xl p-5 card-shadow hover:border-[#D8DBE4] transition space-y-4">
@@ -481,7 +477,6 @@ export default function Dashboard() {
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-[#0B7A57]">#{index + 1}</span>
                             <span>{prog.institution}</span><span>•</span><span className="font-mono-data text-[#667085]">KOT {prog.kot_nr}</span>
                           </div>
                           <button onClick={(e) => { e.stopPropagation(); setShowShareModal(true); }} title="Del dette match" className="p-1.5 text-[#667085] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition flex items-center gap-1">
@@ -489,15 +484,16 @@ export default function Dashboard() {
                             <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
                           </button>
                         </div>
-                        <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition"><Link href={`/uddannelse/${createProgramSlug(prog)}`}>{prog.udbud_titel}</Link></h3>
-                        {prog.locationsCount && prog.locationsCount > 1 ? (
-                          <div className="pt-1"><span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/20">Findes {prog.locationsCount} steder ({prog.locationsList.slice(0, 3).join(", ")}{prog.locationsList.length > 3 ? `, +${prog.locationsList.length - 3}` : ""})</span></div>
+                        <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition"><Link href={`/uddannelse/${createProgramSlug(prog)}`}>{prog.displayTitle}</Link></h3>
+                        {prog.startDetails && <p className="text-xs text-[#545D71]">Studiestart: {prog.startDetails}</p>}
+                        {prog.locationsCount > 1 ? (
+                          <div className="pt-1"><span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/20">Flere katalogopslag · kontrollér studiested</span></div>
                         ) : null}
                       </div>
                       <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
                         <span className="text-[11px] text-[#667085] block">Kvote 1 ved optaget i 2026</span>
                         {prog.kvNum !== null ? (
-                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.admissionLabel}</span><span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-semibold border ${prog.meetsGpa ? "bg-[#E6F4ED] text-[#0B7A57] border-[#0F9D6E]/20" : "bg-[#FDF1E3] text-[#B45309] border-[#B45309]/20"}`}>{prog.meetsGpa ? <CheckCircleIcon /> : <AlertTriangleIcon />}{prog.meetsGpa ? "På eller over kvotienten i 2026" : `Under kvotienten i 2026 (${prog.kvNum})`}</span></div>
+                          <span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.admissionLabel}</span>
                         ) : (
                           <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-sm font-semibold text-[#545D71]">{prog.admissionLabel}</span><span className="text-[11px] text-[#545D71]">Status ved optaget i 2026 · kontrollér aktuelle oplysninger</span></div>
                         )}
@@ -507,7 +503,7 @@ export default function Dashboard() {
                     {includeAiModels && <AiModelIndicator score={prog.robustScore} eligible={prog.aiEligible} />}
 
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-[#545D71] pt-1">
-                      <p className="leading-relaxed flex-1"><strong className="text-[#12172B]">Begrundelse:</strong> {prog.whyText}</p>
+                      {gpa !== null && prog.kvNum !== null && <p className="leading-relaxed flex-1">{`Dit snit ${formatDanishNumber(gpa)} · kvotient ${formatDanishNumber(prog.kvNum)} · ${marginLabel(prog.kvNum, gpa)}`}</p>}
                       <button onClick={() => setExpandedProgram(isExpanded ? null : prog)} className="text-[#2563EB] font-semibold hover:underline text-xs whitespace-nowrap self-end sm:self-auto flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">{isExpanded ? "Skjul detaljer" : "Se fuld analyse →"}</button>
                     </div>
                     {isExpanded && (
@@ -519,13 +515,14 @@ export default function Dashboard() {
                   </article>
                 );
               })}
+              </section>)}
             </div>
           ) : (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow"><h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3><p className="text-xs text-[#545D71]">{includeAiModels ? "Din søgning gav ingen resultater blandt de 569 uddannelser med AI-modeldata. Slå AI fra for at søge i alle 1.413 uddannelser." : "Prøv at vælge et andet uddannelsessted eller ryd dit søgefelt."}</p><button onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setIncludeAiModels(false); }} className="px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Nulstil og vis alle uddannelser</button></div>
           )}
 
-          {visibleCount < matchedPrograms.length && (
-            <div className="text-center pt-4"><button onClick={() => setVisibleCount((prev) => prev + 10)} className="px-6 py-2.5 bg-[#FFFFFF] border border-[#D8DBE4] hover:border-[#12172B] text-[#12172B] font-semibold rounded-lg text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Vis flere anbefalinger (Viser {visibleCount} af {matchedPrograms.length})</button></div>
+          {topMatches.length < matchedPrograms.length && (
+            <div className="text-center pt-4"><button onClick={() => setVisibleCount((prev) => prev + 10)} className="px-6 py-2.5 bg-[#FFFFFF] border border-[#D8DBE4] hover:border-[#12172B] text-[#12172B] font-semibold rounded-lg text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Vis flere uddannelser (viser {topMatches.length} af {matchedPrograms.length})</button></div>
           )}
         </div>
 
@@ -553,7 +550,7 @@ export default function Dashboard() {
               <div className="bg-gradient-to-br from-[#12172B] to-[#1E293B] text-[#FFFFFF] rounded-xl p-5 space-y-4 shadow-md">
                 <div className="flex justify-between items-center text-[11px] text-[#A1A1AA] border-b border-[#3F3F46] pb-3"><span className="font-bold text-[#38BDF8]">UDDANNELSESINDSIGT.COM</span><span className="bg-[#0F9D6E] text-white px-2 py-0.5 rounded text-[10px] font-bold">{includeAiModels ? "AI TILVALGT" : "ALLE UDDANNELSER"}</span></div>
                 <div className="space-y-1"><span className="text-xs font-bold text-[#10B981] uppercase tracking-wider">Første resultat</span><h4 className="text-xl font-bold tracking-tight text-white font-display">{matchedPrograms[0].udbud_titel}</h4><p className="text-xs text-[#D4D4D8]">{matchedPrograms[0].institution} • KOT {matchedPrograms[0].kot_nr}</p></div>
-                <div className="bg-[#27272A] p-3 rounded-lg flex flex-wrap justify-between text-[11px] text-[#A1A1AA] gap-2 font-mono-data"><span>Snit: {gpa.toFixed(1)}</span><span>AI-model: {includeAiModels ? "til" : "fra"}</span></div>
+                <div className="bg-[#27272A] p-3 rounded-lg flex flex-wrap justify-between text-[11px] text-[#A1A1AA] gap-2 font-mono-data"><span>Snit: {gpa === null ? "ikke indtastet" : formatDanishNumber(gpa)}</span><span>AI-model: {includeAiModels ? "til" : "fra"}</span></div>
               </div>
             )}
             <div className="space-y-3">

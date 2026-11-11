@@ -18,7 +18,7 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     const hydrationErrors: string[] = [];
     page.on("pageerror", (error) => { if (/hydration/i.test(error.message)) hydrationErrors.push(error.message); });
     await page.goto("/?q=bioteknologi");
-    await expect(page.getByText(/ingen garanti for optagelse/i)).toBeVisible();
+    await expect(page.getByText(/ingen garanti for optagelse/i).first()).toBeVisible();
     await expect(page.getByText("Kvote 1 opfyldt")).toHaveCount(0);
     await page.goto("/sammenlign?a=10234&b=10318");
     await expect(page.getByText("På eller over kvotienten i 2026")).toBeVisible();
