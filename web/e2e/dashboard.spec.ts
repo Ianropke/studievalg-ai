@@ -54,6 +54,30 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.getByLabel('Sortér resultater')).toHaveValue('alphabetical');
   });
 
+  test('Min liste gemmes lokalt og valgte uddannelser overføres til sammenligning', async ({ page }) => {
+    await page.evaluate(() => localStorage.removeItem('uddannelsesindsigt.saved-programs'));
+    await page.reload();
+    const cards = page.getByTestId('program-card');
+    const first = cards.nth(0);
+    const second = cards.nth(1);
+    const firstId = await first.getAttribute('data-program-id');
+    const firstTitle = await first.getByTestId('program-title').innerText();
+    const secondTitle = await second.getByTestId('program-title').innerText();
+    await first.getByRole('button', { name: /^Gem .* Min liste/ }).click();
+    await expect(first.getByRole('button', { name: /^Fjern .* Min liste/ })).toHaveAttribute('aria-pressed', 'true');
+    const stored = await page.evaluate(() => localStorage.getItem('uddannelsesindsigt.saved-programs'));
+    expect(JSON.parse(stored!)).toEqual({ version: 1, kotIds: [firstId] });
+    await page.reload();
+    await page.getByRole('button', { name: /Min liste \(1\)/ }).click();
+    await expect(page.locator('#saved-programs')).toContainText(firstTitle.split(',')[0]);
+    await first.getByRole('checkbox', { name: /^Sammenlign / }).check();
+    await second.getByRole('checkbox', { name: /^Sammenlign / }).check();
+    await page.getByRole('link', { name: 'Sammenlign (2)' }).click();
+    await expect(page).toHaveURL(/\/sammenlign\?a=/);
+    await expect(page.locator('main')).toContainText(firstTitle.split(',')[0]);
+    await expect(page.locator('main')).toContainText(secondTitle.split(',')[0]);
+  });
+
   test('E2E-03: AI er fravalgt som standard og kan tilvælges eksplicit', async ({ page }) => {
     const firstThreeIds = () => page.locator('[data-testid="program-card"]').evaluateAll((cards) =>
       cards.slice(0, 3).map((card) => card.getAttribute('data-program-id'))

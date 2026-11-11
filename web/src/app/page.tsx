@@ -9,13 +9,12 @@ import { getEnrichedScores } from "@/lib/domainScoring";
 import type { NormalizedScores, RawProgramScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
-import { ScoreDisclosure } from "@/components/ScoreDisclosure";
-import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/EvidenceList";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } from "@/lib/shareMatch";
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
 import { admissionGroup, compareResults, formatDanishNumber, marginLabel, parseGpaInput, type ResultSort } from "@/lib/resultSorting";
+import { getBrowserStorageAdapter, readSavedPrograms, removeProgram, saveProgram } from "@/lib/savedPrograms";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -191,7 +190,11 @@ export default function Dashboard() {
   const [sort, setSort] = useState<ResultSort>("closest");
   const effectiveSort = sort === "closest" && gpa === null ? "alphabetical" : sort;
   const [includeAiModels, setIncludeAiModels] = useState(false);
-  const [expandedProgram, setExpandedProgram] = useState<ProgramItem | null>(null);
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [savedIds, setSavedIds] = useState<readonly string[]>([]);
+  const [savedError, setSavedError] = useState("");
+  const [showSaved, setShowSaved] = useState(false);
+  const [cardMessage, setCardMessage] = useState("");
   const [visibleCount, setVisibleCount] = useState(10);
   const [sectionLimits, setSectionLimits] = useState({ at_or_above: 5, near_above: 3, further_above: 2, unknown: 2 });
   const [showShareModal, setShowShareModal] = useState(false);
@@ -211,6 +214,28 @@ export default function Dashboard() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const syncSaved = () => {
+      const result = readSavedPrograms(getBrowserStorageAdapter());
+      if (result.ok) { setSavedIds(result.kotIds); setSavedError(""); }
+      else setSavedError("Min liste er ikke tilgængelig i denne browser. Kontrollér browserens lagringsindstillinger.");
+    };
+    const frame = requestAnimationFrame(syncSaved);
+    window.addEventListener("storage", syncSaved);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("storage", syncSaved); };
+  }, []);
+
+  const toggleSaved = (kot: string) => {
+    const storage = getBrowserStorageAdapter();
+    const result = savedIds.includes(kot) ? removeProgram(storage, kot) : saveProgram(storage, kot);
+    if (result.ok) { setSavedIds(result.kotIds); setSavedError(""); }
+    else setSavedError(result.reason === "limit_reached" ? "Min liste kan højst indeholde 100 uddannelser." : "Kunne ikke gemme ændringen på denne enhed. Kontrollér browserens lagringsindstillinger.");
+  };
+
+  const toggleComparison = (slug: string) => setSelectedForComparison((current) =>
+    current.includes(slug) ? current.filter((item) => item !== slug) : current.length < 3 ? [...current, slug] : current
+  );
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const deferredSelectedUniversity = useDeferredValue(selectedUniversity);
@@ -360,12 +385,15 @@ export default function Dashboard() {
     query: searchQuery,
     sort: effectiveSort,
   })}`;
+  const comparisonParams = new URLSearchParams();
+  selectedForComparison.forEach((slug, index) => comparisonParams.set(["a", "b", "c"][index], slug));
+  if (includeAiModels) comparisonParams.set("ai", "1");
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <Header />
-      <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+      <main id="main-content" tabIndex={-1} className={`max-w-5xl mx-auto px-6 py-10 space-y-10 ${selectedForComparison.length > 0 ? "pb-32" : ""}`}>
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/20">
             <span className="w-2 h-2 rounded-full bg-[#0F9D6E]"></span>
@@ -437,6 +465,17 @@ export default function Dashboard() {
             <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none pt-2"><SearchIcon /></div>
             <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
           </div>
+          <div className="border-t border-[#E7E9EF] pt-3">
+            <button type="button" onClick={() => setShowSaved(!showSaved)} aria-expanded={showSaved} aria-controls="saved-programs" className="min-h-11 text-sm font-semibold text-[#1D4ED8] hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Min liste ({savedIds.length}) {showSaved ? "↑" : "↓"}</button>
+            {savedError && <p role="status" className="text-xs text-[#B45309]">{savedError}</p>}
+            {showSaved && <div id="saved-programs" className="space-y-2 text-xs text-[#545D71]">
+              <p>Listen gemmes kun i denne browser på denne enhed; den kræver ingen konto og kan forsvinde, hvis browserdata ryddes.</p>
+              {savedIds.length === 0 ? <p>Du har ikke gemt nogen uddannelser endnu. Brug “Gem” på et uddannelseskort.</p> : <ul className="space-y-1">{savedIds.map((id) => {
+                const program = allPrograms.find((item) => String(item.kot_nr) === id);
+                return <li key={id} className="flex items-center justify-between gap-2">{program ? <Link href={`/uddannelse/${createProgramSlug(program)}`} className="font-semibold text-[#1D4ED8] hover:underline">{formatProgramTitle(program.udbud_titel || id)}</Link> : <span>Uddannelse {id} er ikke i kataloget</span>}<button type="button" onClick={() => toggleSaved(id)} aria-label={`Fjern ${program?.udbud_titel || id} fra Min liste`} className="min-h-11 px-2 text-[#545D71] hover:text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Fjern</button></li>;
+              })}</ul>}
+            </div>}
+          </div>
         </div>
 
         <div className="space-y-4 max-w-3xl mx-auto">
@@ -461,6 +500,7 @@ export default function Dashboard() {
             </select>
           </div>
           <p className="text-xs leading-relaxed text-[#545D71]">Kvotienter er fra optaget i 2026 og kan ændre sig. Dit snit er ingen garanti for optagelse; kontrollér også fagkrav og øvrige adgangskrav.</p>
+          {cardMessage && <p role="status" className="text-xs text-[#1D4ED8]">{cardMessage}</p>}
 
           {loading ? (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow animate-pulse">
@@ -474,21 +514,20 @@ export default function Dashboard() {
               {sections.map((section) => <section key={section.key} className="space-y-4" aria-label={groupLabels[section.key]}>
               {showGroups && <div><h3 className="text-sm font-bold text-[#12172B]">{groupLabels[section.key]}</h3>{section.key === "near_above" && <p className="text-xs text-[#545D71]">Kvotienten kan ændre sig fra år til år. Dette er ikke en prognose for optagelse.</p>}</div>}
               {section.shown.map((prog) => {
-                const isExpanded = expandedProgram?.kot_nr === prog.kot_nr;
+                const slug = createProgramSlug(prog);
+                const selected = selectedForComparison.includes(slug);
+                const saved = savedIds.includes(String(prog.kot_nr));
                 return (
-                  <article key={prog.kot_nr} data-testid="program-card" data-program-id={prog.kot_nr} className="border border-[#E7E9EF] bg-[#FFFFFF] rounded-xl p-5 card-shadow hover:border-[#D8DBE4] transition space-y-4">
+                  <article key={prog.kot_nr} data-testid="program-card" data-program-id={prog.kot_nr} className="relative border border-[#E7E9EF] bg-[#FFFFFF] rounded-xl p-5 card-shadow hover:border-[#D8DBE4] focus-within:ring-2 focus-within:ring-[#2563EB] transition space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
                             <span>{prog.institution}</span><span>•</span><span className="font-mono-data text-[#667085]">KOT {prog.kot_nr}</span>
                           </div>
-                          <button onClick={(e) => { e.stopPropagation(); setShowShareModal(true); }} title="Del dette match" className="p-1.5 text-[#667085] hover:text-[#12172B] hover:bg-[#F7F8FA] rounded transition flex items-center gap-1">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.999 3 3 0 000 5.999zm0 11.998a3 3 0 100-5.999 3 3 0 000 5.999" /></svg>
-                            <span className="text-[10px] font-semibold hidden sm:inline">Del</span>
-                          </button>
+                          <details className="relative z-10 text-left"><summary aria-label={`Flere handlinger for ${prog.displayTitle}`} className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded text-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]">⋯</summary><div className="absolute right-0 z-20 w-44 rounded-lg border border-[#D8DBE4] bg-white p-2 shadow-lg"><button type="button" onClick={() => { const url = `${window.location.origin}/uddannelse/${slug}`; navigator.clipboard.writeText(url).then(() => setCardMessage(`Link til ${prog.displayTitle} er kopieret.`)).catch(() => setCardMessage("Linket kunne ikke kopieres. Åbn uddannelsen og kopiér adressen fra browseren.")); }} className="min-h-11 w-full rounded px-2 text-left text-xs text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Kopiér link til uddannelsen</button></div></details>
                         </div>
-                        <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition"><Link href={`/uddannelse/${createProgramSlug(prog)}`}>{prog.displayTitle}</Link></h3>
+                        <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition"><Link href={`/uddannelse/${slug}`} className="after:absolute after:inset-0 after:rounded-xl focus:outline-none">{prog.displayTitle}</Link></h3>
                         {prog.startDetails && <p className="text-xs text-[#545D71]">Studiestart: {prog.startDetails}</p>}
                         {prog.locationsCount > 1 ? (
                           <div className="pt-1"><span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/20">Flere katalogopslag · kontrollér studiested</span></div>
@@ -508,14 +547,11 @@ export default function Dashboard() {
 
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-[#545D71] pt-1">
                       {gpa !== null && prog.kvNum !== null && <p className="leading-relaxed flex-1">{`Dit snit ${formatDanishNumber(gpa)} · kvotient ${formatDanishNumber(prog.kvNum)} · ${marginLabel(prog.kvNum, gpa)}`}</p>}
-                      <button onClick={() => setExpandedProgram(isExpanded ? null : prog)} className="text-[#2563EB] font-semibold hover:underline text-xs whitespace-nowrap self-end sm:self-auto flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded">{isExpanded ? "Skjul detaljer" : "Se fuld analyse →"}</button>
                     </div>
-                    {isExpanded && (
-                      <div className="pt-4 border-t border-[#E7E9EF] space-y-4 text-xs">
-                        <div className="space-y-2"><span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">Kurser og fagindhold</span><div className="flex flex-wrap gap-1.5">{prog.skills_hierarchy?.courses?.map((c: string, i: number) => (<span key={i} className="bg-[#F7F8FA] text-[#12172B] border border-[#D8DBE4] px-2.5 py-1 rounded-md text-[11px] font-semibold">{c}</span>))}</div></div>
-                        <div className="space-y-2 pt-2 border-t border-[#E7E9EF]"><span className="font-bold text-[#12172B] uppercase tracking-wider text-[11px] block">Evidenskilder</span>{includeAiModels && <ScoreDisclosure scores={prog.scoreDetails!} />}<EvidenceList evidence={withoutUnverifiedAdmissionsEvidence(prog.rag_evidence)} /></div>
-                      </div>
-                    )}
+                    <div className="relative z-10 flex flex-wrap items-center gap-3 border-t border-[#E7E9EF] pt-2 text-xs">
+                      <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="checkbox" checked={selected} disabled={!selected && selectedForComparison.length >= 3} onChange={() => toggleComparison(slug)} aria-label={`Sammenlign ${prog.displayTitle}`} className="h-5 w-5 accent-[#2563EB]" /><span>Sammenlign</span></label>
+                      <button type="button" onClick={() => toggleSaved(String(prog.kot_nr))} aria-pressed={saved} aria-label={`${saved ? "Fjern" : "Gem"} ${prog.displayTitle} ${saved ? "fra" : "i"} Min liste`} className="min-h-11 rounded px-2 font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">{saved ? "★ Gemt" : "☆ Gem"}</button>
+                    </div>
                   </article>
                 );
               })}
@@ -545,6 +581,10 @@ export default function Dashboard() {
           <Link href="/guides" className="inline-flex text-xs font-bold text-[#12172B] hover:underline">Se alle guides og datadrevne toplister →</Link>
         </section>
       </main>
+
+      {selectedForComparison.length > 0 && <aside aria-label="Valgte uddannelser til sammenligning" className="fixed inset-x-0 bottom-0 z-40 border-t border-[#D8DBE4] bg-white p-3 shadow-[0_-4px_16px_rgba(18,23,43,0.12)]">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3"><p className="text-xs text-[#12172B]"><strong>{selectedForComparison.length} af 3 valgt</strong><span className="block text-[#545D71]">{selectedForComparison.length < 2 ? "Vælg mindst én mere for at sammenligne." : "Klar til sammenligning."}</span></p>{selectedForComparison.length >= 2 ? <Link href={`/sammenlign?${comparisonParams}`} className="inline-flex min-h-11 items-center rounded-xl bg-[#12172B] px-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Sammenlign ({selectedForComparison.length})</Link> : <span className="rounded-xl bg-[#F7F8FA] px-4 py-3 text-xs text-[#667085]">Sammenlign (1)</span>}</div>
+      </aside>}
 
       {showShareModal && (
         <div className="fixed inset-0 z-50 bg-[#12172B]/60 backdrop-blur-sm flex items-center justify-center p-4" onKeyDown={(event) => { if (event.key === "Escape") setShowShareModal(false); }}>
