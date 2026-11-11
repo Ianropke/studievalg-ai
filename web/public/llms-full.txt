@@ -56,7 +56,7 @@ job replacement.
 ## Primary pages
 
 - Match: https://uddannelsesindsigt.com/
-- AI Insights: https://uddannelsesindsigt.com/analyse
+- AI-analyse: https://uddannelsesindsigt.com/analyse
 - Evidence and model status: https://uddannelsesindsigt.com/evidens
 - Guides: https://uddannelsesindsigt.com/guides
 - Compare: https://uddannelsesindsigt.com/sammenlign

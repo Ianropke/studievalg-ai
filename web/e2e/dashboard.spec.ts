@@ -167,6 +167,15 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.getByText('Lønpotentiale', { exact: true })).toHaveCount(0);
   });
 
+  test('nulstilling efter tomt AI-resultat fjerner også AI-sortering', async ({ page }) => {
+    await page.getByTestId('include-ai-models').check();
+    await page.getByLabel('Sortér resultater').selectOption('ai');
+    await page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' }).fill('zzzxqingenuddannelse');
+    await page.getByRole('button', { name: 'Nulstil og vis alle uddannelser' }).click();
+    await expect(page.getByTestId('include-ai-models')).not.toBeChecked();
+    await expect(page.getByLabel('Sortér resultater')).toHaveValue('alphabetical');
+  });
+
   test('E2E-04b: AI-tilvalget kan betjenes med tastaturet', async ({ page }) => {
     const toggle = page.getByTestId('include-ai-models');
     await toggle.focus();
@@ -187,7 +196,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   test('E2E-06: Navigering til AI Insights og Evidens undersider', async ({ page }) => {
     await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'AI-analyse' }).click();
     await expect(page).toHaveURL(/.*analyse/);
-    await expect(page.locator('h1')).toContainText('AI Insights');
+    await expect(page.locator('h1')).toContainText('AI-analyse');
 
     await page.getByRole('navigation', { name: 'Hovednavigation' }).getByRole('link', { name: 'Kilder og metode' }).click();
     await expect(page).toHaveURL(/.*evidens/);
@@ -241,7 +250,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   test('E2E-10: AI Insights viser nyere forskning som kontekst og ikke som skjult rangering', async ({ page }) => {
     await page.goto('/analyse');
 
-    await expect(page.getByRole('heading', { name: 'AI Insights til dit uddannelsesvalg' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'AI-analyse til dit uddannelsesvalg' })).toBeVisible();
     await expect(page.getByText('Hvad betyder det for dig?').first()).toBeVisible();
     await expect(page.getByText('Begrænsning:', { exact: false }).first()).toBeVisible();
     await expect(page.getByText('Nye forskningskort ovenfor indgår ikke skjult i rangeringen.')).toBeVisible();
@@ -253,7 +262,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/analyse');
 
-    await expect(page.getByRole('heading', { name: 'AI Insights til dit uddannelsesvalg' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'AI-analyse til dit uddannelsesvalg' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Find uddannelser →' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Hvad viser undersøgelser af AI på arbejdspladsen?' })).toBeVisible();
 

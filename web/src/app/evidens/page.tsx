@@ -122,7 +122,7 @@ export default function EvidensPage() {
         <section className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 card-shadow space-y-5">
           <div>
             <span className="text-[11px] font-bold text-[#545D71] uppercase tracking-wider block">NYERE FORSKNING OG STATISTIK</span>
-            <h2 className="text-xl font-bold text-[#12172B] font-display">Kilder vist i AI Insights</h2>
+            <h2 className="text-xl font-bold text-[#12172B] font-display">Kilder vist i AI-analysen</h2>
             <p className="mt-2 text-xs leading-relaxed text-[#545D71]">Disse kilder giver baggrund om AI, unge og arbejdsmarkedet. De indgår ikke automatisk i rangeringen, fordi geografi og måleenhed ikke svarer til et dansk uddannelsesudbud.</p>
           </div>
           <div className="divide-y divide-[#E7E9EF] rounded-lg border border-[#E7E9EF]">

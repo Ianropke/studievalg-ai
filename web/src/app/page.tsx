@@ -146,7 +146,7 @@ function AiModelIndicator({ score, eligible }: { score: number; eligible: boolea
     return (
       <div className="rounded-lg border border-[#D8DBE4] bg-[#F7F8FA] p-4 text-xs text-[#545D71]">
         <strong className="block text-[#12172B]">AI-perspektiv ikke tilgængeligt</strong>
-        Denne uddannelse har endnu ikke en defensibel programkobling til O*NET 31.0.
+        Vi mangler et tilstrækkeligt grundlag for at koble uddannelsen til arbejdsopgaver i O*NET 31.0.
       </div>
     );
   }
@@ -161,7 +161,7 @@ function AiModelIndicator({ score, eligible }: { score: number; eligible: boolea
         </div>
         <span className="rounded-full border border-[#0F9D6E]/30 bg-white px-3 py-1 text-xs font-bold text-[#0B7A57]">ca. {roundAiScore(score)}/100</span>
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-[#545D71]">Opgavebaseret crosswalk-estimat — ikke en jobprognose eller garanti.</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#545D71]">Modelestimat baseret på arbejdsopgaver og koblinger mellem fag — ikke en jobprognose eller garanti.</p>
     </div>
   );
 }
@@ -468,7 +468,9 @@ export default function Dashboard() {
           </div>
           <details className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
             <summary className="cursor-pointer font-semibold">Sådan læser du tallene</summary>
-            <p className="mt-2">Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet. AI-robusthed er et O*NET-baseret model/crosswalkestimat, ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.</p>
+            <p className="mt-2"><strong>Kvote 1</strong> er den del af optaget, hvor karaktergennemsnittet bruges i udvælgelsen. En adgangskvotient beskriver et tidligere optag, ikke et fast krav eller en garanti. <strong>KOT-nummeret</strong> er optagelsesområdets nummer i den officielle opgørelse.</p>
+            <p className="mt-2">Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet.</p>
+            <p className="mt-2"><strong>AI-modelestimatet</strong> er en beregnet vurdering, ikke et observeret resultat. Det bygger på amerikanske O*NET-opgavedata og usikre koblinger mellem uddannelser og arbejdsopgaver. AI-robusthed er ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.</p>
             <span className="mt-1 block">Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status og begrænsninger.</span>
           </details>
           <div data-testid="ai-model-toggle-panel" className={`rounded-xl border p-4 ${includeAiModels ? "border-[#0F9D6E]/35 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
@@ -595,7 +597,7 @@ export default function Dashboard() {
               </section>)}
             </div>
           ) : (
-            <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow"><h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3><p className="text-xs text-[#545D71]">{includeAiModels ? "Din søgning gav ingen resultater blandt de 569 uddannelser med AI-modeldata. Slå AI fra for at søge i alle 1.413 uddannelser." : "Prøv at vælge et andet uddannelsessted eller ryd dit søgefelt."}</p><button onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setIncludeAiModels(false); }} className="px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Nulstil og vis alle uddannelser</button></div>
+            <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow"><h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3><p className="text-xs text-[#545D71]">{includeAiModels ? "Din søgning gav ingen resultater blandt de 569 uddannelser med AI-modeldata. Slå AI fra for at søge i alle 1.413 uddannelser." : "Prøv at vælge et andet uddannelsessted eller ryd dit søgefelt."}</p><button onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setIncludeAiModels(false); if (sort === "ai") setSort("closest"); setVisibleCount(10); }} className="min-h-11 px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Nulstil og vis alle uddannelser</button></div>
           )}
 
           {!showGroups && topMatches.length < matchedPrograms.length && (
@@ -608,7 +610,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { href: "/guides/hvad-kan-jeg-laese-med-mit-snit", title: "Hvad kan jeg læse med mit snit?", text: "Forstå Kvote 1-tal og find relevante alternativer." },
-              { href: "/guides/ai-og-uddannelsesvalg", title: "AI og uddannelsesvalg", text: "Brug AI-resiliens uden at læse modellen som en garanti." },
+              { href: "/guides/ai-og-uddannelsesvalg", title: "AI og uddannelsesvalg", text: "Brug AI-estimatet uden at læse det som en garanti." },
               { href: "/guides/saadan-sammenligner-du-uddannelser", title: "Sammenlign uddannelser", text: "En enkel tjekliste til adgang, indhold, sted og AI-perspektiv." },
             ].map((guide) => (
               <Link key={guide.href} href={guide.href} onClick={() => track("guide_open", { guide: guide.href.replace("/guides/", ""), source: "homepage" })} className="rounded-xl border border-[#E7E9EF] bg-[#F7F8FA] p-4 hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition"><span className="block text-sm font-bold text-[#12172B]">{guide.title}</span><span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">{guide.text}</span><span className="mt-3 block text-xs font-bold text-[#2563EB]">Læs guiden →</span></Link>
