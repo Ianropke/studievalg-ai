@@ -67,7 +67,6 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
 
   const title = prog.udbud_titel || "Uddannelse";
   const inst = admission2026Institution(prog);
-  const city = prog.by || "";
   const kot = String(prog.kot_nr || "");
   const kv = admission2026Label(getAdmission2026(prog));
 
@@ -87,7 +86,6 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
       "name": inst,
       "address": {
         "@type": "PostalAddress",
-        "addressLocality": city,
         "addressCountry": "DK"
       },
     },
@@ -152,7 +150,6 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2 text-xs text-[#545D71]">
                 <span className="font-semibold text-[#2563EB]">{inst}</span>
-                {city && <span>• {city}</span>}
                 <span>•</span>
                 <span className="font-mono-data text-[#667085]">KOT {kot}</span>
               </div>

@@ -12,6 +12,7 @@ import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
+import { formatDanishNumber, parseGpaInput } from "@/lib/resultSorting";
 
 function ComparisonContent() {
   const searchParams = useSearchParams();
@@ -29,7 +30,8 @@ function ComparisonContent() {
   };
 
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>(getInitialSlugs);
-  const [userGpa, setUserGpa] = useState<number>(9.5);
+  const [userGpaInput, setUserGpaInput] = useState<string>(() => { const raw = searchParams.get("gpa") || ""; const value = parseGpaInput(raw); return value === null ? raw : formatDanishNumber(value); });
+  const userGpa = parseGpaInput(userGpaInput);
   const [includeAiModels, setIncludeAiModels] = useState<boolean>(() => ["1", "true"].includes((searchParams.get("ai") || "").toLowerCase()));
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -74,6 +76,7 @@ function ComparisonContent() {
     if (selectedSlugs[1]) url.searchParams.set("b", selectedSlugs[1]);
     if (selectedSlugs[2]) url.searchParams.set("c", selectedSlugs[2]);
     if (includeAiModels) url.searchParams.set("ai", "1");
+    if (userGpa !== null) url.searchParams.set("gpa", String(userGpa));
     if (navigator.share) {
       navigator.share({ title: "Sammenlign uddannelser på Uddannelsesindsigt", url: url.toString() }).catch(() => {});
     } else {
@@ -102,7 +105,7 @@ function ComparisonContent() {
         </div>
         <div className="bg-[#FFFFFF] p-4 rounded-xl border border-[#E7E9EF] card-shadow flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-0.5 w-full sm:w-auto"><span className="text-xs font-bold text-[#12172B]">Dit gymnasiale gennemsnit (kvote 1):</span><p className="text-[11px] text-[#545D71]">Sammenlign med optaget i 2026, når uddannelsen kan matches sikkert. Kvotienter kan ændre sig og er ingen garanti for optagelse. Eventuelle ledige pladser er historiske. Kontrollér aktuelle adgangskrav hos uddannelsesstedet.</p></div>
-          <div className="flex items-center gap-3 w-full sm:w-auto shrink-0"><input type="range" min="2.0" max="12.0" step="0.1" value={userGpa} onChange={(e) => setUserGpa(parseFloat(e.target.value))} aria-label={`Gymnasialt gennemsnit: ${userGpa.toFixed(1)}`} aria-valuemin={2} aria-valuemax={12} aria-valuenow={userGpa} className="w-48 accent-[#2563EB] cursor-pointer"/><span className="text-lg font-bold font-mono-data text-[#2563EB] w-12 text-right">{userGpa.toFixed(1)}</span></div>
+          <div className="w-full sm:w-48 shrink-0"><label htmlFor="compare-gpa" className="sr-only">Dit gymnasiale gennemsnit til sammenligning</label><input id="compare-gpa" type="text" inputMode="decimal" value={userGpaInput} onChange={(event) => setUserGpaInput(event.target.value)} onBlur={() => { if (userGpa !== null) setUserGpaInput(formatDanishNumber(userGpa)); }} placeholder="Fx 9,5" aria-invalid={userGpaInput.trim() !== "" && userGpa === null} aria-describedby="compare-gpa-help" className="min-h-11 w-full rounded-lg border border-[#D8DBE4] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"/><p id="compare-gpa-help" className="mt-1 text-[11px] text-[#545D71]">{userGpaInput.trim() !== "" && userGpa === null ? "Skriv et snit mellem 2,0 og 12,0." : "Indtast dit eget snit."}</p></div>
         </div>
         <div className="bg-[#FFFFFF] p-6 rounded-2xl border border-[#E7E9EF] card-shadow space-y-5">
           <label className="flex cursor-pointer items-start justify-between gap-4 rounded-xl border border-[#0F9D6E]/25 bg-[#E3F6EE] p-4 text-xs leading-relaxed text-[#315C4C]">
@@ -119,8 +122,8 @@ function ComparisonContent() {
           <p className="px-4 pt-3 text-xs text-[#545D71] sm:hidden">Stryg til siden i tabellen for at se alle uddannelser.</p>
           <div className="overflow-x-auto"><table className="w-full text-xs text-left"><thead><tr className="border-b border-[#E7E9EF] bg-[#FFFFFF]"><th className="p-4 font-bold text-[#545D71] w-1/4">Parameter / Metric</th>{selectedPrograms.map((prog, idx) => { const style = colors[idx % colors.length]; return <th key={prog.id || idx} className="p-4 font-bold text-[#12172B] w-1/4"><span className={`text-[10px] font-bold px-2 py-0.5 rounded ${style.bg} ${style.text} mr-1.5`}>{style.badge}</span><div className="pt-1 font-display">{prog.udbud_titel}</div></th>; })}</tr></thead>
             <tbody className="divide-y divide-[#E7E9EF]">
-              <tr><td className="p-4 font-semibold text-[#545D71]">Institution &amp; By</td>{selectedPrograms.map((prog) => <td key={createProgramSlug(prog)} className="p-4 text-[#12172B]"><div className="font-medium">{admission2026Institution(prog)}</div><div className="text-[11px] text-[#667085]">{prog.by || "Danmark"} • KOT {prog.kot_nr}</div></td>)}</tr>
-              <tr><td className="p-4 font-semibold text-[#545D71]">Kvote 1 ved optaget i 2026</td>{selectedPrograms.map((prog) => { const admission = getAdmission2026(prog); const kvNum = admission2026Threshold(admission); const meets = kvNum !== null && userGpa >= kvNum; return <td key={createProgramSlug(prog)} className="p-4"><span className="font-mono-data font-bold text-sm text-[#12172B] block">{admission2026Label(admission)}</span><span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1 ${meets ? "bg-[#E6F4ED] text-[#0B7A57]" : "bg-[#F7F8FA] text-[#545D71]"}`}>{kvNum === null ? "Kontrollér aktuelle oplysninger" : meets ? "På eller over kvotienten i 2026" : "Under kvotienten i 2026"}</span></td>; })}</tr>
+              <tr><td className="p-4 font-semibold text-[#545D71]">Uddannelsessted &amp; KOT</td>{selectedPrograms.map((prog) => <td key={createProgramSlug(prog)} className="p-4 text-[#12172B]"><div className="font-medium">{admission2026Institution(prog)}</div><div className="text-[11px] text-[#667085]">KOT {prog.kot_nr} · kontrollér studiestedet hos uddannelsesstedet</div></td>)}</tr>
+              <tr><td className="p-4 font-semibold text-[#545D71]">Kvote 1 ved optaget i 2026</td>{selectedPrograms.map((prog) => { const admission = getAdmission2026(prog); const kvNum = admission2026Threshold(admission); const meets = kvNum !== null && userGpa !== null && userGpa >= kvNum; return <td key={createProgramSlug(prog)} className="p-4"><span className="font-mono-data font-bold text-sm text-[#12172B] block">{admission2026Label(admission)}</span><span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1 ${meets ? "bg-[#E6F4ED] text-[#0B7A57]" : "bg-[#F7F8FA] text-[#545D71]"}`}>{kvNum === null ? "Kontrollér aktuelle oplysninger" : userGpa === null ? "Indtast dit snit for at sammenligne" : meets ? "På eller over kvotienten i 2026" : "Under kvotienten i 2026"}</span></td>; })}</tr>
               {includeAiModels && <tr><td className="p-4 font-semibold text-[#545D71]">AI-perspektiv <span className="block text-[10px] font-normal text-[#667085]">O*NET 31.0-modelestimat</span></td>{selectedPrograms.map((prog) => { const enriched = getEnrichedScores(prog.udbud_titel, prog.scores); return <td key={createProgramSlug(prog)} className="p-4">{enriched.ranking_eligible.ai ? <><span className="font-bold text-sm text-[#087454] block">{aiBand(enriched.ai_resilience)} AI-robusthed</span><span className="mt-1 block font-mono-data text-[11px] text-[#545D71]">ca. {roundAiScore(enriched.ai_resilience)}/100</span></> : <span className="font-semibold text-xs text-[#667085]">Ikke tilgængeligt</span>}</td>; })}</tr>}
               <tr><td className="p-4 font-semibold text-[#545D71]">Kernekompetencer</td>{selectedPrograms.map((prog) => <td key={createProgramSlug(prog)} className="p-4">{prog.skills_hierarchy?.skills && prog.skills_hierarchy.skills.length > 0 ? <div className="flex flex-wrap gap-1">{prog.skills_hierarchy.skills.slice(0, 3).map((skill) => <span key={skill} className="bg-[#F7F8FA] border border-[#E7E9EF] px-1.5 py-0.5 rounded text-[10px] text-[#12172B]">{skill}</span>)}</div> : <span className="text-[#667085]">Tværdisciplinære evner</span>}</td>)}</tr>
             </tbody></table></div>

@@ -388,6 +388,7 @@ export default function Dashboard() {
   const comparisonParams = new URLSearchParams();
   selectedForComparison.forEach((slug, index) => comparisonParams.set(["a", "b", "c"][index], slug));
   if (includeAiModels) comparisonParams.set("ai", "1");
+  if (gpa !== null) comparisonParams.set("gpa", String(gpa));
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B] antialiased">
@@ -412,7 +413,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-b border-[#E7E9EF] pb-5">
             <div className="space-y-2">
               <label htmlFor="gpa-input" className="block text-xs font-semibold text-[#12172B]">Dit gymnasiale gennemsnit (kvote 1)</label>
-              <input id="gpa-input" type="text" inputMode="decimal" placeholder="Fx 9,5" value={gpaInput} onChange={(event) => { setGpaInput(event.target.value); setVisibleCount(10); }} aria-invalid={gpaInvalid} aria-describedby="gpa-help" className="w-full min-h-11 bg-white border border-[#D8DBE4] rounded-lg px-3 py-2 text-sm text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]" />
+              <input id="gpa-input" type="text" inputMode="decimal" placeholder="Fx 9,5" value={gpaInput} onChange={(event) => { setGpaInput(event.target.value); setVisibleCount(10); }} onBlur={() => { if (gpa !== null) setGpaInput(formatDanishNumber(gpa)); }} aria-invalid={gpaInvalid} aria-describedby="gpa-help" className="w-full min-h-11 bg-white border border-[#D8DBE4] rounded-lg px-3 py-2 text-sm text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]" />
               <p id="gpa-help" className={`text-xs leading-relaxed ${gpaInvalid ? "text-[#B45309]" : "text-[#545D71]"}`}>{gpaInvalid ? "Skriv et snit mellem 2,0 og 12,0 med komma eller punktum." : "Indtast dit eget snit for at sammenligne med optaget i 2026."}</p>
               {gpa !== null && <><label htmlFor="gpa-slider" className="block text-xs text-[#545D71]">Justér dit snit: {formatDanishNumber(gpa)}</label><input id="gpa-slider" type="range" min="2" max="12" step="0.1" value={gpa} onChange={(event) => { setGpaInput(formatDanishNumber(Number(event.target.value))); setVisibleCount(10); }} aria-label={`Gennemsnit: ${formatDanishNumber(gpa)}`} className="w-full h-6 bg-transparent cursor-pointer accent-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" /></>}
             </div>
@@ -485,7 +486,7 @@ export default function Dashboard() {
               <p className="text-xs text-[#545D71]">{deferredSearchQuery.trim() ? "Søgerelevans først · derefter " : "Sorteret: "}{sortDescription}{includeAiModels ? " · kun uddannelser med AI-modeldata" : " · AI fravalgt"}</p>
             </div>
             <div className="flex items-center gap-3">
-              <button onClick={() => setShowShareModal(true)} className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><span>✨</span><span>Del dit match</span></button>
+              <button onClick={() => setShowShareModal(true)} className="inline-flex min-h-11 items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15V3m0 0L8 7m4-4 4 4M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" /></svg><span>Del din søgning</span></button>
               <span className="text-xs text-[#545D71] font-mono-data font-semibold hidden sm:inline">{loading ? "Henter..." : `${matchedPrograms.length} uddannelser i visningen`}</span>
             </div>
           </div>
@@ -525,7 +526,7 @@ export default function Dashboard() {
                           <div className="flex items-center gap-1.5">
                             <span>{prog.institution}</span><span>•</span><span className="font-mono-data text-[#667085]">KOT {prog.kot_nr}</span>
                           </div>
-                          <details className="relative z-10 text-left"><summary aria-label={`Flere handlinger for ${prog.displayTitle}`} className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded text-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]">⋯</summary><div className="absolute right-0 z-20 w-44 rounded-lg border border-[#D8DBE4] bg-white p-2 shadow-lg"><button type="button" onClick={() => { const url = `${window.location.origin}/uddannelse/${slug}`; navigator.clipboard.writeText(url).then(() => setCardMessage(`Link til ${prog.displayTitle} er kopieret.`)).catch(() => setCardMessage("Linket kunne ikke kopieres. Åbn uddannelsen og kopiér adressen fra browseren.")); }} className="min-h-11 w-full rounded px-2 text-left text-xs text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Kopiér link til uddannelsen</button></div></details>
+                          <details className="relative z-10 text-left"><summary aria-label={`Flere handlinger for ${prog.udbud_titel}, KOT ${prog.kot_nr}`} className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded text-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]">⋯</summary><div className="absolute right-0 z-20 w-44 rounded-lg border border-[#D8DBE4] bg-white p-2 shadow-lg"><button type="button" onClick={() => { const url = `${window.location.origin}/uddannelse/${slug}`; if (!navigator.clipboard?.writeText) { setCardMessage("Linket kunne ikke kopieres. Åbn uddannelsen og kopiér adressen fra browseren."); return; } navigator.clipboard.writeText(url).then(() => setCardMessage(`Link til ${prog.displayTitle} er kopieret.`)).catch(() => setCardMessage("Linket kunne ikke kopieres. Åbn uddannelsen og kopiér adressen fra browseren.")); }} aria-label={`Kopiér link til ${prog.udbud_titel}, KOT ${prog.kot_nr}`} className="min-h-11 w-full rounded px-2 text-left text-xs text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Kopiér link til uddannelsen</button></div></details>
                         </div>
                         <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition"><Link href={`/uddannelse/${slug}`} className="after:absolute after:inset-0 after:rounded-xl focus:outline-none">{prog.displayTitle}</Link></h3>
                         {prog.startDetails && <p className="text-xs text-[#545D71]">Studiestart: {prog.startDetails}</p>}
@@ -549,8 +550,8 @@ export default function Dashboard() {
                       {gpa !== null && prog.kvNum !== null && <p className="leading-relaxed flex-1">{`Dit snit ${formatDanishNumber(gpa)} · kvotient ${formatDanishNumber(prog.kvNum)} · ${marginLabel(prog.kvNum, gpa)}`}</p>}
                     </div>
                     <div className="relative z-10 flex flex-wrap items-center gap-3 border-t border-[#E7E9EF] pt-2 text-xs">
-                      <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="checkbox" checked={selected} disabled={!selected && selectedForComparison.length >= 3} onChange={() => toggleComparison(slug)} aria-label={`Sammenlign ${prog.displayTitle}`} className="h-5 w-5 accent-[#2563EB]" /><span>Sammenlign</span></label>
-                      <button type="button" onClick={() => toggleSaved(String(prog.kot_nr))} aria-pressed={saved} aria-label={`${saved ? "Fjern" : "Gem"} ${prog.displayTitle} ${saved ? "fra" : "i"} Min liste`} className="min-h-11 rounded px-2 font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">{saved ? "★ Gemt" : "☆ Gem"}</button>
+                      <label className="flex min-h-11 cursor-pointer items-center gap-2"><input type="checkbox" checked={selected} disabled={!selected && selectedForComparison.length >= 3} onChange={() => toggleComparison(slug)} aria-label={`Sammenlign ${prog.udbud_titel}, KOT ${prog.kot_nr}`} className="h-5 w-5 accent-[#2563EB]" /><span>Sammenlign</span></label>
+                      <button type="button" onClick={() => toggleSaved(String(prog.kot_nr))} aria-pressed={saved} aria-label={`${saved ? "Fjern" : "Gem"} ${prog.udbud_titel}, KOT ${prog.kot_nr} ${saved ? "fra" : "i"} Min liste`} className="min-h-11 rounded px-2 font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">{saved ? "★ Gemt" : "☆ Gem"}</button>
                     </div>
                   </article>
                 );
