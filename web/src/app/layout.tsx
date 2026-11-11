@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://uddannelsesindsigt.com"),
   title: "Find uddannelse efter snit og AI | Uddannelsesindsigt",
   description:
-    "Søg i 1.413 danske uddannelsestilbud med ældre katalogtal og et valgfrit, tydeligt markeret AI-perspektiv.",
+    "Søg i 1.413 danske uddannelsestilbud med historiske optagelsestal fra 2026, hvor de er dokumenteret, og et valgfrit AI-perspektiv.",
   keywords: [
     "uddannelsesindsigt",
     "studievalg",
