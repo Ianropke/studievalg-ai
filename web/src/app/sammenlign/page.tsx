@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import initialProgramsCatalog from "../../../public/data/all_programs_catalog.json";
@@ -13,6 +13,7 @@ import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
 import { formatDanishNumber, parseGpaInput } from "@/lib/resultSorting";
+import { choiceParams } from "@/lib/shareMatch";
 
 function ComparisonContent() {
   const searchParams = useSearchParams();
@@ -36,6 +37,26 @@ function ComparisonContent() {
   const [showSearchModal, setShowSearchModal] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
+
+  useEffect(() => {
+    let frame = 0;
+    const restoreFragment = () => {
+      if (!window.location.hash.startsWith("#valg?")) return;
+      const params = choiceParams("", window.location.hash);
+      const slugs = [params.get("a"), params.get("b"), params.get("c")].filter((slug): slug is string => Boolean(slug)).map((slug) => slug.slice(0, 300));
+      const rawGpa = params.get("gpa") || "";
+      const gpa = parseGpaInput(rawGpa);
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (slugs.length > 0) setSelectedSlugs(slugs);
+        setUserGpaInput(gpa === null ? "" : formatDanishNumber(gpa));
+        setIncludeAiModels(["1", "true"].includes((params.get("ai") || "").toLowerCase()));
+      });
+    };
+    restoreFragment();
+    window.addEventListener("hashchange", restoreFragment);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("hashchange", restoreFragment); };
+  }, []);
 
   const selectedPrograms = useMemo(() => {
     const list = selectedSlugs
@@ -72,11 +93,13 @@ function ComparisonContent() {
 
   const handleShare = () => {
     const url = new URL(window.location.origin + "/sammenlign");
-    if (selectedSlugs[0]) url.searchParams.set("a", selectedSlugs[0]);
-    if (selectedSlugs[1]) url.searchParams.set("b", selectedSlugs[1]);
-    if (selectedSlugs[2]) url.searchParams.set("c", selectedSlugs[2]);
-    if (includeAiModels) url.searchParams.set("ai", "1");
-    if (userGpa !== null) url.searchParams.set("gpa", String(userGpa));
+    const params = new URLSearchParams();
+    if (selectedSlugs[0]) params.set("a", selectedSlugs[0]);
+    if (selectedSlugs[1]) params.set("b", selectedSlugs[1]);
+    if (selectedSlugs[2]) params.set("c", selectedSlugs[2]);
+    if (includeAiModels) params.set("ai", "1");
+    if (userGpa !== null) params.set("gpa", String(userGpa));
+    url.hash = `valg?${params.toString()}`;
     if (navigator.share) {
       navigator.share({ title: "Sammenlign uddannelser på Uddannelsesindsigt", url: url.toString() }).catch(() => {});
     } else {

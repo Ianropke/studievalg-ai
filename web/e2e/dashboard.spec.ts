@@ -75,7 +75,8 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await first.getByRole('checkbox', { name: /^Sammenlign / }).check();
     await second.getByRole('checkbox', { name: /^Sammenlign / }).check();
     await page.getByRole('link', { name: 'Sammenlign (2)' }).click();
-    await expect(page).toHaveURL(/\/sammenlign\?a=/);
+    await expect(page).toHaveURL(/\/sammenlign#valg\?a=/);
+    expect(new URL(page.url()).search).toBe('');
     await expect(page.getByLabel('Dit gymnasiale gennemsnit til sammenligning')).toHaveValue('9,5');
     await expect(page.locator('main')).toContainText(firstTitle.split(',')[0]);
     await expect(page.locator('main')).toContainText(secondTitle.split(',')[0]);
@@ -93,6 +94,8 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
   test('adresselinje og tilbageknap gendanner snit, sortering og aktive filtre', async ({ page }) => {
     await page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)').fill('8,2');
     await expect(page).toHaveURL(/gpa=8\.2/);
+    expect(new URL(page.url()).search).toBe('');
+    expect(new URL(page.url()).hash).toContain('#valg?');
     await page.getByLabel('Vælg universitet eller uddannelsessted').selectOption('au');
     await expect(page).toHaveURL(/u=au/);
     await expect(page.getByLabel('Aktive filtre')).toContainText('Uddannelsessted: AU');
@@ -120,6 +123,15 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await page.waitForTimeout(600);
     await expect(page).toHaveURL(/gpa=8\.2/);
     await expect(input).toHaveValue('8,2');
+  });
+
+  test('hurtig navigation bevarer netop indtastet snit ved tilbage', async ({ page }) => {
+    await page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)').fill('8,2');
+    await page.getByTestId('program-title').first().getByRole('link').click();
+    await expect(page).toHaveURL(/\/uddannelse\//);
+    await page.goBack();
+    await expect(page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)')).toHaveValue('8,2');
+    expect(new URL(page.url()).search).toBe('');
   });
 
   test('institutionsfilter følger kildeverificeret uddannelsessted frem for KOT-prefix', async ({ page }) => {

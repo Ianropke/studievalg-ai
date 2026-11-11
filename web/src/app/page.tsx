@@ -214,13 +214,15 @@ export default function Dashboard() {
   const [urlRevision, setUrlRevision] = useState(0);
   const restoringUrl = useRef(false);
   const pendingUrlTimer = useRef<number | null>(null);
+  const pendingUrlPath = useRef<string | null>(null);
   const filterDialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     let frame = 0;
     const restore = () => {
       if (pendingUrlTimer.current !== null) window.clearTimeout(pendingUrlTimer.current);
-      const shared = parseMatchShareParams(window.location.search);
+      pendingUrlPath.current = null;
+      const shared = parseMatchShareParams(window.location.search, window.location.hash);
       restoringUrl.current = true;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
@@ -234,21 +236,35 @@ export default function Dashboard() {
         setUrlRevision((current) => current + 1);
       });
     };
+    const cancelPendingNavigation = (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!(target instanceof HTMLAnchorElement)) return;
+      const destination = new URL(target.href, window.location.href);
+      if (destination.origin !== window.location.origin || destination.pathname !== window.location.pathname) {
+        if (pendingUrlTimer.current !== null) window.clearTimeout(pendingUrlTimer.current);
+        pendingUrlTimer.current = null;
+        if (pendingUrlPath.current !== null) window.history.replaceState(null, "", pendingUrlPath.current);
+        pendingUrlPath.current = null;
+      }
+    };
     restore();
     window.addEventListener("popstate", restore);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("popstate", restore); };
+    document.addEventListener("click", cancelPendingNavigation, true);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("popstate", restore); document.removeEventListener("click", cancelPendingNavigation, true); };
   }, []);
 
   useEffect(() => {
     if (!urlReady) return;
     if (restoringUrl.current) { restoringUrl.current = false; return; }
     const nextPath = buildMatchSharePath({ gpa: gpa ?? undefined, includeAiModels, university: selectedUniversity as ShareableUniversity, query: searchQuery, sort });
+    pendingUrlPath.current = nextPath;
     const timeout = window.setTimeout(() => {
       pendingUrlTimer.current = null;
-      if (`${window.location.pathname}${window.location.search}` !== nextPath) window.history.pushState(null, "", `${nextPath}${window.location.hash}`);
+      pendingUrlPath.current = null;
+      if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== nextPath) window.history.pushState(null, "", nextPath);
     }, 400);
     pendingUrlTimer.current = timeout;
-    return () => { window.clearTimeout(timeout); if (pendingUrlTimer.current === timeout) pendingUrlTimer.current = null; };
+    return () => { window.clearTimeout(timeout); if (pendingUrlTimer.current === timeout) { pendingUrlTimer.current = null; pendingUrlPath.current = null; } };
   }, [gpa, includeAiModels, selectedUniversity, searchQuery, sort, urlReady, urlRevision]);
 
   useEffect(() => {
@@ -502,7 +518,7 @@ export default function Dashboard() {
             <input type="text" maxLength={120} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(10); }} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full min-h-11 bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
           </div>
           {(selectedUniversity !== "all" || searchQuery.trim() || includeAiModels) && <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="Aktive filtre"><span className="font-semibold text-[#545D71]">Aktive filtre:</span>{selectedUniversity !== "all" && <button type="button" onClick={() => setSelectedUniversity("all")} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern filter for uddannelsessted">Uddannelsessted: {UNIVERSITY_LABELS[selectedUniversity] || selectedUniversity} ×</button>}{searchQuery.trim() && <button type="button" onClick={() => setSearchQuery("")} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern søgning">Søgning: {searchQuery} ×</button>}{includeAiModels && <button type="button" onClick={() => { setIncludeAiModels(false); if (sort === "ai") setSort("closest"); }} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern AI-filter">AI-modeldata ×</button>}<button type="button" onClick={() => { setSelectedUniversity("all"); setSearchQuery(""); setIncludeAiModels(false); if (sort === "ai") setSort("closest"); setVisibleCount(10); }} className="min-h-11 rounded px-2 font-semibold text-[#1D4ED8] underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Nulstil alle filtre</button></div>}
-          <p className="text-[11px] leading-relaxed text-[#545D71]">Snit, søgning og filtre vises i adresselinjen, så de kan deles og gendannes. Adressen kan gemmes i browserhistorik og sendes ved sideindlæsning. Del kun linket, hvis du vil dele disse valg.</p>
+          <p className="text-[11px] leading-relaxed text-[#545D71]">Snit, søgning og filtre gemmes efter # i adressen, så de normalt ikke sendes til serveren ved sideindlæsning. De kan gemmes i browserhistorik og ses af dem, du deler linket med. Ældre links kan have parametre, der sendes til serveren.</p>
           <div className="border-t border-[#E7E9EF] pt-3">
             <button type="button" onClick={() => setShowSaved(!showSaved)} aria-expanded={showSaved} aria-controls="saved-programs" className="min-h-11 text-sm font-semibold text-[#1D4ED8] hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Min liste ({savedIds.length}) {showSaved ? "↑" : "↓"}</button>
             {savedError && <p role="status" className="text-xs text-[#B45309]">{savedError}</p>}
@@ -621,7 +637,7 @@ export default function Dashboard() {
       </main>
 
       {selectedForComparison.length > 0 && <aside aria-label="Valgte uddannelser til sammenligning" className="fixed inset-x-0 bottom-0 z-40 border-t border-[#D8DBE4] bg-white p-3 shadow-[0_-4px_16px_rgba(18,23,43,0.12)]">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3"><p className="text-xs text-[#12172B]"><strong>{selectedForComparison.length} af 3 valgt</strong><span className="block text-[#545D71]">{selectedForComparison.length < 2 ? "Vælg mindst én mere for at sammenligne." : "Klar til sammenligning."}</span></p>{selectedForComparison.length >= 2 ? <Link href={`/sammenlign?${comparisonParams}`} className="inline-flex min-h-11 items-center rounded-xl bg-[#12172B] px-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Sammenlign ({selectedForComparison.length})</Link> : <span className="rounded-xl bg-[#F7F8FA] px-4 py-3 text-xs text-[#667085]">Sammenlign (1)</span>}</div>
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3"><p className="text-xs text-[#12172B]"><strong>{selectedForComparison.length} af 3 valgt</strong><span className="block text-[#545D71]">{selectedForComparison.length < 2 ? "Vælg mindst én mere for at sammenligne." : "Klar til sammenligning."}</span></p>{selectedForComparison.length >= 2 ? <Link href={`/sammenlign#valg?${comparisonParams}`} className="inline-flex min-h-11 items-center rounded-xl bg-[#12172B] px-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Sammenlign ({selectedForComparison.length})</Link> : <span className="rounded-xl bg-[#F7F8FA] px-4 py-3 text-xs text-[#667085]">Sammenlign (1)</span>}</div>
       </aside>}
 
       {showShareModal && (

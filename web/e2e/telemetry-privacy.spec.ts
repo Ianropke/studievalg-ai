@@ -15,3 +15,13 @@ test('beslutningssider blokerer statistik med valg i URL', async ({ page }) => {
   });
   expect(results).toEqual([null, null]);
 });
+
+test('nye links gendanner valg uden at sende fragmentet i sideanmodningen', async ({ page }) => {
+  const response = await page.goto('/#valg?gpa=8.2&q=medicin&ai=0&sort=closest');
+  expect(new URL(response!.request().url()).search).toBe('');
+  expect(response!.request().url()).not.toContain('gpa');
+  await expect(page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)')).toHaveValue('8,2');
+  await expect(page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' })).toHaveValue('medicin');
+  await page.reload();
+  await expect(page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)')).toHaveValue('8,2');
+});
