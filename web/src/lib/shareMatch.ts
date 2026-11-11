@@ -33,8 +33,15 @@ function readBoundedNumber(params: URLSearchParams, key: string, min: number, ma
   return Math.min(max, Math.max(min, value));
 }
 
-export function parseMatchShareParams(search: string): ParsedMatchShareState {
-  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+/** New choice links use a fragment, which the browser does not send in HTTP requests. */
+export function choiceParams(search: string, hash = ""): URLSearchParams {
+  const fragment = hash.startsWith("#valg?") ? hash : search.startsWith("#valg?") ? search : "";
+  if (fragment) return new URLSearchParams(fragment.slice("#valg?".length));
+  return new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+}
+
+export function parseMatchShareParams(search: string, hash = ""): ParsedMatchShareState {
+  const params = choiceParams(search, hash);
   const parsed: ParsedMatchShareState = {};
 
   const gpa = readBoundedNumber(params, "gpa", 2, 12);
@@ -66,5 +73,5 @@ export function buildMatchSharePath(state: MatchShareState): string {
   if (state.query.trim()) params.set("q", state.query.trim().slice(0, 120));
   if (state.sort && (state.sort !== "ai" || state.includeAiModels)) params.set("sort", state.sort);
 
-  return `/?${params.toString()}`;
+  return `/#valg?${params.toString()}`;
 }
