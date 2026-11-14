@@ -18,9 +18,9 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     const hydrationErrors: string[] = [];
     page.on("pageerror", (error) => { if (/hydration/i.test(error.message)) hydrationErrors.push(error.message); });
     await page.goto("/?q=bioteknologi");
-    await expect(page.getByText(/ingen garanti for optagelse/i)).toBeVisible();
+    await expect(page.getByText(/ingen garanti for optagelse/i).first()).toBeVisible();
     await expect(page.getByText("Kvote 1 opfyldt")).toHaveCount(0);
-    await page.goto("/sammenlign?a=10234&b=10318");
+    await page.goto("/sammenlign?a=10234&b=10318&gpa=9.5");
     await expect(page.getByText("På eller over kvotienten i 2026")).toBeVisible();
     await expect(page.getByText("Ikke fundet i 2026-kilden")).toBeVisible();
     await expect(page.getByText("Adgangssnit opfyldt")).toHaveCount(0);
@@ -41,6 +41,22 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     await expect(page.getByText("DATASTATUS & BEGRÆNSNINGER")).toBeVisible();
     await expect(page.getByText("MODELBASERET EVIDENS & METODE")).toHaveCount(0);
     expect(hydrationErrors).toEqual([]);
+  });
+
+  test("ukontrolleret katalogfelt vises ikke som by i sammenligning eller strukturdata", async ({ page }) => {
+    await page.goto('/sammenlign?a=50016&b=10234');
+    await expect(page.getByText('Uddannelsessted & KOT')).toBeVisible();
+    await expect(page.locator('main')).not.toContainText(/jordemoder\s*•\s*KOT/i);
+    await page.goto('/uddannelse/50016');
+    const data = await page.locator('script[type="application/ld+json"]').allTextContents();
+    expect(data.join(' ')).not.toMatch(/"addressLocality"\s*:\s*"jordemoder"/i);
+  });
+
+  test("reduceret bevægelse respekteres", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto('/');
+    const duration = await page.getByRole('button', { name: 'Del din søgning' }).evaluate((element) => getComputedStyle(element).transitionDuration);
+    expect(duration.split(',').every((part) => parseFloat(part) <= 0.00001)).toBe(true);
   });
 
   for (const route of KEY_ROUTES) {
@@ -75,7 +91,7 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     await page.keyboard.press("Enter");
     await expect(page.locator("#main-content")).toBeFocused();
 
-    await page.getByRole("button", { name: "Del dit match" }).click();
+    await page.getByRole("button", { name: "Del din søgning" }).click();
     const dialog = page.getByRole("dialog", { name: "Del din søgning" });
     await expect(dialog).toBeVisible();
     await expect(page.getByRole("button", { name: "Luk deling" })).toBeFocused();

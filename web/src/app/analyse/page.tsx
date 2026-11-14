@@ -48,7 +48,7 @@ export default function AIInsightsPage() {
             Seneste tilføjelse · {AI_RESEARCH_UPDATED_AT}
           </span>
           <h1 className="font-display text-4xl font-bold tracking-tight text-[#12172B]">
-            AI Insights til dit uddannelsesvalg
+            AI-analyse til dit uddannelsesvalg
           </h1>
           <p className="text-sm leading-relaxed text-[#545D71]">
             Hvad ved vi faktisk om AI og arbejde — og hvad betyder det for dig? Her får du nye tal med

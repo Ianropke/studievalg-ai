@@ -11,8 +11,8 @@ export function Header() {
     { label: "Toplister", href: "/lister/top-10-mest-ai-robuste-uddannelser" },
     { label: "Guides", href: "/guides" },
     { label: "Sammenlign", href: "/sammenlign" },
-    { label: "AI Insights", href: "/analyse" },
-    { label: "Evidens", href: "/evidens" },
+    { label: "AI-analyse", href: "/analyse" },
+    { label: "Kilder og metode", href: "/evidens" },
   ];
 
   return (
@@ -46,7 +46,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded ${
+                className={`inline-flex min-h-11 items-center transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded ${
                   isActive
                     ? "text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold"
                     : "text-[#545D71] hover:text-[#12172B]"

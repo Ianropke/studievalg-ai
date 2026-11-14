@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { PrivacyAwareTelemetry } from "@/components/PrivacyAwareTelemetry";
 import { Footer } from "@/components/Footer";
 import { DEFAULT_SOCIAL_IMAGE, DEFAULT_SOCIAL_IMAGE_URL } from "@/lib/siteMetadata";
 import "./globals.css";
@@ -28,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://uddannelsesindsigt.com"),
   title: "Find uddannelse efter snit og AI | Uddannelsesindsigt",
   description:
-    "Søg i 1.413 danske uddannelsestilbud med ældre katalogtal og et valgfrit, tydeligt markeret AI-perspektiv.",
+    "Søg i 1.413 danske uddannelsestilbud med historiske optagelsestal fra 2026, hvor de er dokumenteret, og et valgfrit AI-perspektiv.",
   keywords: [
     "uddannelsesindsigt",
     "studievalg",
@@ -96,8 +95,7 @@ export default function RootLayout({
       <body className="bg-[#F7F8FA] text-[#12172B] antialiased font-sans">
         {children}
         <Footer />
-        <Analytics />
-        <SpeedInsights />
+        <PrivacyAwareTelemetry />
       </body>
     </html>
   );
