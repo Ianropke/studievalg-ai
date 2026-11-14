@@ -11,10 +11,28 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await page.goto('/');
   });
 
-  test('E2E-01: Forside indlæser korrekt med Nordisk Myndigheds-UI og top navigation', async ({ page }) => {
+  test('E2E-01: Enkel forside med søgeforslag og forklaringer nederst', async ({ page }) => {
     await expect(page).toHaveTitle(/Uddannelsesindsigt/i);
     await expect(page.locator('h1')).toContainText('Hvilken uddannelse');
-    await expect(page.getByText(/KOT-optaget 2026 \(delvis dækning\)/).first()).toBeVisible();
+    await expect(page.getByTestId('program-card').first()).toContainText('Administrationsøkonom, Horsens');
+    await page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' }).fill('13255');
+    await expect(page.getByTestId('program-card')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Nulstil og vis alle uddannelser' }).click();
+    await expect(page.locator('main')).not.toContainText(/ikke verificeret|Ikke fundet i 2026-kilden|model-\/provenansstatus/);
+    await expect(page.getByRole('heading', { name: 'Hvad er du nysgerrig på?' })).toBeVisible();
+    await expect(page.locator('#om-tallene details').first()).not.toHaveAttribute('open', '');
+    await page.getByRole('button', { name: 'Software ↗' }).click();
+    await expect(page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' })).toHaveValue('software');
+    await expect(page.getByTestId('program-card').first()).toContainText(/software|datalogi|computer/i);
+    await page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)').fill('9,5');
+    await expect(page).toHaveURL(/gpa=9\.5/);
+    const searchUrl = page.url();
+    await page.getByRole('button', { name: 'Om optagelsestal fra 2026' }).click();
+    await expect(page).toHaveURL(searchUrl);
+    await expect(page.getByRole('textbox', { name: 'Søg efter uddannelse eller erhverv' })).toHaveValue('software');
+    await expect(page.getByLabel('Dit gymnasiale gennemsnit (kvote 1)')).toHaveValue('9,5');
+    await page.getByText('Sådan læser du tallene', { exact: true }).click();
+    await expect(page.locator('#om-tallene')).toContainText('ikke et fast krav eller en garanti');
   });
 
   test('E2E-02: Søgning på "læge" placerer Medicin som #1 match', async ({ page }) => {
@@ -35,9 +53,9 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(page.getByText(/Indtast dit snit for at sammenligne kvotienter/)).toBeVisible();
     await gpa.fill('9,5');
     await expect(page.getByLabel('Sortér resultater')).toHaveValue('closest');
-    await expect(page.getByRole('heading', { name: /Lige uden for rækkevidde/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Uden numerisk kvotient/ })).toBeVisible();
-    const nearSection = page.getByRole('region', { name: /Lige uden for rækkevidde/ });
+    await expect(page.getByRole('heading', { name: /Op til 1,0 over dit snit/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Andre optagelsesformer/ })).toBeVisible();
+    const nearSection = page.getByRole('region', { name: /Op til 1,0 over dit snit/ });
     await expect(nearSection.getByTestId('program-card')).toHaveCount(3);
     await nearSection.getByRole('button', { name: /Vis flere/ }).click();
     await expect(nearSection.getByTestId('program-card')).toHaveCount(13);
@@ -163,10 +181,10 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
 
     const initialIds = await firstThreeIds();
     await expect(page.getByTestId('include-ai-models')).not.toBeChecked();
-    await expect(page.getByTestId('ai-toggle-status')).toContainText('alle 1.413 uddannelser');
+    await expect(page.getByTestId('ai-toggle-status')).toContainText('alle 879 uddannelser');
     await expect(page.getByTestId('ai-model-indicator')).toHaveCount(0);
     await page.getByTestId('include-ai-models').check();
-    await expect(page.getByTestId('ai-toggle-status')).toContainText('569 af 1.413 uddannelser dækket');
+    await expect(page.getByTestId('ai-toggle-status')).toContainText('410 af 879 uddannelser dækket');
     await expect.poll(firstThreeIds).not.toEqual(initialIds);
     await expect(page.locator('[data-testid="program-card"]').first().getByTestId('ai-model-indicator')).toBeVisible();
   });
@@ -194,7 +212,7 @@ test.describe('AI-Studievalgsplatform Dashboard E2E Tests', () => {
     await expect(toggle).toBeFocused();
     await page.keyboard.press('Space');
     await expect(toggle).toBeChecked();
-    await expect(page.getByTestId('ai-toggle-status')).toContainText('569 af 1.413 uddannelser dækket');
+    await expect(page.getByTestId('ai-toggle-status')).toContainText('410 af 879 uddannelser dækket');
   });
 
   test('E2E-05: Søgning opdaterer resultater uden manuel genindlæsning', async ({ page }) => {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { PrivacyAwareTelemetry } from "@/components/PrivacyAwareTelemetry";
+import { BROWSE_COVERAGE } from "@/lib/browseCatalog";
 import { Footer } from "@/components/Footer";
 import { DEFAULT_SOCIAL_IMAGE, DEFAULT_SOCIAL_IMAGE_URL } from "@/lib/siteMetadata";
 import "./globals.css";
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://uddannelsesindsigt.com"),
   title: "Find uddannelse efter snit og AI | Uddannelsesindsigt",
   description:
-    "Søg i 1.413 danske uddannelsestilbud med historiske optagelsestal fra 2026, hvor de er dokumenteret, og et valgfrit AI-perspektiv.",
+    `Udforsk ${BROWSE_COVERAGE.programmeCount} danske uddannelsestilbud fra optaget i 2026. Sammenlign dine favoritter og find din retning.`,
   keywords: [
     "uddannelsesindsigt",
     "studievalg",
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   publisher: "Uddannelsesindsigt",
   openGraph: {
     title: "Hvilken uddannelse passer til dit snit og dine prioriteter?",
-    description: "Søg i 1.413 uddannelsestilbud med ældre katalogtal og et valgfrit AI-perspektiv.",
+    description: `Udforsk ${BROWSE_COVERAGE.programmeCount} uddannelsestilbud. Find nye muligheder og sammenlign dine favoritter.`,
     url: "https://uddannelsesindsigt.com",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Find uddannelse efter snit og AI",
-    description: "Sammenlign danske uddannelser med ældre katalogtal og tydeligt markerede modelestimater.",
+    description: "Find din retning. Udforsk danske uddannelser og sammenlign dine favoritter.",
     images: [DEFAULT_SOCIAL_IMAGE_URL],
   },
   alternates: {

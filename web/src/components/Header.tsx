@@ -7,7 +7,7 @@ export function Header() {
   const pathname = usePathname();
 
   const navItems = [
-    { label: "Matchværktøj", href: "/" },
+    { label: "Find uddannelse", href: "/" },
     { label: "Toplister", href: "/lister/top-10-mest-ai-robuste-uddannelser" },
     { label: "Guides", href: "/guides" },
     { label: "Sammenlign", href: "/sammenlign" },
@@ -33,7 +33,7 @@ export function Header() {
             <Link href="/" className="font-bold text-sm text-[#12172B] tracking-tight hover:underline font-display">
               Uddannelsesindsigt
             </Link>
-            <p className="text-[10px] text-[#545D71]">Uddannelseskatalog og tydeligt markerede AI-modelestimater</p>
+            <p className="text-[10px] text-[#545D71]">Find din retning. Udforsk dine muligheder.</p>
           </div>
         </div>
         <nav aria-label="Hovednavigation" className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto max-w-full pb-1 sm:pb-0">

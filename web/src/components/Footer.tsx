@@ -18,7 +18,7 @@ export function Footer() {
               <span className="font-bold text-sm text-[#12172B] font-display">Uddannelsesindsigt</span>
             </div>
             <p className="leading-relaxed">
-              Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Du kan søge i hele kataloget og selv vælge et modelbaseret perspektiv på, hvordan AI kan ændre opgaver i forskellige fag.
+              Uddannelsesindsigt hjælper dig med at vælge uddannelse — helt uafhængigt og uden reklamer. Du kan udforske uddannelsestilbud fra optaget i 2026 og selv vælge et modelbaseret perspektiv på, hvordan AI kan ændre opgaver i forskellige fag.
             </p>
             <p className="leading-relaxed">
               Platformen vurderer ikke mennesker eller deres fremtid. AI-perspektivet er et opgavebaseret modelestimat for de uddannelser, der har en dokumenteret modelkobling. Det er slået fra som standard og bygger på en offentlig, deterministisk metode.

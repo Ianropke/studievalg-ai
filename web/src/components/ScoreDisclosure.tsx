@@ -7,17 +7,17 @@ interface ScoreDisclosureProps {
 }
 
 const STATUS_LABELS: Record<EvidenceStatus, string> = {
-  OBSERVED: "Observeret data",
-  DERIVED: "Afledt indikator",
-  CROSSWALK: "Crosswalk-estimat",
+  OBSERVED: "Tal fra kilden",
+  DERIVED: "Beregnet ud fra kildetal",
+  CROSSWALK: "Modelestimat",
   MODEL: "Modelestimat",
-  PROVENANCE_REQUIRED: "Kilde kræver dokumentation",
-  UNKNOWN: "Ukendt datastatus"
+  PROVENANCE_REQUIRED: "Estimat mangler",
+  UNKNOWN: "Oplysninger mangler"
 };
 
 const METRIC_LABELS: Record<string, string> = {
-  automation_risk: "AI-opgaveeksponering",
-  augmentation_potential: "AI-augmentationspotentiale",
+  automation_risk: "Beregnet AI-eksponering",
+  augmentation_potential: "Beregnet potentiale for AI-hjælp",
 };
 
 function statusLabel(status?: EvidenceStatus): string {
@@ -36,11 +36,11 @@ function metricStatus(scores: NormalizedScores, metric: string): EvidenceStatus 
 }
 
 function metricStatusNote(status: EvidenceStatus): string {
-  if (status === "PROVENANCE_REQUIRED") return "Intet offentligt estimat; udelukket fra AI-ranking";
-  if (status === "CROSSWALK") return "US occupational data via dokumenteret crosswalk/model";
+  if (status === "PROVENANCE_REQUIRED") return "Vi viser endnu ikke et AI-estimat";
+  if (status === "CROSSWALK") return "Beregnet ud fra amerikanske data om arbejdsopgaver";
   if (status === "MODEL") return "Modelbaseret indikator";
   if (status === "DERIVED") return "Afledt af dokumenterede observationer";
-  if (status === "OBSERVED") return "Observeret datakilde";
+  if (status === "OBSERVED") return "Tal fra kilden";
   return statusLabel(status);
 }
 
@@ -54,25 +54,26 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
     .join(" · ");
   const aiStatus = metricStatus(scores, "automation_risk");
   const metricRows = [
-    { key: "automation_risk", label: "AI-opgaveeksponering" },
-    { key: "augmentation_potential", label: "AI-augmentationspotentiale" },
+    { key: "automation_risk", label: "Beregnet AI-eksponering" },
+    { key: "augmentation_potential", label: "Beregnet potentiale for AI-hjælp" },
   ];
 
   return (
-    <section aria-label="Model- og kilde-status" className="rounded-lg border border-[#D8DBE4] bg-[#F7F8FA] px-3 py-2 text-[11px] text-[#545D71]">
+    <details aria-label="Om AI-estimatet" className="rounded-lg border border-[#D8DBE4] bg-[#F7F8FA] px-3 py-2 text-[11px] text-[#545D71]">
+      <summary className="min-h-11 cursor-pointer content-center font-semibold text-[#12172B]">Om AI-estimatet og kilderne</summary>
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="rounded-full border border-[#2563EB]/20 bg-[#EFF6FF] px-2 py-0.5 font-bold text-[#1D4ED8]">
-          {scores.is_baseline_estimate ? "Ingen O*NET-programkobling" : statusLabel(aiStatus)}
+          {scores.is_baseline_estimate ? "AI-estimat mangler" : statusLabel(aiStatus)}
         </span>
-        <span className="font-semibold">Datakvalitet: {qualityLabel(scores)}</span>
-        <span className="font-semibold">AI-ranking: {scores.ranking_eligible.ai ? "kan tilvælges" : "ikke tilgængelig"}</span>
+        <span className="font-semibold">Grundlagets sikkerhed: {qualityLabel(scores)}</span>
+        <span className="font-semibold">AI-perspektiv: {scores.ranking_eligible.ai ? "kan tilvælges" : "ikke tilgængelig"}</span>
         <span className="text-[#667085]">Model opdateret: {DATA_STATUS.scoring.updatedLabel}</span>
       </div>
       <p className="mt-1 leading-relaxed">
-        AI-resiliens er et model-/crosswalkindeks, ikke en sandsynlighed for automatisering eller en prognose for arbejdsløshed.
+        AI-estimatet handler om arbejdsopgaver i faget. Det fortæller ikke, om du får et job, eller om et helt fag forsvinder.
         {scores.provenance.automation_risk.dataset_version === "O*NET 31.0" && scores.ranking_eligible.ai
-          ? " Denne uddannelse bruger amerikanske O*NET 31.0 Work Activities via O*NET–ESCO/ISCO/DISCO og en programkobling; det er ikke dansk observeret jobdata."
-          : " Denne uddannelse mangler en defensibel O*NET 31.0-programkobling; der vises derfor intet AI-estimat, og uddannelsen kan ikke indgå i AI-ranking."}
+          ? " Beregningen bygger på amerikanske data om arbejdsopgaver fra O*NET 31.0, som er koblet til uddannelsen. Den måler ikke danske dimittenders jobmuligheder."
+          : " Vi har endnu ikke tilstrækkeligt grundlag til at beregne et AI-estimat for denne uddannelse."}
       </p>
       {!compact && (
         <>
@@ -88,9 +89,9 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
               );
             })}
           </div>
-          <p className="mt-1 leading-relaxed">Metrikstatus: {metricStatuses}</p>
+          <p className="mt-1 leading-relaxed">Beregningens dele: {metricStatuses}</p>
           <p className="mt-1 leading-relaxed text-[#667085]">
-            Scoringsmodel: {DATA_STATUS.scoring.methodologyVersion} · Katalog: {DATA_STATUS.scoring.datasetVersion}
+            Modelversion: {DATA_STATUS.scoring.methodologyVersion} · Dataversion: {DATA_STATUS.scoring.datasetVersion}
           </p>
         </>
       )}
@@ -99,6 +100,6 @@ export function ScoreDisclosure({ scores, compact = false }: ScoreDisclosureProp
           Kildegrundlag: {sources.join(" · ")}
         </p>
       )}
-    </section>
+    </details>
   );
 }

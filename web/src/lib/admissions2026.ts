@@ -25,8 +25,8 @@ export function getAdmission2026(program: AdmissionProgram): Admission2026 {
 }
 
 export function admission2026Label(admission: Admission2026): string {
-  if (admission.kind === "identity_conflict") return "Navn afviger fra 2026-kilden";
-  if (admission.kind === "not_in_source") return "Ikke fundet i 2026-kilden";
+  if (admission.kind === "identity_conflict") return "Adgangstal mangler";
+  if (admission.kind === "not_in_source") return "Adgangstal mangler";
   if (admission.record.threshold !== null) return admission.record.threshold.toLocaleString("da-DK", { maximumFractionDigits: 1 });
   return admission.record.kvote1_raw;
 }
@@ -37,5 +37,5 @@ export function admission2026Threshold(admission: Admission2026): number | null 
 
 export function admission2026Institution(program: AdmissionProgram): string {
   const admission = getAdmission2026(program);
-  return admission.kind === "matched" ? admission.record.institution : "Uddannelsessted ikke verificeret";
+  return admission.kind === "matched" ? admission.record.institution : "Uddannelsessted ikke oplyst";
 }

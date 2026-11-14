@@ -11,6 +11,7 @@ import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { normalizeProgramName } from "@/lib/programName";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
+import { selectBrowsePrograms } from "@/lib/browseCatalog";
 import { admission2026Institution, admission2026Label, getAdmission2026 } from "@/lib/admissions2026";
 
 export async function generateStaticParams() {
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const robust = enriched.ai_resilience;
   const aiDescription = enriched.ranking_eligible.ai
     ? `${aiBand(robust)} AI-robusthed i et opgavebaseret O*NET 31.0-modelestimat.`
-    : "AI-modelestimat er ikke tilgængeligt, fordi en defensibel programkobling mangler.";
+    : "Vi har endnu ikke et AI-estimat for denne uddannelse.";
 
   return {
     title: `${title} — adgangskvotient og AI-perspektiv | Uddannelsesindsigt`,
@@ -74,6 +75,11 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
   const robustScore = enriched.ai_resilience;
   const aiEligible = enriched.ranking_eligible.ai;
   const roundedRobustScore = roundAiScore(robustScore);
+  const isArchived = getAdmission2026(prog).kind !== "matched";
+  const relatedPrograms = selectBrowsePrograms(getAllPrograms())
+    .filter((program) => String(program.kot_nr) !== kot && program.udbud_titel && normalizeProgramName(program.udbud_titel) === normalizeProgramName(title))
+    .map((program) => ({ program, slug: createProgramSlug(program) }))
+    .slice(0, 4);
 
   // Schema.org Structured Data
   const jsonLd = {
@@ -144,6 +150,8 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           <span className="font-medium text-[#12172B]">{title}</span>
         </nav>
 
+        {isArchived && <aside className="rounded-xl border border-[#D8DBE4] bg-white p-5 text-sm text-[#545D71]"><strong className="block text-[#12172B]">Et ældre uddannelsesopslag</strong><p className="mt-1">Vi har ikke optagelsestal fra 2026 for dette opslag. <Link href="/" className="font-semibold text-[#2563EB] underline">Find uddannelser i søgningen</Link>, eller spørg uddannelsesstedet om dine muligheder.</p></aside>}
+
         {/* Hero Banner Card */}
         <article className="border border-[#E7E9EF] bg-[#FFFFFF] rounded-2xl p-6 lg:p-8 card-shadow space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 pb-6 border-b border-[#E7E9EF]">
@@ -176,7 +184,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             <p className="text-sm font-semibold text-[#12172B] leading-relaxed">
               {aiEligible
                 ? `${aiBand(robustScore)} AI-robusthed (ca. ${roundedRobustScore}/100). Estimatet beskriver opgavernes mulige møde med AI og er ikke en prognose for uddannelsens værdi, ledighed eller din fremtid.`
-                : "Der vises ikke et AI-estimat for denne uddannelse, fordi den endnu ikke har en defensibel programkobling til O*NET 31.0. Manglende data er ikke det samme som lav AI-robusthed."}
+                : "Vi har endnu ikke et AI-estimat for denne uddannelse. Du kan stadig undersøge indhold, studieliv og adgangskrav hos uddannelsesstedet."}
             </p>
           </div>
 
@@ -185,7 +193,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B7A57]">AI-perspektiv</p>
                 <h2 className="mt-1 text-lg font-bold text-[#12172B]">{aiEligible ? `${aiBand(robustScore)} modelestimat` : "Ikke tilgængeligt"}</h2>
-                <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#545D71]">{aiEligible ? `Baseret på amerikanske O*NET 31.0-opgavedata via en program-crosswalk. Dækning på hele siden: ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser.` : "Uddannelsen vises stadig i kataloget. Kontrollér aktuelle adgangskrav og optagelsestal hos uddannelsesstedet."}</p>
+                <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#545D71]">{aiEligible ? `En beregnet vurdering af, hvordan AI kan påvirke arbejdsopgaver i faget. Læs mere om beregningen nedenfor.` : "Uddannelsen vises stadig i kataloget. Kontrollér aktuelle adgangskrav og optagelsestal hos uddannelsesstedet."}</p>
               </div>
               {aiEligible && <span className="w-fit rounded-full border border-[#0F9D6E]/30 bg-white px-4 py-2 text-sm font-bold text-[#0B7A57]">ca. {roundedRobustScore}/100</span>}
             </div>
@@ -216,7 +224,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
 
           {/* RAG Evidence & Method Explanation */}
           <div className="space-y-4 pt-4 border-t border-[#E7E9EF]">
-            <h3 className="text-base font-bold text-[#12172B]">Evidensforklaring & Modelanalyse</h3>
+            <h3 className="text-base font-bold text-[#12172B]">Sådan skal du læse tallene</h3>
             <p className="text-xs text-[#545D71] leading-relaxed">
               Kvote 1 ved optaget i 2026 for <strong className="text-[#12172B]">{title}</strong>: <strong className="text-[#12172B]">{kv}</strong>. Kilden anvendes kun ved match på KOT-nummer og navn. Oplysninger om ledige pladser er historiske; kontrollér aktuelle optagelsestal og adgangskrav hos uddannelsesstedet. {aiEligible ? `AI-perspektivet er et modelestimat i kategorien “${aiBand(robustScore)}”, afrundet til ca. ${roundedRobustScore}/100.` : "Der er ikke tilstrækkeligt grundlag for et programspecifikt AI-estimat."}
             </p>
@@ -244,14 +252,12 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           <div className="pt-6 border-t border-[#E7E9EF] space-y-4">
             <div>
               <h3 className="text-base font-bold text-[#12172B]">Samme uddannelse andre steder</h3>
-              <p className="text-xs text-[#545D71]">Andre KOT-udbud med samme normaliserede uddannelsesnavn — ikke et modelbaseret lighedsforslag.</p>
+              <p className="text-xs text-[#545D71]">Se, hvor du ellers kan læse uddannelsen.</p>
             </div>
 
+            {relatedPrograms.length === 0 && <p className="text-sm text-[#545D71]">Vi har ikke andre steder at vise for denne uddannelse. Du kan finde andre muligheder i søgningen.</p>}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {getAllPrograms()
-                .filter((p) => createProgramSlug(p) !== slug && p.udbud_titel && normalizeProgramName(p.udbud_titel) === normalizeProgramName(title))
-                .map((p) => ({ program: p, slug: createProgramSlug(p) }))
-                .slice(0, 4)
+              {relatedPrograms
                 .map(({ program: simProg, slug: simSlug }) => (
                   <Link
                     key={simSlug}
@@ -273,10 +279,10 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           {/* Call to Action Button */}
           <div className="pt-6 border-t border-[#E7E9EF] text-center">
             <Link
-              href={`/?q=${encodeURIComponent(title)}`}
+              href={isArchived ? "/" : `/?q=${encodeURIComponent(title)}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow"
             >
-              Find og sammenlign uddannelsen i søgeværktøjet →
+              {isArchived ? "Udforsk andre uddannelser →" : "Find og sammenlign uddannelsen i søgeværktøjet →"}
             </Link>
           </div>
         </article>
