@@ -18,17 +18,21 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     const hydrationErrors: string[] = [];
     page.on("pageerror", (error) => { if (/hydration/i.test(error.message)) hydrationErrors.push(error.message); });
     await page.goto("/?q=bioteknologi");
-    await expect(page.getByText(/ingen garanti for optagelse/i).first()).toBeVisible();
+    await page.getByText("Sådan læser du tallene", { exact: true }).click();
+    await expect(page.locator("#om-tallene")).toContainText("ikke et fast krav eller en garanti");
     await expect(page.getByText("Kvote 1 opfyldt")).toHaveCount(0);
     await page.goto("/sammenlign?a=10234&b=10318&gpa=9.5");
     await expect(page.getByText("På eller over kvotienten i 2026")).toBeVisible();
-    await expect(page.getByText("Ikke fundet i 2026-kilden")).toBeVisible();
+    await expect(page.getByText("Adgangstal mangler")).toBeVisible();
     await expect(page.getByText("Adgangssnit opfyldt")).toHaveCount(0);
     await page.goto("/uddannelse/10318-finsk-koebenhavn-k-studiestart-sommerstart");
     await expect(page.getByText("Historisk optag · kontrollér aktuelle optagelsestal og ledige pladser")).toBeVisible();
+    await expect(page.getByText("Et ældre uddannelsesopslag", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Udforsk andre uddannelser →" })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "Find og sammenlign uddannelsen i søgeværktøjet →" })).toHaveCount(0);
     await expect(page.getByText("Alle optaget", { exact: true })).toHaveCount(0);
     await expect(page.getByText(/kan sammenlignes på observerede optagelsesdata/)).toHaveCount(0);
-    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /2026.*ikke fundet/i);
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /2026.*Adgangstal mangler/i);
     await page.goto("/uddannelse/10234-bioteknologi-frederiksberg-c-studiestart-sommerstart");
     await expect(page.locator('meta[property="og:description"]')).toHaveAttribute("content", /2026.*7,2/);
     await page.goto("/evidens");
@@ -112,7 +116,7 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
   test("SEO- og agent-discoveryflader er komplette og kanoniske", async ({ page, request }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/Find uddannelse.*Uddannelsesindsigt/i);
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /1\.413 danske/);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /879 danske/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://uddannelsesindsigt.com");
 
     const [robots, sitemap, llms, llmsFull] = await Promise.all([

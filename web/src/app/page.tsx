@@ -9,13 +9,13 @@ import { getEnrichedScores } from "@/lib/domainScoring";
 import type { NormalizedScores, RawProgramScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
 import { formatProgramTitle, formatCityName } from "@/lib/textUtils";
-import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } from "@/lib/shareMatch";
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
 import { admissionGroup, compareResults, formatDanishNumber, marginLabel, parseGpaInput, type ResultSort } from "@/lib/resultSorting";
 import { getBrowserStorageAdapter, readSavedPrograms, removeProgram, saveProgram } from "@/lib/savedPrograms";
 import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
+import { browsePrograms, BROWSE_COVERAGE } from "@/lib/browseCatalog";
 
 // Synonymer for søgning & udvidet erhvervssprog
 const SYNONYM_MAP: Record<string, string[]> = {
@@ -114,7 +114,7 @@ const UNIVERSITY_OPTIONS = [
   ["dtu", "Danmarks Tekniske Universitet (DTU)"], ["au", "Aarhus Universitet (AU)"],
   ["cbs", "Copenhagen Business School (CBS)"], ["sdu", "Syddansk Universitet (SDU)"],
   ["aau", "Aalborg Universitet (AAU)"], ["ruc", "Roskilde Universitet (RUC)"],
-  ["itu", "IT-Universitetet i København (ITU)"], ["professionshojskole", "Professionshøjskoler og erhvervsakademier (delvis dækning)"],
+  ["itu", "IT-Universitetet i København (ITU)"], ["professionshojskole", "Professionshøjskoler og erhvervsakademier"],
 ] as const;
 
 function normalizeSearchText(text: string): string {
@@ -146,7 +146,7 @@ function AiModelIndicator({ score, eligible }: { score: number; eligible: boolea
     return (
       <div className="rounded-lg border border-[#D8DBE4] bg-[#F7F8FA] p-4 text-xs text-[#545D71]">
         <strong className="block text-[#12172B]">AI-perspektiv ikke tilgængeligt</strong>
-        Vi mangler et tilstrækkeligt grundlag for at koble uddannelsen til arbejdsopgaver i O*NET 31.0.
+        Vi har endnu ikke et AI-estimat for denne uddannelse.
       </div>
     );
   }
@@ -161,7 +161,7 @@ function AiModelIndicator({ score, eligible }: { score: number; eligible: boolea
         </div>
         <span className="rounded-full border border-[#0F9D6E]/30 bg-white px-3 py-1 text-xs font-bold text-[#0B7A57]">ca. {roundAiScore(score)}/100</span>
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-[#545D71]">Modelestimat baseret på arbejdsopgaver og koblinger mellem fag — ikke en jobprognose eller garanti.</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#545D71]">Et beregnet perspektiv på, hvordan AI kan påvirke arbejdsopgaverne i faget.</p>
     </div>
   );
 }
@@ -303,7 +303,7 @@ export default function Dashboard() {
       }
     });
     const exactMajors = EXACT_MAJOR_MAP[rawQuery] || EXACT_MAJOR_MAP[normalizedQuery] || [];
-    let list = allPrograms.map((prog) => {
+    let list = (browsePrograms as unknown as ProgramItem[]).map((prog) => {
       const admission = getAdmission2026(prog);
       const kvNum = admission2026Threshold(admission);
       const meetsGpa = kvNum !== null && gpa !== null && gpa >= kvNum;
@@ -412,9 +412,9 @@ export default function Dashboard() {
 
   const groupLabels = {
     at_or_above: "På eller over kvotienten i 2026",
-    near_above: "Lige uden for rækkevidde · op til 1,0 over dit snit",
+    near_above: "Op til 1,0 over dit snit",
     further_above: "Mere end 1,0 over dit snit",
-    unknown: "Uden numerisk kvotient i 2026",
+    unknown: "Andre optagelsesformer",
     all: "Alle resultater",
   } as const;
   const showGroups = sort === "closest" && gpa !== null && !deferredSearchQuery.trim();
@@ -443,58 +443,51 @@ export default function Dashboard() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <Header />
       <main id="main-content" tabIndex={-1} className={`max-w-5xl mx-auto px-6 py-10 space-y-10 ${selectedForComparison.length > 0 ? "pb-32" : ""}`}>
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F6EE] text-[#0B7A57] border border-[#0F9D6E]/20">
-            <span className="w-2 h-2 rounded-full bg-[#0F9D6E]"></span>
-            <span>Optagelsesdata {DATA_STATUS.catalogue.admissionsUpdatedLabel} • {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#12172B] leading-tight font-display">
-            Hvilken uddannelse <br className="hidden sm:inline" />
-            vil du <span className="border-b-4 border-[#0F9D6E] pb-1">undersøge?</span>
-          </h1>
-          <p className="text-sm text-[#545D71] max-w-lg mx-auto font-normal leading-relaxed">
-            Søg i uddannelseskataloget, sammenlign kvotienter fra optaget i 2026, og vælg selv om tydeligt markerede AI-modelestimater skal indgå.
-          </p>
-        </div>
+        <section className="overflow-hidden rounded-[2rem] bg-[#E3F6EE] px-6 py-9 text-center sm:px-10 sm:py-12">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#0B7A57]">Dit næste kapitel starter her</p>
+          <h1 className="mx-auto mt-4 max-w-2xl text-4xl font-bold tracking-tight leading-[1.08] font-display sm:text-6xl">Hvilken uddannelse<br /> <span className="text-[#0B7A57]">er noget for dig?</span></h1>
+          <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-[#39594F]">Find nye muligheder. Sammenlign dine favoritter.<br className="hidden sm:block" /> Og bliv klogere på, hvad du har lyst til.</p>
+          <button type="button" onClick={() => document.getElementById("uddannelsessoegning")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="mt-6 inline-flex min-h-11 items-center rounded-full bg-[#12172B] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#243E35] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Find din retning ↓</button>
+          <p className="mt-5 text-xs text-[#39594F]">{BROWSE_COVERAGE.programmeCount.toLocaleString("da-DK")} uddannelsestilbud at gå på opdagelse i · Ingen konto nødvendig</p>
+        </section>
 
-        <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-6 card-shadow space-y-6 max-w-3xl mx-auto">
+        <section id="uddannelsessoegning" aria-labelledby="search-heading" className="scroll-mt-40 bg-white border border-[#E7E9EF] rounded-2xl p-5 sm:p-7 card-shadow space-y-5 max-w-3xl mx-auto">
+          <div><h2 id="search-heading" className="text-xl font-bold font-display">Hvad er du nysgerrig på?</h2><p className="mt-1 text-sm text-[#545D71]">Start med et fag, et drømmejob eller noget, du interesserer dig for.</p></div>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none"><SearchIcon /></div>
+            <input type="text" maxLength={120} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(10); }} aria-label="Søg efter uddannelse eller erhverv" placeholder="Fx psykologi, læge eller software" className="w-full min-h-14 bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-3 text-base text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2" aria-label="Forslag til søgninger"><span className="mr-1 text-xs text-[#545D71]">Prøv fx</span>{["Psykologi", "Software", "Design", "Klima"].map((topic) => <button key={topic} type="button" onClick={() => { setSearchQuery(topic.toLowerCase()); setVisibleCount(10); }} className="min-h-11 rounded-full bg-[#E3F6EE] px-4 text-xs font-semibold text-[#0B7A57] transition hover:bg-[#CDECDC] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">{topic} ↗</button>)}</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-b border-[#E7E9EF] pb-5">
             <div className="space-y-2">
               <label htmlFor="gpa-input" className="block text-xs font-semibold text-[#12172B]">Dit gymnasiale gennemsnit (kvote 1)</label>
               <input id="gpa-input" type="text" inputMode="decimal" placeholder="Fx 9,5" value={gpaInput} onChange={(event) => { setGpaInput(event.target.value); setVisibleCount(10); }} onBlur={() => { if (gpa !== null) setGpaInput(formatDanishNumber(gpa)); }} aria-invalid={gpaInvalid} aria-describedby="gpa-help" className="w-full min-h-11 bg-white border border-[#D8DBE4] rounded-lg px-3 py-2 text-sm text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]" />
-              <p id="gpa-help" className={`text-xs leading-relaxed ${gpaInvalid ? "text-[#B45309]" : "text-[#545D71]"}`}>{gpaInvalid ? "Skriv et snit mellem 2,0 og 12,0 med komma eller punktum." : "Indtast dit eget snit for at sammenligne med optaget i 2026."}</p>
+              <p id="gpa-help" className={`text-xs leading-relaxed ${gpaInvalid ? "text-[#B45309]" : "text-[#545D71]"}`}>{gpaInvalid ? "Skriv et snit mellem 2,0 og 12,0 med komma eller punktum." : "Valgfrit · sammenlign dit snit med optaget i 2026."}</p>
               {gpa !== null && <><label htmlFor="gpa-slider" className="block text-xs text-[#545D71]">Justér dit snit: {formatDanishNumber(gpa)}</label><input id="gpa-slider" type="range" min="2" max="12" step="0.1" value={gpa} onChange={(event) => { setGpaInput(formatDanishNumber(Number(event.target.value))); setVisibleCount(10); }} aria-label={`Gennemsnit: ${formatDanishNumber(gpa)}`} className="w-full h-6 bg-transparent cursor-pointer accent-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2" /></>}
             </div>
             <div className="hidden space-y-2 sm:block">
               <label htmlFor="university-select" className="text-xs font-semibold text-[#12172B] block">Vælg universitet eller uddannelsessted</label>
               <select id="university-select" value={selectedUniversity} onChange={(e) => { setSelectedUniversity(e.target.value); setVisibleCount(10); }} className="w-full min-h-11 bg-[#FFFFFF] border border-[#D8DBE4] rounded-lg px-3 py-2 text-xs text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]">
-                {UNIVERSITY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}{value === "all" && !loading ? ` (${allPrograms.length})` : ""}</option>)}
+                {UNIVERSITY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}{value === "all" && !loading ? ` (${BROWSE_COVERAGE.programmeCount})` : ""}</option>)}
               </select>
-              <p className="text-[11px] text-[#545D71]">Ved filter vises kun uddannelser med et verificeret uddannelsessted i 2026-kilden. Professions- og akademifilteret er ikke nødvendigvis komplet.</p>
+
             </div>
             <div className="sm:hidden"><button type="button" onClick={() => filterDialog.current?.showModal()} className="min-h-11 w-full rounded-lg border border-[#D8DBE4] px-3 text-left text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Uddannelsessted: {selectedUniversity === "all" ? "Alle" : UNIVERSITY_LABELS[selectedUniversity] || selectedUniversity} · Vælg filter</button>
               <dialog ref={filterDialog} aria-labelledby="mobile-filter-title" className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-2xl border border-[#D8DBE4] bg-white p-6 text-[#12172B] shadow-xl backdrop:bg-[#12172B]/60 sm:hidden">
                 <div className="flex items-center justify-between gap-3"><h2 id="mobile-filter-title" className="text-lg font-bold">Filtrér efter uddannelsessted</h2><button type="button" onClick={() => filterDialog.current?.close()} aria-label="Luk filtre" className="min-h-11 min-w-11 rounded focus:outline-none focus:ring-2 focus:ring-[#2563EB]">✕</button></div>
                 <label htmlFor="mobile-university-select" className="mt-4 block text-xs font-semibold">Vælg uddannelsessted på mobil</label>
                 <select id="mobile-university-select" value={selectedUniversity} onChange={(event) => { setSelectedUniversity(event.target.value); setVisibleCount(10); }} className="mt-2 min-h-11 w-full rounded-lg border border-[#D8DBE4] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">{UNIVERSITY_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
-                <p className="mt-3 text-xs leading-relaxed text-[#545D71]">Ved filter vises kun uddannelser med et verificeret uddannelsessted i 2026-kilden. Professions- og akademifilteret er ikke nødvendigvis komplet. AI-tilvalget findes på forsiden.</p>
+                <p className="mt-3 text-xs leading-relaxed text-[#545D71]">Vælg et sted, og se dine muligheder.</p>
                 <button type="button" onClick={() => filterDialog.current?.close()} className="mt-5 min-h-11 w-full rounded-xl bg-[#12172B] px-4 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Vis {matchedPrograms.length} uddannelser</button>
               </dialog>
             </div>
           </div>
-          <details className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-xs text-[#92400E]">
-            <summary className="cursor-pointer font-semibold">Sådan læser du tallene</summary>
-            <p className="mt-2"><strong>Kvote 1</strong> er den del af optaget, hvor karaktergennemsnittet bruges i udvælgelsen. En adgangskvotient beskriver et tidligere optag, ikke et fast krav eller en garanti. <strong>KOT-nummeret</strong> er optagelsesområdets nummer i den officielle opgørelse.</p>
-            <p className="mt-2">Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet.</p>
-            <p className="mt-2"><strong>AI-modelestimatet</strong> er en beregnet vurdering, ikke et observeret resultat. Det bygger på amerikanske O*NET-opgavedata og usikre koblinger mellem uddannelser og arbejdsopgaver. AI-robusthed er ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.</p>
-            <span className="mt-1 block">Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status og begrænsninger.</span>
-          </details>
           <div data-testid="ai-model-toggle-panel" className={`rounded-xl border p-4 ${includeAiModels ? "border-[#0F9D6E]/35 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
             <label htmlFor="include-ai-models" className="flex cursor-pointer items-start justify-between gap-4">
               <span>
-                <strong className="flex items-center gap-2 text-sm text-[#12172B]"><SlidersIcon /> Inddrag AI-modelestimater</strong>
+                <strong className="flex items-center gap-2 text-sm text-[#12172B]"><SlidersIcon /> Vis AI-perspektiv</strong>
                 <span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">
-                  Viser kun de {DATA_STATUS.scoring.mappedProgrammeCount.toLocaleString("da-DK")} uddannelser med O*NET 31.0-modeldata. Du kan vælge AI som sortering nedenfor. Standardvisningen søger i hele kataloget.
+                  Viser kun de {BROWSE_COVERAGE.aiProgrammeCount.toLocaleString("da-DK")} uddannelser med AI-modeldata. Beregnede estimater · <button type="button" onClick={() => document.getElementById("om-tallene")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="underline">om modellen</button>.
                 </span>
               </span>
               <input
@@ -507,18 +500,14 @@ export default function Dashboard() {
                 className="mt-0.5 h-5 w-5 shrink-0 accent-[#0F9D6E] focus:outline-none focus:ring-2 focus:ring-[#0F9D6E] focus:ring-offset-2"
               />
             </label>
-            <p aria-live="polite" data-testid="ai-toggle-status" className="mt-3 border-t border-current/10 pt-3 text-xs font-semibold text-[#0B7A57]">
+            <p aria-live="polite" data-testid="ai-toggle-status" className="sr-only">
               {includeAiModels
-                ? `AI er slået til · ${DATA_STATUS.scoring.mappedProgrammeCount.toLocaleString("da-DK")} af ${DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser dækket`
-                : `AI er slået fra · alle ${DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser kan søges`}
+                ? `AI er slået til · ${BROWSE_COVERAGE.aiProgrammeCount.toLocaleString("da-DK")} af ${BROWSE_COVERAGE.programmeCount.toLocaleString("da-DK")} uddannelser dækket`
+                : `AI er slået fra · alle ${BROWSE_COVERAGE.programmeCount.toLocaleString("da-DK")} uddannelser kan søges`}
             </p>
           </div>
-          <div className="pt-2 border-t border-[#E7E9EF] relative">
-            <div className="absolute inset-y-0 left-3 pl-1 flex items-center pointer-events-none pt-2"><SearchIcon /></div>
-            <input type="text" maxLength={120} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(10); }} aria-label="Søg efter uddannelse eller erhverv" placeholder="Søg efter uddannelse eller erhverv (fx 'odontologi', 'læge', 'jura')..." className="w-full min-h-11 bg-[#F7F8FA] border border-[#D8DBE4] rounded-lg pl-9 pr-4 py-2.5 text-xs text-[#12172B] placeholder-[#667085] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]" />
-          </div>
           {(selectedUniversity !== "all" || searchQuery.trim() || includeAiModels) && <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="Aktive filtre"><span className="font-semibold text-[#545D71]">Aktive filtre:</span>{selectedUniversity !== "all" && <button type="button" onClick={() => setSelectedUniversity("all")} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern filter for uddannelsessted">Uddannelsessted: {UNIVERSITY_LABELS[selectedUniversity] || selectedUniversity} ×</button>}{searchQuery.trim() && <button type="button" onClick={() => setSearchQuery("")} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern søgning">Søgning: {searchQuery} ×</button>}{includeAiModels && <button type="button" onClick={() => { setIncludeAiModels(false); if (sort === "ai") setSort("closest"); }} className="min-h-11 rounded-full border border-[#D8DBE4] px-3 focus:outline-none focus:ring-2 focus:ring-[#2563EB]" aria-label="Fjern AI-filter">AI-modeldata ×</button>}<button type="button" onClick={() => { setSelectedUniversity("all"); setSearchQuery(""); setIncludeAiModels(false); if (sort === "ai") setSort("closest"); setVisibleCount(10); }} className="min-h-11 rounded px-2 font-semibold text-[#1D4ED8] underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Nulstil alle filtre</button></div>}
-          <p className="text-[11px] leading-relaxed text-[#545D71]">Snit, søgning og filtre gemmes efter # i adressen, så de normalt ikke sendes til serveren ved sideindlæsning. De kan gemmes i browserhistorik og ses af dem, du deler linket med. Ældre links kan have parametre, der sendes til serveren.</p>
+
           <div className="border-t border-[#E7E9EF] pt-3">
             <button type="button" onClick={() => setShowSaved(!showSaved)} aria-expanded={showSaved} aria-controls="saved-programs" className="min-h-11 text-sm font-semibold text-[#1D4ED8] hover:underline focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Min liste ({savedIds.length}) {showSaved ? "↑" : "↓"}</button>
             {savedError && <p role="status" className="text-xs text-[#B45309]">{savedError}</p>}
@@ -530,13 +519,13 @@ export default function Dashboard() {
               })}</ul>}
             </div>}
           </div>
-        </div>
+        </section>
 
         <div className="space-y-4 max-w-3xl mx-auto">
           <div className="flex justify-between items-center border-b border-[#E7E9EF] pb-3">
             <div>
               <h2 className="text-xl font-bold text-[#12172B] font-display">Uddannelser at undersøge</h2>
-              <p className="text-xs text-[#545D71]">{deferredSearchQuery.trim() ? "Søgerelevans først · derefter " : "Sorteret: "}{sortDescription}{includeAiModels ? " · kun uddannelser med AI-modeldata" : " · AI fravalgt"}</p>
+              <p className="text-xs text-[#545D71]">{deferredSearchQuery.trim() ? "Søgerelevans først · derefter " : "Sorteret: "}{sortDescription}{includeAiModels ? " · med AI-modeldata" : ""}</p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => setShowShareModal(true)} className="inline-flex min-h-11 items-center gap-2 px-3.5 py-1.5 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"><svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15V3m0 0L8 7m4-4 4 4M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" /></svg><span>Del din søgning</span></button>
@@ -553,20 +542,20 @@ export default function Dashboard() {
               {includeAiModels && <option value="ai">AI-robusthed</option>}
             </select>
           </div>
-          <p className="text-xs leading-relaxed text-[#545D71]">Kvotienter er fra optaget i 2026 og kan ændre sig. Dit snit er ingen garanti for optagelse; kontrollér også fagkrav og øvrige adgangskrav.</p>
+          <button type="button" onClick={() => document.getElementById("om-tallene")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="inline-flex min-h-11 items-center text-xs text-[#545D71] underline underline-offset-4">Om optagelsestal fra 2026</button>
           {cardMessage && <p role="status" className="text-xs text-[#1D4ED8]">{cardMessage}</p>}
 
           {loading ? (
             <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow animate-pulse">
               <div className="w-12 h-12 border-4 border-[#0F9D6E] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <h3 className="text-base font-bold text-[#12172B]">Indlæser uddannelseskataloget...</h3>
-              <p className="text-xs text-[#545D71]">Analyserer kataloget og markerer model-/provenansstatus.</p>
+              <p className="text-xs text-[#545D71]">Finder uddannelser, du kan gå på opdagelse i.</p>
             </div>
           ) : topMatches.length > 0 ? (
             <div className="space-y-4" data-testid="ranked-program-results">
               <p aria-live="polite" className="text-xs text-[#545D71]">{matchedPrograms.length} uddannelser i visningen. {gpa === null ? "Indtast dit snit for at sammenligne kvotienter." : "Resultaterne opdateres, når du ændrer dine valg."}</p>
               {sections.map((section) => <section key={section.key} className="space-y-4" aria-label={groupLabels[section.key]}>
-              {showGroups && <div><h3 className="text-sm font-bold text-[#12172B]">{groupLabels[section.key]}</h3>{section.key === "near_above" && <p className="text-xs text-[#545D71]">Kvotienten kan ændre sig fra år til år. Dette er ikke en prognose for optagelse.</p>}</div>}
+              {showGroups && <div><h3 className="text-sm font-bold text-[#12172B]">{groupLabels[section.key]}</h3></div>}
               {section.shown.map((prog) => {
                 const slug = createProgramSlug(prog);
                 const selected = selectedForComparison.includes(slug);
@@ -577,14 +566,14 @@ export default function Dashboard() {
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center justify-between gap-1.5 text-xs text-[#545D71]">
                           <div className="flex items-center gap-1.5">
-                            <span>{prog.institution}</span><span>•</span><span className="font-mono-data text-[#667085]">KOT {prog.kot_nr}</span>
+                            <span>{prog.institution}</span>
                           </div>
                           <details className="relative z-10 text-left"><summary aria-label={`Flere handlinger for ${prog.udbud_titel}, KOT ${prog.kot_nr}`} className="flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded text-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]">⋯</summary><div className="absolute right-0 z-20 w-44 rounded-lg border border-[#D8DBE4] bg-white p-2 shadow-lg"><button type="button" onClick={() => { const url = `${window.location.origin}/uddannelse/${slug}`; if (!navigator.clipboard?.writeText) { setCardMessage("Linket kunne ikke kopieres. Åbn uddannelsen og kopiér adressen fra browseren."); return; } navigator.clipboard.writeText(url).then(() => setCardMessage(`Link til ${prog.displayTitle} er kopieret.`)).catch(() => setCardMessage("Linket kunne ikke kopieres. Åbn uddannelsen og kopiér adressen fra browseren.")); }} aria-label={`Kopiér link til ${prog.udbud_titel}, KOT ${prog.kot_nr}`} className="min-h-11 w-full rounded px-2 text-left text-xs text-[#1D4ED8] hover:bg-[#EFF6FF] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Kopiér link til uddannelsen</button></div></details>
                         </div>
                         <h3 data-testid="program-title" className="text-xl font-bold text-[#12172B] tracking-tight font-display hover:text-[#2563EB] transition"><Link href={`/uddannelse/${slug}`} className="after:absolute after:inset-0 after:rounded-xl focus:outline-none">{prog.displayTitle}</Link></h3>
                         {prog.startDetails && <p className="text-xs text-[#545D71]">Studiestart: {prog.startDetails}</p>}
                         {prog.locationsCount > 1 ? (
-                          <div className="pt-1"><span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/20">Flere katalogopslag · kontrollér studiested</span></div>
+                          <div className="pt-1"><span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#2563EB]/20">Udbydes flere steder</span></div>
                         ) : null}
                       </div>
                       <div className="text-left sm:text-right space-y-1 w-full sm:w-auto border-t sm:border-t-0 border-[#E7E9EF] pt-2 sm:pt-0">
@@ -592,7 +581,7 @@ export default function Dashboard() {
                         {prog.kvNum !== null ? (
                           <span className="text-xl font-bold text-[#12172B] font-mono-data">{prog.admissionLabel}</span>
                         ) : (
-                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-sm font-semibold text-[#545D71]">{prog.admissionLabel}</span><span className="text-[11px] text-[#545D71]">Status ved optaget i 2026 · kontrollér aktuelle oplysninger</span></div>
+                          <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-start gap-1"><span className="text-sm font-semibold text-[#545D71]">{prog.admissionLabel}</span></div>
                         )}
                       </div>
                     </div>
@@ -613,7 +602,7 @@ export default function Dashboard() {
               </section>)}
             </div>
           ) : (
-            <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow"><h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3><p className="text-xs text-[#545D71]">{includeAiModels ? "Din søgning gav ingen resultater blandt de 569 uddannelser med AI-modeldata. Slå AI fra for at søge i alle 1.413 uddannelser." : "Prøv at vælge et andet uddannelsessted eller ryd dit søgefelt."}</p><button onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setIncludeAiModels(false); if (sort === "ai") setSort("closest"); setVisibleCount(10); }} className="min-h-11 px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Nulstil og vis alle uddannelser</button></div>
+            <div className="bg-[#FFFFFF] border border-[#E7E9EF] rounded-xl p-8 text-center space-y-3 card-shadow"><h3 className="text-base font-bold text-[#12172B]">Ingen matchende uddannelser fundet</h3><p className="text-xs text-[#545D71]">{includeAiModels ? "Din søgning gav ingen resultater med AI-perspektivet slået til. Slå det fra for at søge i flere uddannelser." : "Prøv at vælge et andet uddannelsessted eller ryd dit søgefelt."}</p><button onClick={() => { setSearchQuery(""); setSelectedUniversity("all"); setIncludeAiModels(false); if (sort === "ai") setSort("closest"); setVisibleCount(10); }} className="min-h-11 px-4 py-2 bg-[#12172B] text-[#FFFFFF] rounded-lg text-xs font-semibold hover:bg-[#545D71] transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2">Nulstil og vis alle uddannelser</button></div>
           )}
 
           {!showGroups && topMatches.length < matchedPrograms.length && (
@@ -622,17 +611,31 @@ export default function Dashboard() {
         </div>
 
         <section data-testid="guide-links" aria-labelledby="guide-links-heading" className="rounded-2xl border border-[#D8DBE4] bg-[#FFFFFF] p-6 sm:p-8 card-shadow space-y-5">
-          <div className="max-w-2xl"><p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Gå et niveau dybere</p><h2 id="guide-links-heading" className="mt-1 text-xl font-bold font-display">Guides til dit næste valg</h2><p className="mt-2 text-xs leading-relaxed text-[#545D71]">Brug matchresultatet som startpunkt, og få hjælp til at forstå adgangskvotienter, AI-modelestimater og forskellene mellem uddannelser.</p></div>
+          <div className="max-w-2xl"><p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Gå et niveau dybere</p><h2 id="guide-links-heading" className="mt-1 text-xl font-bold font-display">Guides til dit næste valg</h2><p className="mt-2 text-xs leading-relaxed text-[#545D71]">Få styr på dit snit, bliv klogere på AI, og find ud af, hvad du skal kigge efter.</p></div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { href: "/guides/hvad-kan-jeg-laese-med-mit-snit", title: "Hvad kan jeg læse med mit snit?", text: "Forstå Kvote 1-tal og find relevante alternativer." },
-              { href: "/guides/ai-og-uddannelsesvalg", title: "AI og uddannelsesvalg", text: "Brug AI-estimatet uden at læse det som en garanti." },
+              { href: "/guides/ai-og-uddannelsesvalg", title: "AI og uddannelsesvalg", text: "Hvad kan AI betyde for dit kommende arbejdsliv?" },
               { href: "/guides/saadan-sammenligner-du-uddannelser", title: "Sammenlign uddannelser", text: "En enkel tjekliste til adgang, indhold, sted og AI-perspektiv." },
             ].map((guide) => (
               <Link key={guide.href} href={guide.href} onClick={() => track("guide_open", { guide: guide.href.replace("/guides/", ""), source: "homepage" })} className="rounded-xl border border-[#E7E9EF] bg-[#F7F8FA] p-4 hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition"><span className="block text-sm font-bold text-[#12172B]">{guide.title}</span><span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">{guide.text}</span><span className="mt-3 block text-xs font-bold text-[#2563EB]">Læs guiden →</span></Link>
             ))}
           </div>
           <Link href="/guides" className="inline-flex text-xs font-bold text-[#12172B] hover:underline">Se alle guides og datadrevne toplister →</Link>
+        </section>
+        <section id="om-tallene" aria-labelledby="data-notes-heading" className="scroll-mt-40 mx-auto max-w-3xl border-t border-[#D8DBE4] pt-6 space-y-4">
+          <h2 id="data-notes-heading" className="text-sm font-bold">Om tallene og din søgning</h2>
+          <details className="text-xs leading-relaxed text-[#545D71]">
+            <summary className="cursor-pointer font-semibold">Sådan læser du tallene</summary>
+            <p className="mt-2"><strong>Kvote 1</strong> er den del af optaget, hvor karaktergennemsnittet bruges i udvælgelsen. En adgangskvotient beskriver et tidligere optag, ikke et fast krav eller en garanti. <strong>KOT-nummeret</strong> er optagelsesområdets nummer i den officielle opgørelse.</p>
+            <p className="mt-2">Optagelsestal gælder optaget i 2026 og vises kun, hvor KOT-nummer og uddannelsesnavn matcher. Oplysninger om ledige pladser er historiske og siger ikke, om der er plads nu. Kontrollér aktuelle oplysninger hos <a href="https://www.ug.dk/artikel/aarets-optagelsestal" className="font-semibold underline">UddannelsesGuiden</a> og uddannelsesstedet.</p>
+            <p className="mt-2"><strong>AI-modelestimatet</strong> er en beregnet vurdering, ikke et observeret resultat. Det bygger på amerikanske O*NET-opgavedata og usikre koblinger mellem uddannelser og arbejdsopgaver. AI-robusthed er ikke en automatiseringssandsynlighed, jobprognose eller anbefaling om at vælge uddannelsen.</p>
+            <span className="mt-1 block">Se <Link href="/evidens" className="font-semibold underline">kilde- og metodeforklaringen</Link> for status og begrænsninger.</span>
+          </details>
+          <details className="text-xs leading-relaxed text-[#545D71]"><summary className="cursor-pointer font-semibold">Datadækning og privatliv</summary><p className="mt-2">Søgningen viser {BROWSE_COVERAGE.programmeCount} uddannelsestilbud fra optaget i 2026. Kataloget dækker ikke alle uddannelser i Danmark. Ældre opslag kan stadig åbnes via gemte links.</p>
+          <p className="text-[11px] leading-relaxed text-[#545D71]">Snit, søgning og filtre gemmes efter # i adressen, så de normalt ikke sendes til serveren ved sideindlæsning. De kan gemmes i browserhistorik og ses af dem, du deler linket med. Ældre links kan have parametre, der sendes til serveren.</p>
+          </details>
+          <Link href="/evidens" className="inline-flex min-h-11 items-center text-xs font-semibold text-[#545D71] underline">Alle kilder og metode →</Link>
         </section>
       </main>
 
