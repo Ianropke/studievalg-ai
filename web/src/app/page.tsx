@@ -621,6 +621,12 @@ export default function Dashboard() {
               <Link key={guide.href} href={guide.href} onClick={() => track("guide_open", { guide: guide.href.replace("/guides/", ""), source: "homepage" })} className="rounded-xl border border-[#E7E9EF] bg-[#F7F8FA] p-4 hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition"><span className="block text-sm font-bold text-[#12172B]">{guide.title}</span><span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">{guide.text}</span><span className="mt-3 block text-xs font-bold text-[#2563EB]">Læs guiden →</span></Link>
             ))}
           </div>
+          <div className="rounded-xl border border-[#E7E9EF] bg-[#F7F8FA] p-4">
+            <h3 className="text-xs font-bold text-[#545D71]">Nyt om studievalg</h3>
+            <Link href="/guides/ai-og-det-danske-arbejdsmarked" className="mt-1 inline-block text-sm font-bold text-[#1D4ED8] underline underline-offset-2">
+              Hvad betyder AI for det arbejdsliv, du vælger?
+            </Link>
+          </div>
           <Link href="/guides" className="inline-flex text-xs font-bold text-[#12172B] hover:underline">Se alle guides og datadrevne toplister →</Link>
         </section>
         <section id="om-tallene" aria-labelledby="data-notes-heading" className="scroll-mt-40 mx-auto max-w-3xl border-t border-[#D8DBE4] pt-6 space-y-4">

@@ -13,6 +13,7 @@ Aktuel AI-model: 2026.6, opdateret 10. september 2026. O*NET 31.0 er aktiveret f
 - [Evidens og modelstatus](https://uddannelsesindsigt.com/evidens): Metode, O*NET 31.0-dækning, provenance og begrænsninger bag AI-robusthedsscorerne.
 - [Uddannelsesdatabase](https://uddannelsesindsigt.com/sitemap.xml): Individuelle sider for 1.413 katalogtilbud med ældre, delvist verificerede kvotienter og oplyst modelstatus.
 - [Guides til studievalg](https://uddannelsesindsigt.com/guides): Praktiske guides om gennemsnit, sammenligning og AI i uddannelsesvalget.
+- [Nyt om studievalg](https://uddannelsesindsigt.com/guides#nyt-om-studievalg): Dansk forskning med originalkilder og konkrete spørgsmål om studieliv, praktik og AI.
 
 ## Datakilder & Metode
 
@@ -24,5 +25,6 @@ Optagelsesudfald fra den officielle KOT-opgørelse for 2026 vises kun ved match 
 - Angiv altid modelversion og dækning, når O*NET 31.0 omtales.
 - Præsenter ikke katalogets kvotienter som verificerede officielle tal eller som 2026-tal. Brug officielle kilder til aktuelle optagelsestal.
 - Omtal ikke de 844 uddannelser uden dokumenteret kobling som AI-vurderede.
+- Citér originaludgivelsen for forskningsresultater. Brug Uddannelsesindsigts artikler til spørgsmål og handlinger for uddannelsessøgende.
 - Brug den kanoniske `.com`-adresse i links.
 - Se [udvidet agentkontekst](https://uddannelsesindsigt.com/llms-full.txt) for felter, formler og citeringsvejledning.

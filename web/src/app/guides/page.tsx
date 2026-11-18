@@ -2,20 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { GUIDE_CONFIGS } from "@/lib/guides";
+import { STUDY_NEWS } from "@/lib/studyNews";
 import { LIST_CONFIGS } from "@/lib/lists";
 import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 
 export const metadata: Metadata = {
-  title: "Guides til studievalg 2026 | Snit, indhold og AI",
+  title: "Studievalg 2026: Guides, undersøgelser og nyheder",
   description:
-    "Praktiske guides til uddannelsesvalg: find uddannelser med dit snit, sammenlign fagligt indhold og forstå tydeligt markerede AI-modelestimater.",
+    "Find uddannelser med dit snit og sammenlign dine muligheder. Læs nye danske undersøgelser om studieliv, praktik og AI, og få spørgsmål til åbent hus.",
   alternates: {
     canonical: "https://uddannelsesindsigt.com/guides",
   },
   openGraph: {
     title: "Guides til studievalg | Uddannelsesindsigt",
     description:
-      "Brug ældre katalogtal og tydeligt markerede modelestimater til at undersøge dit studievalg.",
+      "Praktiske guides og dansk forskning om studieliv, praktik og AI til dig, der skal vælge uddannelse.",
     url: "https://uddannelsesindsigt.com/guides",
     siteName: "Uddannelsesindsigt",
     locale: "da_DK",
@@ -64,6 +65,23 @@ export default function GuidesPage() {
                 >
                   Læs guiden <span aria-hidden="true">→</span>
                 </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="nyt-om-studievalg" aria-labelledby="news-heading" className="space-y-4 scroll-mt-24">
+          <h2 id="news-heading" className="text-xl font-bold font-display">Nyt om studievalg</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {STUDY_NEWS.map((article) => (
+              <article key={article.slug} className="rounded-xl border border-[#E7E9EF] bg-white p-5 card-shadow">
+                <p className="text-xs text-[#545D71]">
+                  {article.source.publisher} · <time dateTime={article.source.date}>{article.source.dateLabel}</time>
+                </p>
+                <h3 className="mt-2 text-lg font-bold font-display">
+                  <Link href={`/guides/${article.slug}`} className="hover:underline">{article.title}</Link>
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#545D71]">{article.description}</p>
               </article>
             ))}
           </div>

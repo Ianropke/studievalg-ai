@@ -4,6 +4,8 @@ import { LIST_CONFIGS } from "@/lib/lists";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { GUIDE_CONFIGS, GUIDE_UPDATED_AT } from "@/lib/guides";
 
+import { STUDY_NEWS } from "@/lib/studyNews";
+
 const DATA_LAST_MODIFIED = DATA_STATUS.catalogue.admissionsUpdatedAt;
 const MODEL_LAST_MODIFIED = DATA_STATUS.scoring.updatedAt;
 
@@ -32,10 +34,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const newsUrls = STUDY_NEWS.map(({ slug, publishedAt }) => ({
+    url: `${baseUrl}/guides/${slug}`,
+    lastModified: publishedAt,
+  }));
+
   const mainUrls = [
     {
       url: baseUrl,
-      lastModified: MODEL_LAST_MODIFIED,
+      lastModified: STUDY_NEWS[0].publishedAt,
       changeFrequency: "weekly" as const,
       priority: 1.0,
     },
@@ -59,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/guides`,
-      lastModified: GUIDE_UPDATED_AT,
+      lastModified: STUDY_NEWS[0].publishedAt,
       changeFrequency: "weekly" as const,
       priority: 0.9,
     },
@@ -71,5 +78,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...mainUrls, ...guideUrls, ...listUrls, ...programUrls];
+  return [...mainUrls, ...guideUrls, ...newsUrls, ...listUrls, ...programUrls];
 }

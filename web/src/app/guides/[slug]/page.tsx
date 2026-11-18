@@ -3,15 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { GUIDE_CONFIGS, getGuide } from "@/lib/guides";
+import { STUDY_NEWS } from "@/lib/studyNews";
 import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 
 export function generateStaticParams() {
-  return Object.keys(GUIDE_CONFIGS).map((slug) => ({ slug }));
+  return [...Object.keys(GUIDE_CONFIGS), ...STUDY_NEWS.map(({ slug }) => slug)].map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getGuide(slug);
+  const news = STUDY_NEWS.find((article) => article.slug === slug);
+  const guide = news ?? getGuide(slug);
 
   if (!guide) {
     return { title: "Guide ikke fundet | Uddannelsesindsigt" };
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       siteName: "Uddannelsesindsigt",
       locale: "da_DK",
       type: "article",
+      publishedTime: news?.publishedAt,
       images: [DEFAULT_SOCIAL_IMAGE],
     },
   };
@@ -36,7 +39,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const guide = getGuide(slug);
+  const news = STUDY_NEWS.find((article) => article.slug === slug);
+  const guide = news ?? getGuide(slug);
 
   if (!guide) notFound();
 
@@ -50,6 +54,16 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     author: { "@type": "Organization", name: "Uddannelsesindsigt" },
     publisher: { "@type": "Organization", name: "Uddannelsesindsigt" },
     inLanguage: "da-DK",
+    ...(news && {
+      datePublished: news.publishedAt,
+      citation: {
+        "@type": "CreativeWork",
+        name: news.source.title,
+        url: news.source.href,
+        datePublished: news.source.date,
+        publisher: { "@type": "Organization", name: news.source.publisher },
+      },
+    }),
   };
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -60,6 +74,30 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       { "@type": "ListItem", position: 3, name: guide.title, item: url },
     ],
   };
+
+  const relatedNews = STUDY_NEWS.filter((article) => article.slug !== slug && (
+    article.primaryCta.href === `/guides/${slug}` ||
+    article.relatedLinks.some(({ href }) => href === `/guides/${slug}`)
+  ));
+  const relatedLinks = [
+    ...guide.relatedLinks,
+    ...relatedNews.map(({ slug, title, description }) => ({
+      href: `/guides/${slug}`, label: title, description,
+    })),
+  ];
+  const primaryCta = (
+    <section className="rounded-xl border border-[#0F9D6E]/20 bg-[#E3F6EE] p-5 sm:p-6">
+      {news ? null : <p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Prøv det i værktøjet</p>}
+      <h2 className="mt-1 text-lg font-bold font-display">{news ? "Dit næste skridt" : guide.primaryCta.label}</h2>
+      <p className="mt-2 text-xs leading-relaxed text-[#345B4E]">{guide.primaryCta.description}</p>
+      <Link
+        href={guide.primaryCta.href}
+        className="mt-4 inline-flex rounded-lg bg-[#12172B] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
+      >
+        {news ? guide.primaryCta.label : "Åbn værktøjet"} →
+      </Link>
+    </section>
+  );
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#12172B]">
@@ -82,20 +120,13 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
               {guide.badge}
             </span>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight font-display">{guide.title}</h1>
+            {news ? <p className="text-xs text-[#545D71]">Udgivet <time dateTime={news.publishedAt}>{
+              new Intl.DateTimeFormat("da-DK", { dateStyle: "long", timeZone: "UTC" }).format(new Date(news.publishedAt))
+            }</time></p> : null}
             <p className="max-w-3xl text-sm leading-relaxed text-[#545D71]">{guide.intro}</p>
           </header>
 
-          <section className="rounded-xl border border-[#0F9D6E]/20 bg-[#E3F6EE] p-5 sm:p-6">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">Prøv det i værktøjet</p>
-            <h2 className="mt-1 text-lg font-bold font-display">{guide.primaryCta.label}</h2>
-            <p className="mt-2 text-xs leading-relaxed text-[#345B4E]">{guide.primaryCta.description}</p>
-            <Link
-              href={guide.primaryCta.href}
-              className="mt-4 inline-flex rounded-lg bg-[#12172B] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
-            >
-              Åbn værktøjet →
-            </Link>
-          </section>
+          {news ? null : primaryCta}
 
           {guide.sections.map((section) => (
             <section key={section.title} className="rounded-xl border border-[#E7E9EF] bg-white p-6 sm:p-7 card-shadow">
@@ -116,24 +147,41 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </section>
           ))}
 
-          <section aria-labelledby="faq-heading" className="space-y-4">
-            <h2 id="faq-heading" className="text-xl font-bold font-display">Ofte stillede spørgsmål</h2>
-            <div className="space-y-3">
-              {guide.questions.map((item) => (
-                <details key={item.question} className="group rounded-xl border border-[#E7E9EF] bg-white p-5">
-                  <summary className="cursor-pointer list-none text-sm font-bold text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] rounded">
-                    {item.question}
-                  </summary>
-                  <p className="mt-3 text-xs leading-relaxed text-[#545D71]">{item.answer}</p>
-                </details>
-              ))}
-            </div>
-          </section>
+          {news ? (
+            <>
+              <section aria-labelledby="source-heading" className="rounded-xl border border-[#E7E9EF] bg-white p-6">
+                <h2 id="source-heading" className="text-lg font-bold font-display">Originalkilde</h2>
+                <p className="mt-2 text-sm text-[#545D71]">
+                  {news.source.publisher} · <time dateTime={news.source.date}>{news.source.dateLabel}</time>
+                </p>
+                <a href={news.source.href} className="mt-2 inline-block text-sm font-semibold text-[#1D4ED8] underline underline-offset-2">
+                  {news.source.title}
+                </a>
+              </section>
+              {primaryCta}
+            </>
+          ) : null}
+
+          {guide.questions.length > 0 ? (
+            <section aria-labelledby="faq-heading" className="space-y-4">
+              <h2 id="faq-heading" className="text-xl font-bold font-display">Ofte stillede spørgsmål</h2>
+              <div className="space-y-3">
+                {guide.questions.map((item) => (
+                  <details key={item.question} className="group rounded-xl border border-[#E7E9EF] bg-white p-5">
+                    <summary className="cursor-pointer list-none text-sm font-bold text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] rounded">
+                      {item.question}
+                    </summary>
+                    <p className="mt-3 text-xs leading-relaxed text-[#545D71]">{item.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="rounded-xl border border-[#D8DBE4] bg-white p-6 space-y-4">
             <h2 className="text-lg font-bold font-display">Læs også</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {guide.relatedLinks.map((link) => (
+              {relatedLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-lg border border-[#E7E9EF] bg-[#F7F8FA] p-4 hover:bg-[#EFF6FF] hover:border-[#2563EB]/30 transition">
                   <span className="block text-xs font-bold text-[#12172B]">{link.label}</span>
                   <span className="mt-1 block text-[11px] leading-relaxed text-[#545D71]">{link.description}</span>
