@@ -623,8 +623,8 @@ export default function Dashboard() {
           </div>
           <div className="rounded-xl border border-[#E7E9EF] bg-[#F7F8FA] p-4">
             <h3 className="text-xs font-bold text-[#545D71]">Nyt om studievalg</h3>
-            <Link href="/guides/ai-og-det-danske-arbejdsmarked" className="mt-1 inline-block text-sm font-bold text-[#1D4ED8] underline underline-offset-2">
-              Hvad betyder AI for det arbejdsliv, du vælger?
+            <Link href="/guides/i-tvivl-om-uddannelse" className="mt-1 inline-block text-sm font-bold text-[#1D4ED8] underline underline-offset-2">
+              Er du i tvivl om, hvad du skal læse?
             </Link>
           </div>
           <Link href="/guides" className="inline-flex text-xs font-bold text-[#12172B] hover:underline">Se alle guides og datadrevne toplister →</Link>

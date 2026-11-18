@@ -45,6 +45,8 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   if (!guide) notFound();
 
   const url = `https://uddannelsesindsigt.com/guides/${guide.slug}`;
+  const sources = news ? [news.source, ...(news.additionalSources ?? [])] : [];
+  const sourceHeading = sources.length > 1 ? "Originalkilder" : "Originalkilde";
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -56,13 +58,13 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     inLanguage: "da-DK",
     ...(news && {
       datePublished: news.publishedAt,
-      citation: {
+      citation: sources.map((source) => ({
         "@type": "CreativeWork",
-        name: news.source.title,
-        url: news.source.href,
-        datePublished: news.source.date,
-        publisher: { "@type": "Organization", name: news.source.publisher },
-      },
+        name: source.title,
+        url: source.href,
+        datePublished: source.date,
+        publisher: { "@type": "Organization", name: source.publisher },
+      })),
     }),
   };
   const breadcrumbJsonLd = {
@@ -150,13 +152,19 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           {news ? (
             <>
               <section aria-labelledby="source-heading" className="rounded-xl border border-[#E7E9EF] bg-white p-6">
-                <h2 id="source-heading" className="text-lg font-bold font-display">Originalkilde</h2>
-                <p className="mt-2 text-sm text-[#545D71]">
-                  {news.source.publisher} · <time dateTime={news.source.date}>{news.source.dateLabel}</time>
-                </p>
-                <a href={news.source.href} className="mt-2 inline-block text-sm font-semibold text-[#1D4ED8] underline underline-offset-2">
-                  {news.source.title}
-                </a>
+                <h2 id="source-heading" className="text-lg font-bold font-display">{sourceHeading}</h2>
+                <ul className="mt-2 space-y-4">
+                  {sources.map((source) => (
+                    <li key={source.href}>
+                      <p className="text-sm text-[#545D71]">
+                        {source.publisher} · <time dateTime={source.date}>{source.dateLabel}</time>
+                      </p>
+                      <a href={source.href} className="mt-1 inline-block text-sm font-semibold text-[#1D4ED8] underline underline-offset-2">
+                        {source.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </section>
               {primaryCta}
             </>
