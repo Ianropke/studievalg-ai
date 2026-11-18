@@ -136,6 +136,39 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     expect((sitemapBody.match(/<url>/g) || []).length).toBeGreaterThan(1400);
   });
 
+  test("studievalgsnyt forbinder forsiden, originalkilder og konkrete valg", async ({ page, request }) => {
+    const aiArticle = "/guides/ai-og-det-danske-arbejdsmarked";
+    const teacherArticle = "/guides/foerste-aar-paa-laereruddannelsen";
+    const campusArticle = "/guides/studiemiljoe-og-undervisning-paa-bachelor";
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.getByRole("link", { name: "Hvad betyder AI for det arbejdsliv, du vælger?" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Hvad betyder AI for det arbejdsliv, du vælger?");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://uddannelsesindsigt.com${aiArticle}`);
+    const originalSource = page.getByRole("region", { name: "Originalkilde" });
+    await expect(originalSource.getByRole("link")).toHaveAttribute("href", /^https:\/\/www.nationalbanken.dk\//);
+    await expect(originalSource.locator("time")).toHaveAttribute("datetime", "2026-09-16");
+
+    await page.getByRole("navigation", { name: "Brødkrummer" }).getByRole("link", { name: "Guides" }).click();
+    const news = page.getByRole("region", { name: "Nyt om studievalg" });
+    await expect(news.getByRole("link")).toHaveCount(3);
+    const width = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(width).toBeLessThanOrEqual(390);
+
+    await news.getByRole("link", { name: /første år på læreruddannelsen/ }).click();
+    await page.getByRole("link", { name: /Find læreruddannelser/ }).click();
+    await expect(page.getByText("Uddannelser at undersøge", { exact: true })).toBeVisible();
+    await expect(page.locator('main a[href^="/uddannelse/"]').first()).toContainText(/lærer/i);
+
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    const agentIndex = await (await request.get("/llms-full.txt")).text();
+    for (const path of [aiArticle, teacherArticle, campusArticle]) {
+      expect(sitemap).toContain(`https://uddannelsesindsigt.com${path}`);
+      expect(agentIndex).toContain(`https://uddannelsesindsigt.com${path}`);
+    }
+  });
+
   test("repræsentative interne links svarer uden fejl", async ({ page, request }) => {
     await page.goto("/");
     const links = await page.locator('main a[href^="/"]').evaluateAll((anchors) =>
