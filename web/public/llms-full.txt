@@ -18,10 +18,11 @@ and does not replace official guidance.
 
 ## Nyt om studievalg
 
-Artiklerne forklarer, hvordan danske undersøgelser kan bruges ved konkret studievalg. Brug den originale undersøgelse ved citering af et forskningsresultat, og angiv dens population og periode.
+Artiklerne forklarer, hvordan danske og internationale undersøgelser kan bruges ved konkret studievalg. Brug den originale undersøgelse ved citering af et forskningsresultat, og angiv dens population og periode.
 
-- [AI og det danske arbejdsmarked](https://uddannelsesindsigt.com/guides/ai-og-det-danske-arbejdsmarked) bygger på Danmarks Nationalbanks analyse (16. september 2026). Den beskriver dansk beskæftigelse samlet og indeholder ingen uddannelsesspecifik jobprognose.
-- [Første år på læreruddannelsen](https://uddannelsesindsigt.com/guides/foerste-aar-paa-laereruddannelsen) bygger på EVA's rapport (9. juni 2026) om førsteårsstuderendes erfaringer med undervisning, studieliv og praktik.
+- [I tvivl om uddannelse](https://uddannelsesindsigt.com/guides/i-tvivl-om-uddannelse) bygger på OECD’s PISA-rapport om unges karrierevalg (20. maj 2025). Den giver en øvelse med to samtaler om studiehverdag og arbejdsliv.
+- [AI og det danske arbejdsmarked](https://uddannelsesindsigt.com/guides/ai-og-det-danske-arbejdsmarked) bygger på Danmarks Nationalbanks analyse (16. september 2026). Den beskriver dansk beskæftigelse samlet og indeholder ingen uddannelsesspecifik jobprognose. Artiklen bruger også en HEPI-undersøgelse blandt 1.054 britiske fuldtidsstuderende som inspiration til spørgsmål om AI i undervisningen.
+- [Første år på læreruddannelsen](https://uddannelsesindsigt.com/guides/foerste-aar-paa-laereruddannelsen) bygger på EVA's rapport (9. juni 2026) om førsteårsstuderendes erfaringer med undervisning, studieliv og praktik. OECD’s danske landenotat fra 2026 bidrager med TALIS 2024-svar fra lærere på udskolingsniveau om ansættelsesvilkår.
 - [Studiemiljø på bacheloruddannelser](https://uddannelsesindsigt.com/guides/studiemiljoe-og-undervisning-paa-bachelor) bygger på EVA's spørgeskemaundersøgelse (27. maj 2026) blandt studerende, undervisere og studieledere på danske universiteter.
 
 ## O*NET 31.0 model coverage

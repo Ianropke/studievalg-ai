@@ -137,33 +137,47 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
   });
 
   test("studievalgsnyt forbinder forsiden, originalkilder og konkrete valg", async ({ page, request }) => {
+    const choiceArticle = "/guides/i-tvivl-om-uddannelse";
     const aiArticle = "/guides/ai-og-det-danske-arbejdsmarked";
     const teacherArticle = "/guides/foerste-aar-paa-laereruddannelsen";
     const campusArticle = "/guides/studiemiljoe-og-undervisning-paa-bachelor";
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await page.getByRole("link", { name: "Hvad betyder AI for det arbejdsliv, du vælger?" }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Hvad betyder AI for det arbejdsliv, du vælger?");
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://uddannelsesindsigt.com${aiArticle}`);
-    const originalSource = page.getByRole("region", { name: "Originalkilde" });
-    await expect(originalSource.getByRole("link")).toHaveAttribute("href", /^https:\/\/www.nationalbanken.dk\//);
-    await expect(originalSource.locator("time")).toHaveAttribute("datetime", "2026-09-16");
+    await page.getByRole("link", { name: "Er du i tvivl om, hvad du skal læse?" }).click();
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://uddannelsesindsigt.com${choiceArticle}`);
+    await expect(page.getByRole("heading", { name: "Prøv to korte samtaler" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Originalkilde", exact: true }).getByRole("link"))
+      .toHaveAttribute("href", /oecd.org/);
 
-    await page.getByRole("navigation", { name: "Brødkrummer" }).getByRole("link", { name: "Guides" }).click();
+    const guides = page.getByRole("navigation", { name: "Brødkrummer" }).getByRole("link", { name: "Guides" });
+    await guides.click();
     const news = page.getByRole("region", { name: "Nyt om studievalg" });
-    await expect(news.getByRole("link")).toHaveCount(3);
+    await expect(news.getByRole("link")).toHaveCount(4);
+    await news.getByRole("link", { name: "Hvad betyder AI for det arbejdsliv, du vælger?" }).click();
+    const sources = page.getByRole("region", { name: "Originalkilder" });
+    await expect(sources.getByRole("link", { name: /Omstillingen er begyndt/ })).toHaveAttribute("href", /nationalbanken.dk/);
+    await expect(sources.getByRole("link", { name: "Student Generative AI Survey 2026" })).toHaveAttribute("href", /hepi.ac.uk/);
+    await expect(sources.locator('time[datetime="2026-03-12"]')).toBeVisible();
+
+    const articles = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const article = articles.map((value) => JSON.parse(value)).find((value) => value["@type"] === "Article");
+    expect(article.citation).toHaveLength(2);
+    expect(article.citation[1].url).toContain("hepi.ac.uk");
+
+    await guides.click();
     const width = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(width).toBeLessThanOrEqual(390);
 
     await news.getByRole("link", { name: /første år på læreruddannelsen/ }).click();
+    await expect(sources.getByRole("link", { name: "Education at a Glance 2026: Denmark" })).toHaveAttribute("href", /oecd.org/);
     await page.getByRole("link", { name: /Find læreruddannelser/ }).click();
     await expect(page.getByText("Uddannelser at undersøge", { exact: true })).toBeVisible();
     await expect(page.locator('main a[href^="/uddannelse/"]').first()).toContainText(/lærer/i);
 
     const sitemap = await (await request.get("/sitemap.xml")).text();
     const agentIndex = await (await request.get("/llms-full.txt")).text();
-    for (const path of [aiArticle, teacherArticle, campusArticle]) {
+    for (const path of [choiceArticle, aiArticle, teacherArticle, campusArticle]) {
       expect(sitemap).toContain(`https://uddannelsesindsigt.com${path}`);
       expect(agentIndex).toContain(`https://uddannelsesindsigt.com${path}`);
     }

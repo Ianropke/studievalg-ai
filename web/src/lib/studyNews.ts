@@ -1,17 +1,68 @@
 import type { GuideConfig } from "./guides";
 
+interface StudyNewsSource {
+  publisher: string;
+  title: string;
+  href: string;
+  date: string;
+  dateLabel: string;
+}
+
 export interface StudyNewsArticle extends GuideConfig {
   publishedAt: string;
-  source: {
-    publisher: string;
-    title: string;
-    href: string;
-    date: string;
-    dateLabel: string;
-  };
+  source: StudyNewsSource;
+  additionalSources?: StudyNewsSource[];
 }
 
 export const STUDY_NEWS: StudyNewsArticle[] = [
+  {
+    slug: "i-tvivl-om-uddannelse",
+    title: "Er du i tvivl om, hvad du skal læse?",
+    seoTitle: "I tvivl om uddannelse? Prøv en øvelse til dit studievalg",
+    description: "Er du usikker på dit studievalg? Brug to korte samtaler til at sammenligne studiehverdag og arbejdsliv, før du vælger uddannelse.",
+    badge: "Tvivl og studievalg",
+    publishedAt: "2026-11-18",
+    intro: "Du behøver ikke vide, hvad du vil arbejde med om ti år. Start med én uddannelse, du er nysgerrig på, og undersøg, hvordan hverdagen ser ud både under og efter studiet.",
+    source: {
+      publisher: "OECD",
+      title: "The State of Global Teenage Career Preparation",
+      href: "https://www.oecd.org/en/publications/the-state-of-global-teenage-career-preparation_d5f8e3f2-en.html",
+      date: "2025-05-20",
+      dateLabel: "20. maj 2025",
+    },
+    sections: [
+      {
+        title: "Du er ikke alene om at være i tvivl",
+        paragraphs: [
+          "OECD’s rapport om 15-årige viser, at mange er usikre på, hvad de vil arbejde med. Unge, der har deltaget i flere aktiviteter som vejledning og møder med folk i arbejde, har typisk klarere planer.",
+        ],
+      },
+      {
+        title: "Prøv to korte samtaler",
+        paragraphs: [
+          "Tal med en studerende og en person, der arbejder inden for faget. Det kan være til åbent hus, gennem studievejledningen eller ved at spørge nogen, du kender.",
+        ],
+        bullets: [
+          "Spørg den studerende, hvordan en almindelig uge ser ud, og hvad der overraskede ved studiestart.",
+          "Spørg den, der arbejder i faget, hvilke opgaver der fylder mest, og hvordan en af dem ser ud i praksis.",
+          "Skriv én ting ned, du fik mere lyst til, og ét spørgsmål, du stadig har. Brug det spørgsmål til at undersøge en anden uddannelse.",
+        ],
+      },
+    ],
+    primaryCta: {
+      href: "/",
+      label: "Find en uddannelse at undersøge",
+      description: "Søg på et fag eller en interesse, og gem de uddannelser, du vil vide mere om.",
+    },
+    relatedLinks: [
+      {
+        href: "/guides/saadan-sammenligner-du-uddannelser",
+        label: "Sådan sammenligner du uddannelser",
+        description: "Brug dine svar til at sammenligne indhold, adgang og studiested.",
+      },
+    ],
+    questions: [],
+  },
   {
     slug: "ai-og-det-danske-arbejdsmarked",
     title: "Hvad betyder AI for det arbejdsliv, du vælger?",
@@ -27,12 +78,26 @@ export const STUDY_NEWS: StudyNewsArticle[] = [
       date: "2026-09-16",
       dateLabel: "16. september 2026",
     },
+    additionalSources: [{
+      publisher: "Higher Education Policy Institute (HEPI)",
+      title: "Student Generative AI Survey 2026",
+      href: "https://www.hepi.ac.uk/reports/student-generative-ai-survey-2026/",
+      date: "2026-03-12",
+      dateLabel: "12. marts 2026",
+    }],
     sections: [
       {
         title: "Hvad viser analysen?",
         paragraphs: [
           "Danmarks Nationalbank finder tegn på, at virksomheder tilpasser deres efterspørgsel efter arbejdskraft, når de tager AI i brug. I de undersøgte data ser den samlede danske beskæftigelse endnu ikke ud til at være påvirket. Udviklingen på længere sigt er usikker.",
           "Analysen handler om det danske arbejdsmarked samlet og giver ingen prognose for jobmulighederne efter en bestemt uddannelse.",
+        ],
+      },
+      {
+        title: "Hvordan lærer du at bruge AI på studiet?",
+        paragraphs: [
+          "I en undersøgelse blandt 1.054 britiske fuldtidsstuderende på bachelorniveau mente 68 %, at AI-kompetencer er nødvendige, mens 48 % oplevede, at deres undervisere hjalp dem med at udvikle kompetencerne til arbejdslivet.",
+          "På en dansk uddannelse, du overvejer, kan du spørge, om AI indgår i konkrete opgaver, og hvordan underviserne hjælper dig med at vurdere svarene.",
         ],
       },
       {
@@ -71,11 +136,25 @@ export const STUDY_NEWS: StudyNewsArticle[] = [
       date: "2026-06-09",
       dateLabel: "9. juni 2026",
     },
+    additionalSources: [{
+      publisher: "OECD",
+      title: "Education at a Glance 2026: Denmark",
+      href: "https://www.oecd.org/en/publications/education-at-a-glance-2026_c0e523a9-en/denmark_79c3e727-en.html",
+      date: "2026-09-29",
+      dateLabel: "29. september 2026",
+    }],
     sections: [
       {
         title: "Hvad undersøger EVA?",
         paragraphs: [
           "Halvdelen af de førsteårsstuderende, der svarede i EVA’s spørgeskemaundersøgelse, angav, at praktikken i høj grad øgede deres lyst til at arbejde som lærer. Samtidig efterlyste flere tydeligere mål for praktikken. Spørg det enkelte studiested, hvad du skal lære i den første praktik, og hvordan du får feedback.",
+        ],
+      },
+      {
+        title: "Hvad fylder i jobbet som lærer?",
+        paragraphs: [
+          "OECD’s landenotat gengiver svar fra TALIS 2024. Her var 71 % af de danske lærere på udskolingsniveau tilfredse med deres ansættelsesvilkår, når lønnen holdes udenfor. OECD-gennemsnittet var 68,4 %.",
+          "Hvis du får mulighed for at tale med en lærer, så spørg, hvordan en almindelig uge fordeler sig mellem undervisning, forberedelse og samarbejde. Det giver dig et konkret billede af de opgaver, du kommer til at øve i praktikken.",
         ],
       },
       {
