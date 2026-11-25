@@ -3,6 +3,8 @@ import catalog from "../../public/data/all_programs_catalog.json";
 import snapshot from "../data/kot2026.json";
 import { browsePrograms, BROWSE_COVERAGE, selectBrowsePrograms } from "../lib/browseCatalog";
 import { admission2026Label, admission2026Threshold, getAdmission2026 } from "../lib/admissions2026";
+import { extractProgramCity } from "../lib/textUtils";
+import { getEnrichedScores, type RawProgramScores } from "../lib/domainScoring";
 
 const counts = { matched: 0, identity_conflict: 0, not_in_source: 0 };
 for (const program of catalog) counts[getAdmission2026(program).kind]++;
@@ -32,4 +34,17 @@ assert.deepEqual(selectBrowsePrograms([example, conflict, absent]), [example]);
 assert.equal(catalog.some((program) => program.kot_nr === "13255"), true, "Archive must remain intact");
 assert.equal(admission2026Label(getAdmission2026(conflict)), "Adgangstal mangler");
 assert.equal(admission2026Label(getAdmission2026(absent)), "Adgangstal mangler");
-console.log("Public discovery: 879 matched identities, 410 AI estimates, legacy archive preserved");
+
+// Slim client browse index must stay strictly in sync with active 2026 matched programmes and clean cities.
+const fullMatched = selectBrowsePrograms(catalog);
+assert.equal(browsePrograms.length, fullMatched.length, "Slim browse index count drifted from full catalogue");
+assert.equal(browsePrograms.length, BROWSE_COVERAGE.programmeCount);
+const actualAiCount = browsePrograms.filter((program) =>
+  getEnrichedScores(program.udbud_titel, program.scores as RawProgramScores).ranking_eligible.ai,
+).length;
+assert.equal(actualAiCount, BROWSE_COVERAGE.aiProgrammeCount);
+const viaPedagog = browsePrograms.find((program) => program.kot_nr === "53260")!;
+assert.equal(viaPedagog.by, "Aarhus C");
+assert.equal(extractProgramCity("Professionsbachelor, pædagog, Aarhus C, Studiestart: sommer- og vinterstart"), "Aarhus C");
+assert.equal(browsePrograms.some((program) => program.by === "pædagog" || program.by === "sygeplejerske"), false);
+console.log("Public discovery: 879 matched identities, 410 AI estimates, slim index & clean cities verified");

@@ -7,6 +7,7 @@ import {
   type ResearchStatus,
 } from "@/lib/aiResearch";
 import { DATA_STATUS } from "@/lib/dataStatus";
+import { BROWSE_COVERAGE } from "@/lib/browseCoverage";
 
 const statusStyles: Record<ResearchStatus, string> = {
   OBSERVERET: "border-[#0F9D6E]/25 bg-[#E3F6EE] text-[#0B7A57]",
@@ -145,9 +146,9 @@ export default function AIInsightsPage() {
           <p className="text-[11px] font-bold uppercase tracking-wider text-[#545D71]">Uddannelsesanalyse</p>
           <h2 id="model-heading" className="mt-1 font-display text-2xl font-bold">Brug AI-perspektivet på en kortliste</h2>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#545D71]">
-            Start med interesse, adgang og studiested. På forsiden kan du derefter aktivere “Inddrag AI-modelestimater”. Kun de {DATA_STATUS.scoring.mappedProgrammeCount} uddannelser med O*NET 31.0-understøttelse indgår i den AI-baserede sortering.
+            Start med interesse, adgang og studiested. På forsiden kan du derefter aktivere “Vis AI-perspektiv”. Kun de {BROWSE_COVERAGE.aiProgrammeCount} af {BROWSE_COVERAGE.programmeCount} aktive 2026-udbud med O*NET 31.0-understøttelse indgår i den AI-baserede sortering.
           </p>
-          <Link href="/?ai=1" className="mt-5 inline-flex rounded-lg bg-[#12172B] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1E293B]">
+          <Link href="/#valg?ai=1" className="mt-5 inline-flex rounded-lg bg-[#12172B] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#1E293B]">
             Find uddannelser med AI-perspektiv →
           </Link>
         </section>
@@ -155,9 +156,7 @@ export default function AIInsightsPage() {
         <section className="rounded-xl border border-[#FDE68A] bg-[#FFFBEB] p-5 text-xs leading-relaxed text-[#7C5A16]">
           <h2 className="font-bold text-[#78350F]">Modelstatus: O*NET 31.0 er delvist aktiveret</h2>
           <p className="mt-2">
-            De publicerede AI-scorer bruger nu {DATA_STATUS.scoring.source} for {DATA_STATUS.scoring.mappedProgrammeCount} uddannelser
-            ({Math.round(DATA_STATUS.scoring.mappedProgrammeShare * 100)}%). De resterende {DATA_STATUS.scoring.baselineProgrammeCount} uddannelser mangler en ikke-standard
-            program→DISCO-kobling og udelukkes derfor fra AI-rangering. Det er bedre end at kalde en ukendt mapping for O*NET-data.
+            I søgeværktøjet bruger de publicerede AI-scorer {DATA_STATUS.scoring.source} for {BROWSE_COVERAGE.aiProgrammeCount} af {BROWSE_COVERAGE.programmeCount} aktive 2026-udbud ({Math.round((BROWSE_COVERAGE.aiProgrammeCount / BROWSE_COVERAGE.programmeCount) * 100)}%). I det samlede historiske arkiv er {DATA_STATUS.scoring.mappedProgrammeCount} af {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser koblet. Uddannelser uden en dokumenteret program→DISCO-kobling udelukkes fra AI-rangering. Det er bedre end at kalde en ukendt mapping for O*NET-data.
             Nye forskningskort ovenfor indgår ikke skjult i rangeringen.
           </p>
           <div className="mt-3 flex flex-wrap gap-3">

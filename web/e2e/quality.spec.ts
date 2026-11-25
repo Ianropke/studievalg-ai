@@ -26,6 +26,7 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     await expect(page.getByText("Adgangstal mangler")).toBeVisible();
     await expect(page.getByText("Adgangssnit opfyldt")).toHaveCount(0);
     await page.goto("/uddannelse/10318-finsk-koebenhavn-k-studiestart-sommerstart");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
     await expect(page.getByText("Historisk optag · kontrollér aktuelle optagelsestal og ledige pladser")).toBeVisible();
     await expect(page.getByText("Et ældre uddannelsesopslag", { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Udforsk andre uddannelser →" })).toHaveAttribute("href", "/");
@@ -133,7 +134,10 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     expect(await llmsFull.text()).toContain("PROVENANCE_REQUIRED");
     const sitemapBody = await sitemap.text();
     expect(sitemapBody).toContain("https://uddannelsesindsigt.com/evidens");
-    expect((sitemapBody.match(/<url>/g) || []).length).toBeGreaterThan(1400);
+    const sitemapUrls = (sitemapBody.match(/<url>/g) || []).length;
+    expect(sitemapUrls).toBeGreaterThan(885);
+    expect(sitemapUrls).toBeLessThan(950);
+    expect(sitemapBody).not.toContain("10318-finsk-koebenhavn-k-studiestart-sommerstart");
   });
 
   test("studievalgsnyt forbinder forsiden, originalkilder og konkrete valg", async ({ page, request }) => {

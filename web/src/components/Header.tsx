@@ -16,11 +16,11 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FFFFFF] border-b border-[#E7E9EF] card-shadow">
+    <header className="sm:sticky sm:top-0 z-50 bg-[#FFFFFF] border-b border-[#E7E9EF] card-shadow">
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-[#12172B] focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white">
         Spring til hovedindhold
       </a>
-      <div className="max-w-5xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
         <div className="flex items-center gap-3">
           <Link
             href="/"
@@ -36,7 +36,7 @@ export function Header() {
             <p className="text-[10px] text-[#545D71]">Find din retning. Udforsk dine muligheder.</p>
           </div>
         </div>
-        <nav aria-label="Hovednavigation" className="flex items-center gap-4 sm:gap-6 text-xs font-semibold overflow-x-auto max-w-full pb-1 sm:pb-0">
+        <nav aria-label="Hovednavigation" className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end gap-x-4 gap-y-0.5 sm:gap-6 text-xs font-semibold max-w-full">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -48,7 +48,7 @@ export function Header() {
                 href={item.href}
                 className={`inline-flex min-h-11 items-center transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded ${
                   isActive
-                    ? "text-[#12172B] border-b-2 border-[#12172B] pb-1 font-bold"
+                    ? "text-[#12172B] border-b-2 border-[#12172B] pb-0.5 sm:pb-1 font-bold"
                     : "text-[#545D71] hover:text-[#12172B]"
                 }`}
               >

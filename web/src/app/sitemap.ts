@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { getAllPrograms, createProgramSlug } from "@/lib/slugs";
+import { getAdmission2026 } from "@/lib/admissions2026";
 import { LIST_CONFIGS } from "@/lib/lists";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { GUIDE_CONFIGS, GUIDE_UPDATED_AT } from "@/lib/guides";
@@ -11,9 +12,11 @@ const MODEL_LAST_MODIFIED = DATA_STATUS.scoring.updatedAt;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://uddannelsesindsigt.com";
-  const allPrograms = getAllPrograms();
+  const activePrograms = getAllPrograms().filter(
+    (program) => getAdmission2026(program).kind === "matched",
+  );
 
-  const programUrls = allPrograms.map((prog) => ({
+  const programUrls = activePrograms.map((prog) => ({
     url: `${baseUrl}/uddannelse/${createProgramSlug(prog)}`,
     lastModified: MODEL_LAST_MODIFIED,
     changeFrequency: "monthly" as const,

@@ -3,8 +3,8 @@
 import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import initialProgramsCatalog from "../../../public/data/all_programs_catalog.json";
-import { createProgramSlug, getProgramBySlug } from "@/lib/slugs";
+import { createProgramSlug, findProgramBySlug } from "@/lib/slugUtils";
+import { loadProgramsCatalog } from "@/lib/catalog";
 import { ProgramItem } from "@/lib/lists";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
@@ -13,12 +13,13 @@ import { DATA_STATUS } from "@/lib/dataStatus";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
 import { formatDanishNumber, parseGpaInput } from "@/lib/resultSorting";
-import { selectBrowsePrograms } from "@/lib/browseCatalog";
+import { browsePrograms } from "@/lib/browseCatalog";
 import { choiceParams } from "@/lib/shareMatch";
 
 function ComparisonContent() {
   const searchParams = useSearchParams();
-  const allPrograms = initialProgramsCatalog as unknown as ProgramItem[];
+  const activePrograms = browsePrograms as unknown as ProgramItem[];
+  const [archivePrograms, setArchivePrograms] = useState<ProgramItem[] | null>(null);
 
   const getInitialSlugs = () => {
     const paramA = searchParams.get("a");
@@ -59,25 +60,48 @@ function ComparisonContent() {
     return () => { cancelAnimationFrame(frame); window.removeEventListener("hashchange", restoreFragment); };
   }, []);
 
+  const resolveProgram = (slug: string, source: readonly ProgramItem[]): ProgramItem | null => {
+    const bySlug = findProgramBySlug(source, slug);
+    if (bySlug) return bySlug;
+    const kotPrefix = slug.split("-")[0];
+    return source.find((p) => String(p.kot_nr) === kotPrefix || String(p.kot_nr) === slug) ?? null;
+  };
+
+  useEffect(() => {
+    if (archivePrograms !== null) return;
+    const needsArchive = selectedSlugs.some((slug) => !resolveProgram(slug, activePrograms));
+    if (!needsArchive) return;
+    let active = true;
+    loadProgramsCatalog()
+      .then((items) => {
+        if (active) setArchivePrograms(items as unknown as ProgramItem[]);
+      })
+      .catch(() => {
+        if (active) setArchivePrograms([]);
+      });
+    return () => { active = false; };
+  }, [selectedSlugs, archivePrograms, activePrograms]);
+
   const selectedPrograms = useMemo(() => {
     const list = selectedSlugs
       .map((slug) => {
-        const bySlug = getProgramBySlug(slug);
-        if (bySlug) return bySlug;
-        const kotPrefix = slug.split("-")[0];
-        return allPrograms.find((p) => String(p.kot_nr) === kotPrefix || String(p.kot_nr) === slug);
+        const fromActive = resolveProgram(slug, activePrograms);
+        if (fromActive) return fromActive;
+        if (archivePrograms) return resolveProgram(slug, archivePrograms);
+        return null;
       })
       .filter(Boolean) as ProgramItem[];
-    if (list.length === 0 && allPrograms.length >= 2) return [allPrograms[0], allPrograms[1]];
+    if (list.length === 0 && archivePrograms !== null && activePrograms.length >= 2) {
+      return [activePrograms[0], activePrograms[1]];
+    }
     return list;
-  }, [selectedSlugs, allPrograms]);
+  }, [selectedSlugs, activePrograms, archivePrograms]);
 
   const searchResults = useMemo(() => {
-    const searchablePrograms = selectBrowsePrograms(allPrograms);
-    if (!searchQuery.trim()) return searchablePrograms.slice(0, 8);
+    if (!searchQuery.trim()) return activePrograms.slice(0, 8);
     const q = searchQuery.toLowerCase();
-    return searchablePrograms.filter((p) => p.udbud_titel.toLowerCase().includes(q) || admission2026Institution(p).toLowerCase().includes(q)).slice(0, 10);
-  }, [searchQuery, allPrograms]);
+    return activePrograms.filter((p) => p.udbud_titel.toLowerCase().includes(q) || admission2026Institution(p).toLowerCase().includes(q)).slice(0, 10);
+  }, [searchQuery, activePrograms]);
 
   const addProgram = (prog: ProgramItem) => {
     const slug = createProgramSlug(prog);

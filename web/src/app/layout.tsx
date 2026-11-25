@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { PrivacyAwareTelemetry } from "@/components/PrivacyAwareTelemetry";
-import { BROWSE_COVERAGE } from "@/lib/browseCatalog";
+import { BROWSE_COVERAGE } from "@/lib/browseCoverage";
 import { Footer } from "@/components/Footer";
 import { DEFAULT_SOCIAL_IMAGE, DEFAULT_SOCIAL_IMAGE_URL } from "@/lib/siteMetadata";
 import "./globals.css";

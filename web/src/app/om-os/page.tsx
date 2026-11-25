@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Header } from "@/components/Header";
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { DEFAULT_SOCIAL_IMAGE } from "@/lib/siteMetadata";
 
@@ -67,6 +68,8 @@ export default function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+
+      <Header />
 
       <main id="main-content" tabIndex={-1} className="max-w-4xl mx-auto px-6 py-10 space-y-8">
         <nav className="flex items-center gap-2 text-xs text-[#545D71]" aria-label="Brødkrummer">

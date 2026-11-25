@@ -4,7 +4,8 @@ import React, { useState, useMemo, useEffect, useDeferredValue, useRef } from "r
 import Link from "next/link";
 import { track } from "@vercel/analytics/react";
 import { Header } from "@/components/Header";
-import { createProgramSlug } from "@/lib/slugs";
+import { createProgramSlug } from "@/lib/slugUtils";
+import { loadProgramsCatalog } from "@/lib/catalog";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import type { NormalizedScores, RawProgramScores } from "@/lib/domainScoring";
 import { normalizeProgramName } from "@/lib/programName";
@@ -14,7 +15,6 @@ import { buildMatchSharePath, parseMatchShareParams, type ShareableUniversity } 
 import { admission2026Institution, admission2026Label, admission2026Threshold, getAdmission2026 } from "@/lib/admissions2026";
 import { admissionGroup, compareResults, formatDanishNumber, marginLabel, parseGpaInput, type ResultSort } from "@/lib/resultSorting";
 import { getBrowserStorageAdapter, readSavedPrograms, removeProgram, saveProgram } from "@/lib/savedPrograms";
-import initialProgramsCatalog from "@public/data/all_programs_catalog.json";
 import { browsePrograms, BROWSE_COVERAGE } from "@/lib/browseCatalog";
 
 // Synonymer for søgning & udvidet erhvervssprog
@@ -131,9 +131,7 @@ function normalizeSearchText(text: string): string {
   if (cleaned.length > 5) {
     cleaned = cleaned
       .replace(/erne$/g, "")
-      .replace(/erne$/g, "")
       .replace(/ing$/g, "")
-      .replace(/erne$/g, "")
       .replace(/er$/g, "")
       .replace(/et$/g, "")
       .replace(/en$/g, "");
@@ -191,7 +189,8 @@ interface ProgramItem {
 }
 
 export default function Dashboard() {
-  const [allPrograms] = useState<ProgramItem[]>(initialProgramsCatalog as unknown as ProgramItem[]);
+  const activePrograms = browsePrograms as unknown as ProgramItem[];
+  const [archivePrograms, setArchivePrograms] = useState<ProgramItem[] | null>(null);
   const loading = false;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUniversity, setSelectedUniversity] = useState("all");
@@ -278,6 +277,19 @@ export default function Dashboard() {
     return () => { cancelAnimationFrame(frame); window.removeEventListener("storage", syncSaved); };
   }, []);
 
+  useEffect(() => {
+    if (!showSaved || archivePrograms !== null) return;
+    const hasMissingSavedId = savedIds.some((id) => !activePrograms.some((item) => String(item.kot_nr) === id));
+    if (!hasMissingSavedId) return;
+    let active = true;
+    loadProgramsCatalog()
+      .then((items) => {
+        if (active) setArchivePrograms(items as unknown as ProgramItem[]);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [showSaved, savedIds, archivePrograms, activePrograms]);
+
   const toggleSaved = (kot: string) => {
     const storage = getBrowserStorageAdapter();
     const result = savedIds.includes(kot) ? removeProgram(storage, kot) : saveProgram(storage, kot);
@@ -293,7 +305,7 @@ export default function Dashboard() {
   const deferredSelectedUniversity = useDeferredValue(selectedUniversity);
 
   const matchedPrograms = useMemo(() => {
-    if (allPrograms.length === 0) return [];
+    if (activePrograms.length === 0) return [];
     const rawQuery = deferredSearchQuery.trim().toLowerCase();
     const normalizedQuery = normalizeSearchText(deferredSearchQuery);
     const expandedTerms: string[] = [rawQuery, normalizedQuery];
@@ -303,7 +315,7 @@ export default function Dashboard() {
       }
     });
     const exactMajors = EXACT_MAJOR_MAP[rawQuery] || EXACT_MAJOR_MAP[normalizedQuery] || [];
-    let list = (browsePrograms as unknown as ProgramItem[]).map((prog) => {
+    let list = activePrograms.map((prog) => {
       const admission = getAdmission2026(prog);
       const kvNum = admission2026Threshold(admission);
       const meetsGpa = kvNum !== null && gpa !== null && gpa >= kvNum;
@@ -349,14 +361,27 @@ export default function Dashboard() {
       if (includeAiModels && !item.aiEligible) return false;
       if (deferredSearchQuery.trim()) {
         const pTitle = (item.udbud_titel || "").toLowerCase();
+        const pNormTitle = normalizeSearchText(pTitle);
         const pDisco = (item.disco_titel || "").toLowerCase();
         const pKot = (item.kot_nr || "").toLowerCase();
         const pCity = (item.by || "").toLowerCase();
         const pInst = (item.institution || item.institution_navn || "").toLowerCase();
+        const pSkills = Array.isArray(item.skills_hierarchy?.skills)
+          ? (item.skills_hierarchy.skills as string[]).map((s) => s.toLowerCase())
+          : [];
         const matchesSearch = expandedTerms.some((term) => {
           if (!term) return false;
           const normTerm = normalizeSearchText(term);
-          return pTitle.includes(term) || pTitle.includes(normTerm) || pDisco.includes(term) || pKot.includes(term) || pCity.includes(term) || pInst.includes(term);
+          return (
+            pTitle.includes(term) ||
+            pTitle.includes(normTerm) ||
+            pNormTitle.includes(normTerm) ||
+            pDisco.includes(term) ||
+            pKot.includes(term) ||
+            pCity.includes(term) ||
+            pInst.includes(term) ||
+            pSkills.some((skill) => skill.includes(term))
+          );
         });
         if (!matchesSearch) return false;
       }
@@ -396,7 +421,7 @@ export default function Dashboard() {
       return deduplicated;
     }
     return sorted;
-  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, includeAiModels, allPrograms, sort]);
+  }, [deferredSearchQuery, deferredSelectedUniversity, gpa, includeAiModels, activePrograms, sort]);
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -514,7 +539,9 @@ export default function Dashboard() {
             {showSaved && <div id="saved-programs" className="space-y-2 text-xs text-[#545D71]">
               <p>Listen gemmes kun i denne browser på denne enhed; den kræver ingen konto og kan forsvinde, hvis browserdata ryddes.</p>
               {savedIds.length === 0 ? <p>Du har ikke gemt nogen uddannelser endnu. Brug “Gem” på et uddannelseskort.</p> : <ul className="space-y-1">{savedIds.map((id) => {
-                const program = allPrograms.find((item) => String(item.kot_nr) === id);
+                const program =
+                  activePrograms.find((item) => String(item.kot_nr) === id) ??
+                  archivePrograms?.find((item) => String(item.kot_nr) === id);
                 return <li key={id} className="flex items-center justify-between gap-2">{program ? <Link href={`/uddannelse/${createProgramSlug(program)}`} className="font-semibold text-[#1D4ED8] hover:underline">{formatProgramTitle(program.udbud_titel || id)}</Link> : <span>Uddannelse {id} er ikke i kataloget</span>}<button type="button" onClick={() => toggleSaved(id)} aria-label={`Fjern ${program?.udbud_titel || id} fra Min liste`} className="min-h-11 px-2 text-[#545D71] hover:text-[#12172B] focus:outline-none focus:ring-2 focus:ring-[#2563EB]">Fjern</button></li>;
               })}</ul>}
             </div>}

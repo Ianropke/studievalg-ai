@@ -120,3 +120,24 @@ export function formatProgramTitle(title: string): string {
 
   return s;
 }
+
+/**
+ * Extracts the study location/city from a structured KOT program title like
+ * "Professionsbachelor, pædagog, Aarhus C, Studiestart: sommer- og vinterstart"
+ * so legacy parser artifacts in `program.by` (e.g. "pædagog", "HA") never leak into the UI.
+ */
+export function extractProgramCity(title?: string | null): string {
+  if (!title) return "";
+  const parts = title
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const withoutStart = parts.filter(
+    (part) => !/^studiestart:/i.test(part) && !/^study start:/i.test(part),
+  );
+  if (withoutStart.length < 2) return "";
+  const candidate = withoutStart[withoutStart.length - 1];
+  if (!candidate) return "";
+  if (/^e-l[æa]ring$/i.test(candidate)) return "E-læring";
+  return formatCityName(candidate);
+}

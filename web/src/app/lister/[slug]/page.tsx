@@ -2,13 +2,15 @@ import React from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { LIST_CONFIGS, getListData } from "@/lib/lists";
-import { createProgramSlug } from "@/lib/slugs";
+import { createProgramSlug } from "@/lib/slugUtils";
 import { Header } from "@/components/Header";
 import { getEnrichedScores } from "@/lib/domainScoring";
 import { admission2026Institution, admission2026Label, getAdmission2026 } from "@/lib/admissions2026";
 import { ScoreDisclosure } from "@/components/ScoreDisclosure";
 import { DATA_STATUS } from "@/lib/dataStatus";
+import { BROWSE_COVERAGE } from "@/lib/browseCoverage";
 import { roundAiScore } from "@/lib/aiPresentation";
+import { extractProgramCity } from "@/lib/textUtils";
 
 export async function generateStaticParams() {
   return Object.keys(LIST_CONFIGS).map((slug) => ({
@@ -119,7 +121,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
           </p>
           {slug.includes("ai-") && (
             <p className="pt-2 text-xs font-semibold text-[#1D4ED8]" data-testid="ai-list-coverage">
-              Dækning: {DATA_STATUS.scoring.mappedProgrammeCount.toLocaleString("da-DK")} af {DATA_STATUS.catalogue.programmeCount.toLocaleString("da-DK")} uddannelser. Uddannelser uden O*NET 31.0-programkobling indgår ikke i rangeringen.
+              Dækning: {BROWSE_COVERAGE.aiProgrammeCount.toLocaleString("da-DK")} af {BROWSE_COVERAGE.programmeCount.toLocaleString("da-DK")} aktive 2026-udbud. Uddannelser uden O*NET 31.0-programkobling indgår ikke i rangeringen.
             </p>
           )}
         </div>
@@ -129,6 +131,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
           {items.map(({ program, rank, valueDisplay }) => {
             const progSlug = createProgramSlug(program);
             const inst = admission2026Institution(program);
+            const city = extractProgramCity(program.udbud_titel);
             const kv = admission2026Label(getAdmission2026(program));
             const scoreDetails = getEnrichedScores(program.udbud_titel, program.scores);
             const rob = scoreDetails.ai_resilience;
@@ -147,7 +150,7 @@ export default async function ListPage({ params }: { params: Promise<{ slug: str
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap text-xs text-[#545D71]">
                       <span className="font-semibold text-[#2563EB]">{inst}</span>
-                      {program.by && <span>• {program.by}</span>}
+                      {city && <span>• {city}</span>}
                       <span>•</span>
                       <span className="font-mono-data text-[#667085]">KOT {program.kot_nr || "–"}</span>
                     </div>

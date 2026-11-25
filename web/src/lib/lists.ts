@@ -1,9 +1,9 @@
 import { getProgramCatalog } from "./programCatalog";
 import { getEnrichedScores } from "./domainScoring";
 import { normalizeProgramName } from "./programName";
-import { DATA_STATUS } from "./dataStatus";
 import { roundAiScore } from "./aiPresentation";
 import { admission2026Label, admission2026Threshold, getAdmission2026 } from "./admissions2026";
+import { BROWSE_COVERAGE } from "./browseCoverage";
 
 export { normalizeProgramName };
 
@@ -56,8 +56,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Mest AI-robuste Uddannelser i Danmark",
     seoTitle: "AI-robuste uddannelser i Danmark 2026",
     badge: "AI-modelestimat · O*NET 31.0 med oplyst dækning",
-    description: `De 10 højeste AI-modelestimater blandt de ${DATA_STATUS.scoring.mappedProgrammeCount} uddannelser med O*NET 31.0-dækning. ${DATA_STATUS.catalogue.programmeCount - DATA_STATUS.scoring.mappedProgrammeCount} uddannelser uden en defensibel programkobling er udeladt.`,
-    introHedge: `Listen omfatter kun ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser. AI-robusthed er et opgavebaseret crosswalk-/modelestimat, ikke observerede danske jobudfald, en automatiseringssandsynlighed eller en anbefaling om at vælge uddannelsen.`,
+    description: `De 10 højeste AI-modelestimater blandt de ${BROWSE_COVERAGE.aiProgrammeCount} aktive 2026-udbud med O*NET 31.0-dækning. ${BROWSE_COVERAGE.programmeCount - BROWSE_COVERAGE.aiProgrammeCount} aktive udbud uden en defensibel programkobling er udeladt.`,
+    introHedge: `Listen omfatter kun ${BROWSE_COVERAGE.aiProgrammeCount} af ${BROWSE_COVERAGE.programmeCount} aktive 2026-udbud. AI-robusthed er et opgavebaseret crosswalk-/modelestimat, ikke observerede danske jobudfald, en automatiseringssandsynlighed eller en anbefaling om at vælge uddannelsen.`,
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
@@ -83,8 +83,8 @@ export const LIST_CONFIGS: Record<string, ListConfig> = {
     title: "Top 10 Uddannelser i Størst AI-omstilling",
     seoTitle: "Uddannelser der påvirkes mest af AI i 2026",
     badge: "AI-modelestimat · O*NET 31.0 med oplyst dækning",
-    description: `De 10 laveste AI-modelestimater blandt de ${DATA_STATUS.scoring.mappedProgrammeCount} uddannelser med O*NET 31.0-dækning. Listen handler om mulig opgaveforandring — ikke om at fag forsvinder.`,
-    introHedge: `Listen omfatter kun ${DATA_STATUS.scoring.mappedProgrammeCount} af ${DATA_STATUS.catalogue.programmeCount} uddannelser. Et lavere estimat betyder, at flere opgaver kan ændres eller understøttes af AI; det er ikke en prognose for ledighed eller uddannelsens værdi.`,
+    description: `De 10 laveste AI-modelestimater blandt de ${BROWSE_COVERAGE.aiProgrammeCount} aktive 2026-udbud med O*NET 31.0-dækning. Listen handler om mulig opgaveforandring — ikke om at fag forsvinder.`,
+    introHedge: `Listen omfatter kun ${BROWSE_COVERAGE.aiProgrammeCount} af ${BROWSE_COVERAGE.programmeCount} aktive 2026-udbud. Et lavere estimat betyder, at flere opgaver kan ændres eller understøttes af AI; det er ikke en prognose for ledighed eller uddannelsens værdi.`,
     metricLabel: "AI-robusthed",
     limit: 10,
     getValue: (p) => {
@@ -154,7 +154,9 @@ export function getListData(slug: string): { config: ListConfig; items: Array<{ 
   const config = LIST_CONFIGS[slug];
   if (!config) return null;
 
-  const catalog = getProgramCatalog() as ProgramItem[];
+  const catalog = (getProgramCatalog() as ProgramItem[]).filter(
+    (program) => getAdmission2026(program).kind === "matched",
+  );
   const candidates = config.filter ? catalog.filter(config.filter) : catalog;
   const scored = candidates.map((prog) => {
     const val = config.getValue(prog);

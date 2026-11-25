@@ -11,8 +11,8 @@ import { EvidenceList, withoutUnverifiedAdmissionsEvidence } from "@/components/
 import { DATA_STATUS } from "@/lib/dataStatus";
 import { normalizeProgramName } from "@/lib/programName";
 import { aiBand, roundAiScore } from "@/lib/aiPresentation";
-import { selectBrowsePrograms } from "@/lib/browseCatalog";
 import { admission2026Institution, admission2026Label, getAdmission2026 } from "@/lib/admissions2026";
+import { ProgramDetailActions } from "@/components/ProgramDetailActions";
 
 export async function generateStaticParams() {
   const all = getAllPrograms();
@@ -27,13 +27,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!prog) {
     return {
-      title: "Uddannelsen blev ikke fundet | Studievalg AI",
+      title: "Uddannelsen blev ikke fundet | Uddannelsesindsigt",
     };
   }
 
   const title = prog.udbud_titel || "Uddannelse";
   const inst = admission2026Institution(prog);
-  const kv = admission2026Label(getAdmission2026(prog));
+  const admission = getAdmission2026(prog);
+  const isArchived = admission.kind !== "matched";
+  const kv = admission2026Label(admission);
   const enriched = getEnrichedScores(title, prog.scores);
   const robust = enriched.ai_resilience;
   const aiDescription = enriched.ranking_eligible.ai
@@ -43,6 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${title} — adgangskvotient og AI-perspektiv | Uddannelsesindsigt`,
     description: `${title} ved ${inst}: Kvote 1 ved optaget i 2026: ${kv}. Kontrollér aktuelle adgangstal hos uddannelsesstedet. ${aiDescription}`,
+    ...(isArchived ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical: `https://uddannelsesindsigt.com/uddannelse/${slug}`,
     },
@@ -76,8 +79,8 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
   const aiEligible = enriched.ranking_eligible.ai;
   const roundedRobustScore = roundAiScore(robustScore);
   const isArchived = getAdmission2026(prog).kind !== "matched";
-  const relatedPrograms = selectBrowsePrograms(getAllPrograms())
-    .filter((program) => String(program.kot_nr) !== kot && program.udbud_titel && normalizeProgramName(program.udbud_titel) === normalizeProgramName(title))
+  const relatedPrograms = getAllPrograms()
+    .filter((program) => getAdmission2026(program).kind === "matched" && String(program.kot_nr) !== kot && program.udbud_titel && normalizeProgramName(program.udbud_titel) === normalizeProgramName(title))
     .map((program) => ({ program, slug: createProgramSlug(program) }))
     .slice(0, 4);
 
@@ -175,28 +178,32 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
             </div>
           </div>
 
-          {/* Kort Svar-boks (AI Summary highlight box for SEO & AI agents) */}
-          <div className="bg-[#EFF6FF] border border-[#2563EB]/20 p-5 rounded-xl space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#1D4ED8]">
-              <span className="w-2 h-2 rounded-full bg-[#2563EB]"></span>
-              <span>KORT FORTALT</span>
-            </div>
-            <p className="text-sm font-semibold text-[#12172B] leading-relaxed">
-              {aiEligible
-                ? `${aiBand(robustScore)} AI-robusthed (ca. ${roundedRobustScore}/100). Estimatet beskriver opgavernes mulige møde med AI og er ikke en prognose for uddannelsens værdi, ledighed eller din fremtid.`
-                : "Vi har endnu ikke et AI-estimat for denne uddannelse. Du kan stadig undersøge indhold, studieliv og adgangskrav hos uddannelsesstedet."}
-            </p>
-          </div>
+          {/* Gem & Sammenlign direkte fra detaljesiden */}
+          <ProgramDetailActions kotNr={kot} slug={slug} title={title} isArchived={isArchived} />
 
-          <div className={`rounded-xl border p-5 ${aiEligible ? "border-[#0F9D6E]/25 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
+          {/* Samlet Kort fortalt & AI-perspektiv */}
+          <div className={`rounded-xl border p-5 space-y-2 ${aiEligible ? "border-[#0F9D6E]/25 bg-[#E3F6EE]" : "border-[#D8DBE4] bg-[#F7F8FA]"}`}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B7A57]">AI-perspektiv</p>
-                <h2 className="mt-1 text-lg font-bold text-[#12172B]">{aiEligible ? `${aiBand(robustScore)} modelestimat` : "Ikke tilgængeligt"}</h2>
-                <p className="mt-1 max-w-xl text-xs leading-relaxed text-[#545D71]">{aiEligible ? `En beregnet vurdering af, hvordan AI kan påvirke arbejdsopgaver i faget. Læs mere om beregningen nedenfor.` : "Uddannelsen vises stadig i kataloget. Kontrollér aktuelle adgangskrav og optagelsestal hos uddannelsesstedet."}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#0B7A57]">
+                  <span className={`w-2 h-2 rounded-full ${aiEligible ? "bg-[#0F9D6E]" : "bg-[#667085]"}`}></span>
+                  <span>Kort fortalt · AI-perspektiv</span>
+                </div>
+                <h2 className="text-lg font-bold text-[#12172B]">
+                  {aiEligible ? `${aiBand(robustScore)} AI-robusthed` : "AI-estimat ikke tilgængeligt"}
+                </h2>
               </div>
-              {aiEligible && <span className="w-fit rounded-full border border-[#0F9D6E]/30 bg-white px-4 py-2 text-sm font-bold text-[#0B7A57]">ca. {roundedRobustScore}/100</span>}
+              {aiEligible && (
+                <span className="w-fit rounded-full border border-[#0F9D6E]/30 bg-white px-4 py-2 text-sm font-bold text-[#0B7A57]">
+                  ca. {roundedRobustScore}/100
+                </span>
+              )}
             </div>
+            <p className="text-xs leading-relaxed text-[#39594F]">
+              {aiEligible
+                ? `Modelestimatet beskriver opgavernes mulige møde med AI og er ikke en prognose for uddannelsens værdi, ledighed eller din fremtid. Læs mere om beregningen nedenfor.`
+                : "Vi har endnu ikke et AI-estimat for denne uddannelse. Du kan stadig undersøge indhold, studieliv og aktuelle adgangskrav hos uddannelsesstedet."}
+            </p>
           </div>
 
           {/* Dataoverblik Faktaboks (Mono-tal & Seneste Optagelsesdato) */}
@@ -238,7 +245,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
                 {prog.skills_hierarchy.skills && prog.skills_hierarchy.skills.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {prog.skills_hierarchy.skills.map((skill, i) => (
-                      <Link key={i} href={`/?q=${encodeURIComponent(skill)}`} className="bg-[#FFFFFF] hover:border-[#12172B] border border-[#D8DBE4] px-2 py-0.5 rounded text-[11px] font-medium text-[#12172B] transition">
+                      <Link key={i} href={`/#valg?q=${encodeURIComponent(skill)}`} className="bg-[#FFFFFF] hover:border-[#12172B] border border-[#D8DBE4] px-2 py-0.5 rounded text-[11px] font-medium text-[#12172B] transition">
                         {skill} →
                       </Link>
                     ))}
@@ -279,7 +286,7 @@ export default async function UddannelsePage({ params }: { params: Promise<{ slu
           {/* Call to Action Button */}
           <div className="pt-6 border-t border-[#E7E9EF] text-center">
             <Link
-              href={isArchived ? "/" : `/?q=${encodeURIComponent(title)}`}
+              href={isArchived ? "/" : `/#valg?q=${encodeURIComponent(title)}`}
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#12172B] hover:bg-[#1E293B] text-[#FFFFFF] font-bold rounded-xl text-xs transition card-shadow"
             >
               {isArchived ? "Udforsk andre uddannelser →" : "Find og sammenlign uddannelsen i søgeværktøjet →"}

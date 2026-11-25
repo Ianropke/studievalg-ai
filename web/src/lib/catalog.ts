@@ -1,4 +1,4 @@
-import type { CatalogProgramItem } from "./slugs";
+import type { CatalogProgramItem } from "./slugUtils";
 
 const CATALOG_URL = "/data/all_programs_catalog.json";
 
