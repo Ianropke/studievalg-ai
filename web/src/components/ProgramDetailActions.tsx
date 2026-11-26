@@ -66,14 +66,15 @@ export function ProgramDetailActions({
             type="button"
             onClick={handleToggleSaved}
             aria-pressed={saved}
-            aria-label={`${saved ? "Fjern" : "Gem"} ${title}, KOT ${kotNr} ${saved ? "fra" : "i"} Min liste`}
+            aria-label={`${saved ? "Gemt i Min liste" : "Gem i Min liste"}: ${title}, KOT ${kotNr}`}
             className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 ${
               saved
                 ? "border-[#2563EB]/30 bg-[#EFF6FF] text-[#1D4ED8]"
                 : "border-[#D8DBE4] bg-white text-[#12172B] hover:border-[#12172B]"
             }`}
           >
-            <span>{saved ? "★ Gemt i Min liste" : "☆ Gem i Min liste"}</span>
+            <span aria-hidden="true">{saved ? "★" : "☆"}</span>
+            <span>{saved ? "Gemt i Min liste" : "Gem i Min liste"}</span>
           </button>
         )}
         <Link

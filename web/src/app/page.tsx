@@ -118,17 +118,18 @@ const UNIVERSITY_OPTIONS = [
 ] as const;
 
 function normalizeSearchText(text: string): string {
-  let cleaned = text
-    .toLowerCase()
+  const trimmed = text.toLowerCase().trim();
+  let cleaned = trimmed
     .replace(/tændlæge/g, "tandlæge")
     .replace(/ordontologi/g, "odontologi")
     .replace(/naestved/g, "næstved")
     .replace(/æ/g, "ae")
     .replace(/ø/g, "oe")
-    .replace(/å/g, "aa")
-    .trim();
+    .replace(/å/g, "aa");
 
-  if (cleaned.length > 5) {
+  // Check original length before æ/ø/å digraph expansion so 5-letter terms like
+  // "lærer" stay "laerer" instead of stemming to "laer" (which false-matches "molekylær").
+  if (trimmed.length > 5) {
     cleaned = cleaned
       .replace(/erne$/g, "")
       .replace(/ing$/g, "")
@@ -337,10 +338,12 @@ export default function Dashboard() {
         } else if (isExactMajor) {
           relevanceBoost = 1000;
         } else {
+          const exactRawTitleMatch = Boolean(rawQuery) && (pTitleLow.includes(rawQuery) || pNormTitle.includes(normalizedQuery));
           const directTitleMatch = expandedTerms.some((term) => term && (pTitleLow.includes(term) || pNormTitle.includes(normalizeSearchText(term))));
           const directKotMatch = expandedTerms.some((term) => term && pKot.includes(term));
           const discoMatch = expandedTerms.some((term) => term && pDisco.includes(term));
-          if (directTitleMatch || directKotMatch) relevanceBoost = 300;
+          if (exactRawTitleMatch) relevanceBoost = 500;
+          else if (directTitleMatch || directKotMatch) relevanceBoost = 300;
           else if (discoMatch) relevanceBoost = 100;
           else relevanceBoost = 20;
         }
