@@ -104,6 +104,20 @@ test.describe("Tilgængelighed, responsive flader og discovery", () => {
     await expect(dialog).toHaveCount(0);
   });
 
+  test("hovednavigation markerer aktiv side med aria-current til skærmlæsere", async ({ page }) => {
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Hovednavigation" });
+    await expect(nav.getByRole("link", { name: "Find uddannelse" })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: "Sammenlign" })).not.toHaveAttribute("aria-current", "page");
+
+    await page.goto("/sammenlign");
+    await expect(nav.getByRole("link", { name: "Sammenlign" })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: "Find uddannelse" })).not.toHaveAttribute("aria-current", "page");
+
+    await page.goto("/lister/top-10-mest-ai-robuste-uddannelser");
+    await expect(nav.getByRole("link", { name: "Toplister" })).toHaveAttribute("aria-current", "page");
+  });
+
   test("sammenligning holder AI-estimater fravalgt, indtil brugeren vælger dem", async ({ page }) => {
     await page.goto("/sammenlign");
     const toggle = page.getByTestId("compare-ai-toggle");

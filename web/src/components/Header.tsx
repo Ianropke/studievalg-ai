@@ -25,12 +25,15 @@ export function Header() {
           <Link
             href="/"
             aria-label="Gå til forsiden"
-            className="w-8 h-8 rounded-lg bg-[#12172B] text-[#FFFFFF] flex items-center justify-center font-bold text-sm font-display hover:opacity-90 transition"
+            className="w-8 h-8 rounded-lg bg-[#12172B] text-[#FFFFFF] flex items-center justify-center font-bold text-sm font-display hover:opacity-90 transition focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2"
           >
             U
           </Link>
           <div>
-            <Link href="/" className="font-bold text-sm text-[#12172B] tracking-tight hover:underline font-display">
+            <Link
+              href="/"
+              className="font-bold text-sm text-[#12172B] tracking-tight hover:underline font-display focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded"
+            >
               Uddannelsesindsigt
             </Link>
             <p className="text-[10px] text-[#545D71]">Find din retning. Udforsk dine muligheder.</p>
@@ -46,6 +49,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={`inline-flex min-h-11 items-center transition whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:ring-offset-2 rounded ${
                   isActive
                     ? "text-[#12172B] border-b-2 border-[#12172B] pb-0.5 sm:pb-1 font-bold"
